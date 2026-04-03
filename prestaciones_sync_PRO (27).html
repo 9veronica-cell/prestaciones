@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prestaciones PRO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f0f2f5; --card:#fff; --primary:#1a6fd4; --primary-light:#e8f0fb;
+      --primary-dark:#1459b0; --danger:#e53935; --danger-light:#fdecea;
+      --success:#2e7d32; --success-light:#e8f5e9; --warning:#f57c00;
+      --text:#1a1d23; --text-muted:#6b7280; --border:#e2e6ea;
+      --shadow:0 2px 12px rgba(0,0,0,0.08); --shadow-lg:0 8px 32px rgba(0,0,0,0.12);
+      --radius:12px; --radius-sm:8px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:16px; }
+    .header { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    .header-icon { width:40px; height:40px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    h1 { font-size:1.4rem; font-weight:600; }
+    .subtitle { font-size:0.8rem; color:var(--text-muted); }
+    .tabs { display:flex; gap:4px; background:var(--card); padding:4px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; overflow-x:auto; }
+    .tab { flex:1; padding:10px 16px; border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter', sans-serif; font-size:0.875rem; font-weight:500; color:var(--text-muted); white-space:nowrap; transition:all 0.2s; }
+    .tab.active { background:var(--primary); color:white; box-shadow:0 2px 8px rgba(26,111,212,0.35); }
+    .tab:hover:not(.active) { background:var(--primary-light); color:var(--primary); }
+    .panel { display:none; } .panel.active { display:block; }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
+    .card-title { font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:14px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:600px){ .grid-2 { grid-template-columns:1fr; } }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:0.78rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; }
+    input,select { padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Inter', sans-serif; font-size:0.95rem; color:var(--text); background:white; transition:border-color 0.2s; width:100%; }
+    input:focus,select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,111,212,0.12); }
+    input.error { border-color:var(--danger); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter', sans-serif; font-size:0.9rem; font-weight:600; transition:all 0.2s; }
+    .btn:active { transform:scale(0.97); }
+    .btn-primary { background:var(--primary); color:white; }
+    .btn-primary:hover { background:var(--primary-dark); }
+    .btn-danger { background:var(--danger); color:white; }
+    .btn-ghost { background:var(--bg); color:var(--text-muted); border:1.5px solid var(--border); }
+    .btn-ghost:hover { background:var(--border); color:var(--text); }
+    .btn-full { width:100%; margin-top:14px; padding:14px; font-size:1rem; }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:white; padding:12px 24px; border-radius:30px; font-size:0.9rem; font-weight:500; z-index:9999; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; white-space:nowrap; }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+    #toast.success { background:var(--success); } #toast.error { background:var(--danger); } #toast.warning { background:var(--warning); }
+    .filtros-row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+    .filtros-row .field { flex:1; min-width:140px; }
+    .filtros-row .btn { margin-top:22px; white-space:nowrap; }
+    .table-wrapper { overflow-x:auto; border-radius:var(--radius-sm); border:1px solid var(--border); }
+    table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+    thead th { background:var(--bg); padding:11px 14px; text-align:left; font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+    tbody td { padding:10px 12px; border-bottom:1px solid var(--border); font-family:'JetBrains Mono', monospace; font-size:0.82rem; vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--primary-light); }
+    .duplicate td { background:var(--danger-light) !important; }
+    .duplicate td:first-child { border-left:3px solid var(--danger); }
+    .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:0.72rem; font-weight:600; font-family:'Inter', sans-serif; }
+    .badge-dup { background:var(--danger-light); color:var(--danger); }
+    .action-btn { width:30px; height:30px; border:none; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s; }
+    .action-btn:hover { transform:scale(1.1); }
+    .btn-del { background:var(--danger-light); color:var(--danger); }
+    .btn-edit { background:var(--primary-light); color:var(--primary); }
+    .btn-edit:hover { background:var(--primary); color:white; }
+    .btn-del:hover { background:var(--danger); color:white; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+    .stat-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; display:flex; flex-direction:column; gap:4px; }
+    .stat-label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .stat-value { font-size:1.8rem; font-weight:600; color:var(--text); line-height:1; }
+    .stat-value.money { color:var(--success); font-size:1.5rem; }
+    .stat-value.warn { color:var(--warning); }
+    .empty { text-align:center; padding:40px 20px; color:var(--text-muted); }
+    .empty-icon { font-size:2.5rem; margin-bottom:8px; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .count-bar { display:flex; justify-content:space-between; align-items:center; padding:8px 4px; font-size:0.82rem; color:var(--text-muted); flex-wrap:wrap; gap:6px; }
+    .count-bar strong { color:var(--text); }
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; padding:16px; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:white; border-radius:var(--radius); padding:24px; width:100%; max-width:420px; box-shadow:var(--shadow-lg); animation:slideUp 0.25s ease; }
+    @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .modal h3 { margin-bottom:6px; } .modal p { color:var(--text-muted); font-size:0.9rem; margin-bottom:20px; }
+    .modal-actions { display:flex; gap:10px; } .modal-actions .btn { flex:1; }
+    .autocomplete-wrap { position:relative; }
+    .autocomplete-list { position:absolute; top:100%; left:0; right:0; background:white; border:1.5px solid var(--primary); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm); box-shadow:var(--shadow-lg); z-index:500; max-height:220px; overflow-y:auto; }
+    .autocomplete-item { padding:10px 14px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; transition:background 0.15s; }
+    .autocomplete-item:last-child { border-bottom:none; }
+    .autocomplete-item:hover, .autocomplete-item.selected { background:var(--primary-light); color:var(--primary); }
+    .autocomplete-afiliado { font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace; }
+    .preview-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--radius-sm); background:var(--bg); margin-bottom:6px; font-size:0.82rem; animation:fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .preview-row:first-child { background:var(--primary-light); border-left:3px solid var(--primary); }
+    .preview-chip { background:white; border:1px solid var(--border); border-radius:20px; padding:2px 8px; font-size:0.75rem; font-family:'JetBrains Mono', monospace; white-space:nowrap; }
+    .preview-paciente { font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mes-selector { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🦷</div>
+  <div>
+    <h1>Prestaciones PRO</h1>
+    <div class="subtitle" id="sync-status">Cargando...</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('cargar')">➕ Cargar</button>
+  <button class="tab" onclick="showTab('historial')">📋 Historial</button>
+  <button class="tab" onclick="showTab('resumen')">📊 Resumen</button>
+</div>
+
+<!-- TAB CARGAR -->
+<div id="tab-cargar" class="panel active">
+  <div class="card">
+    <div class="card-title">Nueva prestación</div>
+    <div class="grid-2">
+      <div class="field autocomplete-wrap" style="grid-column:1/-1">
+        <label>Paciente</label>
+        <input id="paciente" placeholder="APELLIDO, NOMBRE" 
+               list="pacientes-datalist"
+               oninput="this.value=this.value.toUpperCase(); onPacienteInput()"
+               style="text-transform:uppercase"
+               autocomplete="off">
+        <datalist id="pacientes-datalist"></datalist>
+      </div>
+      <div class="field">
+        <label>Obra Social</label>
+        <select id="obrasocial" onchange="autocompletarArancel()">
+          <option value="">— Seleccionar —</option>
+          <option value="OMINT">OMINT</option>
+          <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>N° Afiliado</label>
+        <input id="afiliado" placeholder="Ej: 123456789">
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input id="fecha" type="date">
+      </div>
+      <div class="field">
+        <label>Código</label>
+        <input id="codigo" placeholder="Ej: 01.01" oninput="autocompletarArancel()" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Arancel ($)</label>
+        <input id="arancel" type="number" placeholder="0.00" min="0" step="0.01" oninput="calcularSaldo()">
+        <div id="codigo-desc" style="display:none; font-size:0.78rem; margin-top:3px; padding:4px 8px; background:var(--success-light); border-radius:6px; color:var(--success);"></div>
+      </div>
+      <div class="field">
+        <label>Pieza</label>
+        <input id="pieza" placeholder="Ej: 14">
+      </div>
+      <div class="field">
+        <label>Cara</label>
+        <input id="cara" placeholder="Ej: V, D, M...">
+      </div>
+      <div class="field">
+        <label>Tipo de pago</label>
+        <select id="tipopago">
+          <option value="OBRA SOCIAL">Obra Social</option>
+          <option value="PARTICULAR">Particular</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Monto pagado ($)</label>
+        <input id="montopagado" type="number" placeholder="0" min="0" step="1"
+               oninput="calcularSaldo()">
+      </div>
+      <div class="field">
+        <label>Saldo ($)</label>
+        <input id="saldo" type="number" placeholder="0" readonly
+               style="background:var(--bg); color:var(--danger); font-weight:600">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-guardar" onclick="agregar()">☁️ Guardar prestación</button>
+  </div>
+
+  <div class="card" id="preview-card" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div class="card-title" style="margin:0">Cargadas hoy</div>
+      <button class="btn btn-ghost" style="padding:5px 12px; font-size:0.8rem" onclick="showTab('historial')">Ver todas →</button>
+    </div>
+    <div id="preview-lista"></div>
+  </div>
+
+  <div id="dup-warning" class="card" style="display:none; border-left:4px solid var(--danger);">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:1.4rem">⚠️</span>
+      <div>
+        <div style="font-weight:600; color:var(--danger)">Posible duplicado detectado</div>
+        <div id="dup-detail" style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button class="btn btn-ghost" onclick="cancelarDup()">Cancelar</button>
+      <button class="btn btn-danger" onclick="forzarGuardar()">Guardar igual</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB HISTORIAL -->
+<div id="tab-historial" class="panel">
+  <div class="card">
+    <div class="card-title">Filtros</div>
+    <div class="filtros-row">
+      <div class="field"><label>Buscar</label><input id="buscador" placeholder="Paciente..." oninput="render()"></div>
+      <div class="field"><label>Desde</label><input id="desde" type="date" onchange="render()"></div>
+      <div class="field"><label>Hasta</label><input id="hasta" type="date" onchange="render()"></div>
+      <div class="field">
+        <label>Mes</label>
+        <select id="mes" onchange="filtrarMes()">
+          <option value="">— Todos —</option>
+          <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+          <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+          <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+          <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Obra Social</label>
+        <select id="filtro-os" onchange="render()">
+          <option value="">— Todas —</option>
+          <option value="OMINT">OMINT</option>
+          <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" onclick="esteMes()">Este mes</button>
+      <button class="btn btn-ghost" onclick="limpiarFiltros()">✕ Limpiar</button>
+    </div>
+  </div>
+  <div class="count-bar">
+    <span>Mostrando <strong id="count-visible">0</strong> prestaciones</span>
+    <span id="count-dup-warn" style="color:var(--danger);display:none">⚠️ <strong id="count-dup">0</strong> duplicados</span>
+    <button class="btn btn-ghost" style="padding:5px 14px;font-size:0.8rem" onclick="copiarTabla()" title="Copiar tabla para pegar en Excel">📋 Copiar para Excel</button>
+  </div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th onclick="toggleOrden()" style="cursor:pointer;user-select:none;" title="Ordenar por fecha">Fecha <span id="orden-icon">↓</span></th><th>Paciente</th><th>Afiliado</th><th>Código</th><th>Arancel</th><th>Pieza</th><th>Cara</th><th>Obra Social</th><th>Pago</th><th>Pagado</th><th>Saldo</th><th>—</th></tr></thead>
+        <tbody id="tabla"></tbody>
+      </table>
+    </div>
+    <div id="empty-state" class="empty" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-text">No hay prestaciones que coincidan.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB RESUMEN -->
+<div id="tab-resumen" class="panel">
+  <div class="mes-selector">
+    <div class="field">
+      <label>Mes a analizar</label>
+      <select id="mes-resumen" onchange="renderResumen()">
+        <option value="">— Todos —</option>
+        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+        <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+        <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+        <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Obra Social</label>
+      <select id="filtro-os-resumen" onchange="renderResumen()">
+        <option value="">— Todas —</option>
+        <option value="OMINT">OMINT</option>
+        <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:22px" onclick="seleccionarMesActual()">Este mes</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total prestaciones</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Pacientes únicos</div><div class="stat-value" id="stat-pacientes">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total facturado</div><div class="stat-value money" id="stat-monto">—</div></div>
+    <div class="stat-card"><div class="stat-label">Cobrado ✓</div><div class="stat-value money" id="stat-cobrado">—</div></div>
+    <div class="stat-card"><div class="stat-label">Pendiente de cobro</div><div class="stat-value warn" id="stat-debe">—</div></div>
+    <div class="stat-card"><div class="stat-label">Duplicados</div><div class="stat-value warn" id="stat-dup">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Por código</div>
+    <div class="table-wrapper"><table><thead><tr><th>Código</th><th>Cantidad</th><th>Facturación</th></tr></thead><tbody id="tabla-codigos"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Por paciente</div>
+    <div class="table-wrapper"><table><thead><tr><th>Paciente</th><th>Prestaciones</th><th>Facturación</th></tr></thead><tbody id="tabla-pacientes"></tbody></table></div>
+  </div>
+</div>
+
+<!-- MODAL BORRAR -->
+<div id="modal-borrar" class="modal-backdrop">
+  <div class="modal">
+    <h3>🗑️ Borrar prestación</h3>
+    <p>¿Estás segura de que querés eliminar este registro?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-borrar" onclick="confirmarBorrar()">Sí, borrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcw3T9KALUAm3cKjflHMeziaIkQb3ppUlHCqZeJIczy2t5iW-aV-p_BSSuMKuwsGD7/exec";
+
+const ARANCELES = {
+  "01.01":13345,
+  "01.04":19775,
+  "02.01":36081,
+  "02.02":36081,
+  "02.08":36081,
+  "02.16":36081,
+  "02.09":36081,
+  "03.01":59315,
+  "03.02":93909,
+  "03.05":24722,
+  "03.22":42015,
+  "03.24":14831,
+  "03.25":19881,
+  "03.26":20760,
+  "05.01":19775,
+  "05.02":25208,
+  "05.05":14831,
+  "05.06":16960,
+  "07.01":17301,
+  "07.02":88971,
+  "07.04":27185,
+  "07.05":74141,
+  "07.06.01":39542,
+  "07.06.02":39542,
+  "07.06.04":39542,
+  "08.01":16804,
+  "08.01M":28824,
+  "08.02":27185,
+  "08.03":27675,
+  "08.04":32622,
+  "08.17":73220,
+  "08.18":30430,
+  "08.20":30430,
+  "09.01.01":6714,
+  "09.01.02":6714,
+  "09.01.04":22240,
+  "09.01.05":39047,
+  "09.02.04":24722,
+  "09.02.05":24722,
+  "09.02.10":17301,
+  "10.01":32127,
+  "10.02":34103,
+  "10.03":22240,
+  "10.04":30640,
+  "10.05":24722,
+  "10.06":20760,
+  "10.07":34592,
+  "10.08":21248,
+  "10.09":101820,
+  "10.10":99345,
+  "10.11":51896,
+  "10.12":52398,
+  "10.13":39542,
+  "10.14":42015,
+  "10.16":51896,
+  "10.20":37069,
+  "10.22":49919,
+  "10.23":79082,
+  "10.24":84022,
+  "10.25":88971,
+  "10.26":24722
+};
+const DESCRIPCIONES = {
+  "01.01":"Consulta, diagnóstico, fichado y plan de tratamiento.",
+  "01.04":"Consulta de urgencia que resuelve la demanda espontánea.",
+  "02.01":"Obturación con amalgama cavidad simple.",
+  "02.02":"Obturación con amalgama cavidad compuesta y / o compleja.",
+  "02.08":"Restauración con material estético, incluye composites, resinas de fot",
+  "02.16":"Restauración  con material estético, incluye composites, resinas de fo",
+  "02.09":"Reconstrucción de ángulo en dientes anteriores.",
+  "03.01":"Tratamiento uniradicular.",
+  "03.02":"Tratamiento multiradicular. Dos  conductos o más.",
+  "03.05":"Biopulpectomía parcial.",
+  "03.22":"Retratamiento de endodoncia.",
+  "03.24":"Retiro de pernos,coronas,tornillos,perforación de coronas",
+  "03.25":"Preparación para aislacion, incluye gingivectomia, reconstruccion dent",
+  "03.26":"Acopio de pasta alcalina.",
+  "05.01":"Tartectomía y cepillado mecánico.",
+  "05.02":"Consulta preventiva. Incluye cepillado y aplic. de Fluor. Detección, c",
+  "05.05":"Selladores de puntos y fisuras por pieza dentaria.",
+  "05.06":"Aplicación de cariostáticos en piezas dentarias permanentes y temporar",
+  "07.01":"Consultas de Motivación en menores de 14 años incluido",
+  "07.02":"Mantenedor de espacio fijo o removible",
+  "07.04":"Tratamiento de dientes temporarios con formocresol.",
+  "07.05":"Corona de acero provisoria por destrucción coronaria.",
+  "07.06.01":"Reducción de luxación con inmovilización dentaria.",
+  "07.06.02":"Luxación total (reimplante e inmovilización dentaria).",
+  "07.06.04":"Fractura amelodentinaria. Protección pulpar coronas provisorias.",
+  "08.01":"Consulta periodontal. Diagnóstico, pronóstico y plan de tratamiento. I",
+  "08.01M":"Consulta de mantenimiento periodontal",
+  "08.02":"Tratamiento de Gingivitis marginal crónica",
+  "08.03":"Tratamiento de periodontitis destructiva leve o moderada, con bolsas d",
+  "08.04":"Tratamiento de periodontitis severa con bolsas de más de 6 mm o más co",
+  "08.17":"Ferulización (temporaria o definitiva). Incluye alambre.",
+  "08.18":"Cirugia periodontal a colgajo. Por pieza dentaria",
+  "08.20":"Tratamiento de perimplantitis.",
+  "09.01.01":"Rx. Periapical técnica de cono corto o cono largo.",
+  "09.01.02":"Bitte wing.",
+  "09.01.04":"Media Seriada  de 7 placas. Técnica de cono corto o cono largo",
+  "09.01.05":"Seriada de 14  placas. Técnica de cono corto o cono largo.",
+  "09.02.04":"Pantomografía o radiografía panorámica",
+  "09.02.05":"Tele-radiografía cefalométrica",
+  "09.02.10":"Trazado cefalométrico",
+  "10.01":"Extracción dentaria simple.",
+  "10.02":"Plástica comunicación  buco-sinusal como riesgo previsto simultáneo a ",
+  "10.03":"Biopsia por punción o aspiración.",
+  "10.04":"Alveolectomía estabilizadora por zona (6 zonas).",
+  "10.05":"Reimplante dentario inmediato al traumatismo.",
+  "10.06":"Incisión y drenaje de abscesos por vía intrabucal.",
+  "10.07":"Biopsia por escisión.",
+  "10.08":"Alargamiento quirúrgico de la corona clínica.",
+  "10.09":"Extracción de piezas dentarias en retención ósea",
+  "10.10":"Germectomía.",
+  "10.11":"Liberación de dientes retenidos.",
+  "10.12":"Apicectomía.",
+  "10.13":"Tratamiento de osteomelitis.",
+  "10.14":"Extracción de cuerpo extraño.",
+  "10.16":"Frenectomía.",
+  "10.20":"Extracción dentaria por alveolectomía.",
+  "10.22":"Extracción dentaria con retención mucosa.",
+  "10.23":"Extirpación quistes, tumores de tejidos duros o blandos h/ 1 cm.",
+  "10.24":"Extirpación quistes, tumores de tejidos duros o blandos h/ 3 cm.",
+  "10.25":"Extirpación quistes, tumores de tejidos duros/ blandos + de 3 cm",
+  "10.26":"Tratamiento de fracturas dentoalveolares simples."
+};
+
+const ARANCELES_SWISS = {
+  "0101":14503,
+  "0104":17076,
+  "0202":29853,
+  "020801":40000,
+  "0301":93094,
+  "0302":124474,
+  "0305":34580,
+  "0306":18870,
+  "0307":15251,
+  "03101":9302,
+  "03104":21371,
+  "0501":11443,
+  "0502":11403,
+  "0505":8768,
+  "0506":9302,
+  "060900":4093,
+  "0701":20222,
+  "070101":9508,
+  "0702":137046,
+  "0703":222070,
+  "0704":56484,
+  "0705":92840,
+  "070601":35180,
+  "070602":37035,
+  "0801":15587,
+  "0802":12501,
+  "0803":11669,
+  "080301":7385,
+  "0804":15961,
+  "080401":14820,
+  "0805":6556,
+  "0807":13001,
+  "090101":4639,
+  "090102":4986,
+  "090103":8848,
+  "090104":18870,
+  "090105":28186,
+  "090201":8848,
+  "090202":12677,
+  "090203":17943,
+  "090204":19548,
+  "090205":20292,
+  "090206":15961,
+  "090208":12015,
+  "1001":24800,
+  "1002":18494,
+  "1003":12539,
+  "1004":13024,
+  "1005":17117,
+  "1006":13024,
+  "1007":14236,
+  "1008":14284,
+  "1009":19347,
+  "100901":60576,
+  "100902":79368,
+  "100903":92060,
+  "1010":92060,
+  "1011":23323,
+  "1012":31463,
+  "1013":26274,
+  "1014":20262,
+  "1015":17811,
+  "1016":26182,
+  "1017":37973,
+  "1019":25174,
+  "1020":26688,
+  "991000":228170
+};
+const DESCRIPCIONES_SWISS = {
+  "0101":"Examen diagnóstico - fichado y plan de tratamiento",
+  "0104":"Consulta de urgencia",
+  "0202":"Restauraciones con amalgama",
+  "020801":"Restauraciones con fotocurado",
+  "0301":"Endodoncia unirradicular (incluye Rx pre y post)",
+  "0302":"Endodoncia multirradicular (incluye Rx pre y post)",
+  "0305":"Biopulpectomía parcial",
+  "0306":"Protección pulpar directa",
+  "0307":"Acopio de Pasta Alcalina",
+  "03101":"Interconsulta con especialista con orden de derivación",
+  "03104":"Desobturación de conductos",
+  "0501":"Consulta preventiva periódica para mayores",
+  "0502":"Consulta preventiva periódica para menores",
+  "0505":"Sellador de fosas y fisuras",
+  "0506":"Cariostáticos mineralizantes",
+  "060900":"Fotos (5) para cada etapa",
+  "0701":"Consulta fichado y motivación",
+  "070101":"Certificado bucodental",
+  "0702":"Mantenedor de espacio fijo",
+  "0703":"Mantenedor de espacio removible",
+  "0704":"Tratamiento con formocresol en dentición temporaria",
+  "0705":"Corona metálica de acero y similares",
+  "070601":"Reducción de luxación con inmovilización dentaria",
+  "070602":"Luxación total - Reimplante e inmovilización dentaria",
+  "0801":"Consulta de estudio - Diagnóstico - Pronóstico y plan",
+  "0802":"Tratamiento de gingivitis marginal crónica",
+  "0803":"Tratamiento de periodontitis leve o moderada",
+  "080301":"Tratamiento periodontitis leve/moderada (2 piezas)",
+  "0804":"Tratamiento periodontitis destructiva severa",
+  "080401":"Tratamiento periodontitis severa (2 piezas)",
+  "0805":"Desgaste selectivo o armonización oclusal",
+  "0807":"Terapia de mantenimiento",
+  "090101":"Periapical - cono corto o cono largo",
+  "090102":"Bite-Wing",
+  "090103":"clusal 6x8 cm",
+  "090104":"Media seriada de 7 películas",
+  "090105":"Seriadas de 14 películas",
+  "090201":"Extrabucales - Primera exposición",
+  "090202":"Extrabucales - Exposición subsiguiente",
+  "090203":"Articulación Temporo-Mandibular - 6 tomas",
+  "090204":"Pantomografía",
+  "090205":"Tele-radiografía cefalométrica",
+  "090206":"Sialografía",
+  "090208":"Trazados Computados",
+  "1001":"Extracción dentaria simple o restos radiculares",
+  "1002":"Plástica de comunicación buco-sinusal",
+  "1003":"Biopsia por punción o aspiración",
+  "1004":"Alveolectomía estabilizadora - 6 zonas",
+  "1005":"Reimplante dentario inmediato al traumatismo",
+  "1006":"Incisión y drenaje de abscesos intrabucal",
+  "1007":"Biopsia por escisión",
+  "1008":"Alargamiento quirúrgico de la corona clínica",
+  "1009":"Extracción por alveolectomía externa",
+  "100901":"Extracción en retención mucosa",
+  "100902":"Extracción retenido óseo",
+  "100903":"Extracción en retención mucosa y/u ósea",
+  "1010":"Germectomía",
+  "1011":"Liberación de dientes retenidos",
+  "1012":"Apicectomía",
+  "1013":"Tratamiento de osteomielitis",
+  "1014":"Extracción de cuerpo extraño",
+  "1015":"Alveolectomía correctiva por zona",
+  "1016":"Radectomía",
+  "1017":"Frenectomía lingual con anestesia local",
+  "1019":"Extirpación de quiste hasta 2 cm",
+  "1020":"Extirpación de épulis",
+  "991000":"Atención pacientes especiales en quirófano"
+};
+
+
+
+function calcularSaldo() {
+  const arancel = parseFloat(document.getElementById('arancel').value) || 0;
+  const pagado  = parseFloat(document.getElementById('montopagado').value) || 0;
+  const saldo   = arancel - pagado;
+  const campoSaldo = document.getElementById('saldo');
+  campoSaldo.value = saldo > 0 ? saldo : 0;
+  campoSaldo.style.color = saldo > 0 ? 'var(--danger)' : 'var(--success)';
+}
+
+function autocompletarArancel() {
+  const codigo = document.getElementById('codigo').value.trim();
+  const obrasocial = document.getElementById('obrasocial').value;
+  const campoArancel = document.getElementById('arancel');
+  const infoEl = document.getElementById('codigo-desc');
+
+  let tablaAranceles = ARANCELES;
+  let tablaDesc = DESCRIPCIONES;
+
+  if (obrasocial === 'SWISS MEDICAL') {
+    tablaAranceles = ARANCELES_SWISS;
+    tablaDesc = DESCRIPCIONES_SWISS;
+  }
+
+  if (tablaAranceles[codigo] !== undefined) {
+    campoArancel.value = tablaAranceles[codigo];
+    campoArancel.style.borderColor = 'var(--success)';
+    if (infoEl) {
+      infoEl.textContent = '✓ ' + (tablaDesc[codigo] || codigo);
+      infoEl.style.display = 'block';
+      infoEl.style.color = 'var(--success)';
+    }
+  } else {
+    campoArancel.style.borderColor = '';
+    if (infoEl) infoEl.style.display = 'none';
+  }
+}
+
+let datos = [], pendingData = null, rowToDelete = null, autocompleteIdx = -1;
+let toastTimer;
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['cargar','historial','resumen'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'resumen') renderResumen();
+}
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 2800);
+}
+
+function clave(d) {
+  return (d.fecha+'|'+d.paciente+'|'+d.codigo+'|'+d.pieza+'|'+d.cara).toLowerCase().trim();
+}
+
+function formatMoney(n) {
+  if (!n && n !== 0) return '—';
+  return '$' + Number(n).toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function normalizarFecha(val) {
+  if (!val) return '';
+  if (val.includes('T')) return val.split('T')[0];
+  if (val.length > 10) {
+    try {
+      const dt = new Date(val);
+      if (!isNaN(dt.getTime())) {
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth()+1).padStart(2,'0');
+        const d = String(dt.getDate()).padStart(2,'0');
+        return y+'-'+m+'-'+d;
+      }
+    } catch(e) {}
+  }
+  return val;
+}
+
+async function cargar(silencioso=false) {
+  if (!silencioso) setSyncStatus('⏳ Sincronizando...');
+  try {
+    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const raw = await res.json();
+    datos = raw.map(d => {
+      const obj = {};
+      Object.keys(d).forEach(k => {
+        let val = d[k] !== null && d[k] !== undefined ? String(d[k]).trim() : '';
+        const kk = k.toLowerCase().trim();
+        if (kk === 'fecha') val = normalizarFecha(val);
+        if (kk === 'codigo' && val && val.indexOf('.') > 0) {
+          const p = val.split('.');
+          if (p[0].length === 1) val = '0' + val;
+        }
+        // Normalizar "obra social" (con espacio) → "obrasocial"
+        const kkFinal = kk.replace(/\s+/g, '');
+        obj[kkFinal] = val;
+      });
+      // rowIndex viene del servidor
+      obj._rowIndex = Number(d.rowIndex) || 0;
+      return obj;
+    });
+    setSyncStatus('✅ Sync: ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}));
+    render();
+    renderPreview();
+    actualizarDatalist();
+  } catch(e) {
+    setSyncStatus('❌ Sin conexión');
+    toast('Error al conectar con Google Sheets', 'error');
+  }
+}
+
+function setSyncStatus(msg) { document.getElementById('sync-status').textContent = msg; }
+
+function agregar() {
+  const d = leerFormulario();
+  if (!d.paciente || !d.fecha || !d.codigo) {
+    toast('Completá Paciente, Fecha y Código', 'warning');
+    ['paciente','fecha','codigo'].forEach(id => {
+      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
+    });
+    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
+    return;
+  }
+  const claveNueva = clave(d);
+  if (datos.some(ex => clave(ex) === claveNueva)) {
+    pendingData = d;
+    document.getElementById('dup-detail').textContent = d.paciente + ' — ' + d.codigo + ' — Pieza ' + (d.pieza||'—') + ' — ' + d.fecha;
+    document.getElementById('dup-warning').style.display = 'block';
+    document.getElementById('btn-guardar').disabled = true;
+    return;
+  }
+  guardarEnSheets(d);
+}
+
+function leerFormulario() {
+  return {
+    paciente:    document.getElementById('paciente').value.trim(),
+    obrasocial:  document.getElementById('obrasocial').value.trim(),
+    afiliado:    document.getElementById('afiliado').value.trim(),
+    fecha:    document.getElementById('fecha').value,
+    codigo:   document.getElementById('codigo').value.trim(),
+    arancel:  document.getElementById('arancel').value.trim(),
+    pieza:      document.getElementById('pieza').value.trim(),
+    cara:       document.getElementById('cara').value.trim(),
+    tipopago:    document.getElementById('tipopago').value,
+    montopagado: document.getElementById('montopagado').value.trim(),
+    saldo:       document.getElementById('saldo').value.trim()
+  };
+}
+
+function cancelarDup() {
+  pendingData = null;
+  document.getElementById('dup-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+}
+
+function forzarGuardar() {
+  document.getElementById('dup-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+  guardarEnSheets(pendingData);
+  pendingData = null;
+}
+
+async function guardarEnSheets(d) {
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const params = new URLSearchParams({
+      action:'save', fecha:d.fecha||'', paciente:d.paciente||'', obrasocial:d.obrasocial||'',
+      afiliado:d.afiliado||'', codigo:d.codigo||'',
+      arancel:d.arancel||'', pieza:d.pieza||'', cara:d.cara||'', tipopago:d.tipopago||'', montopagado:d.montopagado||'', saldo:d.saldo||''
+    });
+    await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
+    guardarCacheAfiliado(d.paciente, d.afiliado);
+    toast('✓ Guardando...', 'success');
+    await new Promise(r => setTimeout(r, 2500));
+    limpiarFormulario();
+    await cargar(true);
+  } catch(e) {
+    toast('Error de conexión al guardar', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '☁️ Guardar prestación';
+  }
+}
+
+function limpiarFormulario() {
+  ['codigo','arancel','pieza','cara','montopagado','saldo'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('codigo-desc').style.display = 'none';
+  document.getElementById('arancel').style.borderColor = '';
+  cancelarEdicion();
+}
+
+// ── BORRAR ──
+function pedirBorrar(rowIndex) {
+  rowToDelete = rowIndex;
+  document.getElementById('modal-borrar').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-borrar').classList.remove('open');
+  rowToDelete = null;
+}
+
+async function confirmarBorrar() {
+  if (!rowToDelete) return;
+  cerrarModal();
+  const btn = document.getElementById('btn-confirmar-borrar');
+  btn.disabled = true;
+  try {
+    const url = SCRIPT_URL + '?action=delete&rowIndex=' + rowToDelete + '&t=' + Date.now();
+    await fetch(url, {mode:'no-cors'});
+    toast('🗑️ Eliminando...', 'warning');
+    await new Promise(r => setTimeout(r, 2500));
+    await cargar(true);
+  } catch(e) {
+    toast('Error al borrar', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── FILTROS ──
+function filtrarMes() {
+  const mes = document.getElementById('mes').value;
+  if (mes === '') { render(); return; }
+  const año = new Date().getFullYear();
+  document.getElementById('desde').value = new Date(año, mes, 1).toISOString().split('T')[0];
+  document.getElementById('hasta').value = new Date(año, parseInt(mes)+1, 0).toISOString().split('T')[0];
+  render();
+}
+
+function esteMes() {
+  const hoy = new Date();
+  document.getElementById('desde').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+  document.getElementById('hasta').value = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).toISOString().split('T')[0];
+  render();
+}
+
+function limpiarFiltros() {
+  ['buscador','desde','hasta'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mes').value = '';
+  document.getElementById('filtro-os').value = '';
+  render();
+}
+
+// ── ORDEN ──
+let ordenFecha = 'desc'; // desc = más reciente primero
+
+function toggleOrden() {
+  ordenFecha = ordenFecha === 'desc' ? 'asc' : 'desc';
+  document.getElementById('orden-icon').textContent = ordenFecha === 'desc' ? '↓' : '↑';
+  render();
+}
+
+// ── RENDER ──
+function render() {
+  const filtro = document.getElementById('buscador').value.toLowerCase();
+  const desde = document.getElementById('desde').value;
+  const hasta = document.getElementById('hasta').value;
+  const claves = {};
+  datos.forEach(d => { const c = clave(d); claves[c] = (claves[c]||0)+1; });
+  const filtroOS = document.getElementById('filtro-os').value;
+  const visibles = datos.filter(d => {
+    if (filtro && !d.paciente.toLowerCase().includes(filtro)) return false;
+    if (desde && d.fecha < desde) return false;
+    if (hasta && d.fecha > hasta) return false;
+    if (filtroOS && d.obrasocial !== filtroOS) return false;
+    return true;
+  }).sort((a, b) => {
+    if (ordenFecha === 'desc') return b.fecha.localeCompare(a.fecha);
+    return a.fecha.localeCompare(b.fecha);
+  });
+  const dupCount = visibles.filter(d => claves[clave(d)] > 1).length;
+  document.getElementById('count-visible').textContent = visibles.length;
+  document.getElementById('count-dup').textContent = dupCount;
+  document.getElementById('count-dup-warn').style.display = dupCount > 0 ? 'inline' : 'none';
+  const tbody = document.getElementById('tabla');
+  tbody.innerHTML = '';
+  if (visibles.length === 0) { document.getElementById('empty-state').style.display = 'block'; return; }
+  document.getElementById('empty-state').style.display = 'none';
+  visibles.forEach(d => {
+    const esDup = claves[clave(d)] > 1;
+    const tr = document.createElement('tr');
+    if (esDup) tr.classList.add('duplicate');
+    tr.innerHTML = `
+      <td>${d.fecha ? d.fecha.split('-').reverse().join('/') : ''}</td>
+      <td style="text-align:left;font-family:'Inter', sans-serif;font-weight:500">${d.paciente||''}</td>
+      <td>${d.afiliado||''}</td>
+      <td>${d.codigo||''}${esDup?' <span class="badge badge-dup">DUP</span>':''}</td>
+      <td>${d.arancel ? formatMoney(d.arancel) : '—'}</td>
+      <td>${d.pieza||''}</td>
+      <td>${d.cara||''}</td>
+      <td><button class="action-btn btn-del" title="Borrar" onclick="pedirBorrar(${d._rowIndex})">🗑️</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── RESUMEN ──
+function seleccionarMesActual() {
+  document.getElementById('mes-resumen').value = new Date().getMonth();
+  renderResumen();
+}
+
+function renderResumen() {
+  const mesVal = document.getElementById('mes-resumen').value;
+  const año = new Date().getFullYear();
+  const osResumen = document.getElementById('filtro-os-resumen').value;
+  let filtrados = datos;
+  if (mesVal !== '') {
+    const mes = parseInt(mesVal);
+    const desdeStr = new Date(año,mes,1).toISOString().split('T')[0];
+    const hastaStr = new Date(año,mes+1,0).toISOString().split('T')[0];
+    filtrados = datos.filter(d => d.fecha >= desdeStr && d.fecha <= hastaStr);
+  }
+  if (osResumen) {
+    filtrados = filtrados.filter(d => d.obrasocial === osResumen);
+  }
+  const totalPrest = filtrados.length;
+  const pacientesUnicos = new Set(filtrados.map(d => d.paciente.toLowerCase().trim())).size;
+  const montoTotal = filtrados.reduce((acc,d) => acc + (parseFloat(d.arancel)||0), 0);
+  const claves = {};
+  filtrados.forEach(d => { const c = clave(d); claves[c] = (claves[c]||0)+1; });
+  const dupTotal = filtrados.filter(d => claves[clave(d)] > 1).length;
+  const montoCobrado = filtrados.reduce((acc,d) => acc + (parseFloat(d.montopagado)||0), 0);
+  const montoDebe = filtrados.reduce((acc,d) => {
+    const arancel = parseFloat(d.arancel) || 0;
+    const pagado  = parseFloat(d.montopagado) || 0;
+    const resta   = arancel - pagado;
+    return acc + (resta > 0 ? resta : 0);
+  }, 0);
+
+  document.getElementById('stat-total').textContent = totalPrest;
+  document.getElementById('stat-pacientes').textContent = pacientesUnicos;
+  document.getElementById('stat-monto').textContent = formatMoney(montoTotal);
+  document.getElementById('stat-cobrado').textContent = formatMoney(montoCobrado);
+  document.getElementById('stat-debe').textContent = formatMoney(montoDebe);
+  document.getElementById('stat-dup').textContent = dupTotal;
+  const porCodigo = {};
+  filtrados.forEach(d => {
+    const c = d.codigo||'(sin código)';
+    if (!porCodigo[c]) porCodigo[c] = {cant:0,monto:0};
+    porCodigo[c].cant++; porCodigo[c].monto += parseFloat(d.arancel)||0;
+  });
+  const tbodyCod = document.getElementById('tabla-codigos');
+  tbodyCod.innerHTML = Object.entries(porCodigo).sort((a,b)=>b[1].cant-a[1].cant)
+    .map(([cod,v]) => `<tr><td><strong>${cod}</strong></td><td>${v.cant}</td><td>${formatMoney(v.monto)}</td></tr>`).join('');
+  if (!tbodyCod.innerHTML) tbodyCod.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos</td></tr>';
+  const porPaciente = {};
+  filtrados.forEach(d => {
+    const p = d.paciente||'(sin nombre)';
+    if (!porPaciente[p]) porPaciente[p] = {cant:0,monto:0};
+    porPaciente[p].cant++; porPaciente[p].monto += parseFloat(d.arancel)||0;
+  });
+  const tbodyPac = document.getElementById('tabla-pacientes');
+  tbodyPac.innerHTML = Object.entries(porPaciente).sort((a,b)=>b[1].cant-a[1].cant)
+    .map(([pac,v]) => `<tr><td style="text-align:left;font-weight:500">${pac}</td><td>${v.cant}</td><td>${formatMoney(v.monto)}</td></tr>`).join('');
+  if (!tbodyPac.innerHTML) tbodyPac.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos</td></tr>';
+}
+
+// ── PREVIEW ──
+function renderPreview() {
+  const hoy = new Date().toISOString().split('T')[0];
+  const recientes = datos.filter(d => d.fecha === hoy).slice(-8).reverse();
+  const card = document.getElementById('preview-card');
+  const lista = document.getElementById('preview-lista');
+  if (!recientes.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  lista.innerHTML = recientes.map(d => `
+    <div class="preview-row">
+      <span class="preview-paciente">${d.paciente||''}</span>
+      <span class="preview-chip">${d.codigo||''}</span>
+      ${d.pieza ? `<span class="preview-chip">Pza ${d.pieza}</span>` : ''}
+      ${d.arancel ? `<span class="preview-chip" style="color:var(--success);border-color:var(--success)">${formatMoney(d.arancel)}</span>` : ''}
+    </div>`).join('');
+}
+
+// ── AUTOCOMPLETE PACIENTES (datalist nativo) ──
+function getPacientesCache() {
+  try { return JSON.parse(localStorage.getItem('pacientes_cache')||'{}'); } catch(e) { return {}; }
+}
+
+function guardarCacheAfiliado(paciente, afiliado) {
+  if (!paciente || !afiliado) return;
+  const cache = getPacientesCache();
+  cache[paciente.toLowerCase()] = {nombre:paciente, afiliado};
+  localStorage.setItem('pacientes_cache', JSON.stringify(cache));
+}
+
+// Mapa global: nombre → afiliado
+let pacientesMap = {};
+
+function actualizarDatalist() {
+  const cache = getPacientesCache();
+  const pacientesSheets = {};
+  datos.forEach(d => {
+    if (d.paciente) {
+      const key = d.paciente.trim().toLowerCase();
+      pacientesSheets[key] = {nombre: d.paciente.trim(), afiliado: d.afiliado||''};
+    }
+  });
+  const combinado = {...pacientesSheets, ...cache};
+  pacientesMap = {};
+  const datalist = document.getElementById('pacientes-datalist');
+  datalist.innerHTML = Object.values(combinado)
+    .sort((a,b) => a.nombre.localeCompare(b.nombre))
+    .map(p => {
+      pacientesMap[p.nombre.toLowerCase()] = p.afiliado;
+      return `<option value="${p.nombre}">`;
+    }).join('');
+}
+
+function onPacienteInput() {
+  actualizarDatalist();
+  const val = document.getElementById('paciente').value.trim().toLowerCase();
+  // Autocompletar afiliado si hay coincidencia exacta
+  if (pacientesMap[val] !== undefined) {
+    document.getElementById('afiliado').value = pacientesMap[val];
+  }
+}
+
+// ── EDITAR ──
+function editarFila(d) {
+  // Cargar datos en el formulario
+  document.getElementById('paciente').value = d.paciente || '';
+  document.getElementById('afiliado').value  = d.afiliado || '';
+  document.getElementById('fecha').value      = d.fecha || '';
+  if (document.getElementById('obrasocial')) document.getElementById('obrasocial').value = d.obrasocial || '';
+  document.getElementById('codigo').value    = d.codigo || '';
+  document.getElementById('arancel').value   = d.arancel || '';
+  document.getElementById('pieza').value     = d.pieza || '';
+  document.getElementById('cara').value      = d.cara || '';
+
+  // Mostrar descripción del código si existe
+  autocompletarArancel();
+
+  // Marcar que es una edición
+  document.getElementById('btn-guardar').innerHTML = '✏️ Guardar corrección';
+  document.getElementById('btn-guardar').style.background = 'var(--warning)';
+
+  // Banner informativo
+  let banner = document.getElementById('edit-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'edit-banner';
+    banner.style = 'background:var(--warning-light);border-left:4px solid var(--warning);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;';
+    banner.innerHTML = '<span>⚠️ Editando prestación — al guardar se agrega una fila nueva corregida. Borrá la original desde Sheets.</span><button onclick="cancelarEdicion()" style="border:none;background:none;cursor:pointer;font-size:1.2rem;color:var(--warning)">✕</button>';
+    const card = document.querySelector('#tab-cargar .card');
+    card.insertBefore(banner, card.firstChild);
+  }
+  banner.style.display = 'flex';
+
+  // Ir a la pestaña cargar
+  showTab('cargar');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicion() {
+  const banner = document.getElementById('edit-banner');
+  if (banner) banner.style.display = 'none';
+  document.getElementById('btn-guardar').innerHTML = '☁️ Guardar prestación';
+  document.getElementById('btn-guardar').style.background = '';
+}
+
+// ── COPIAR PARA EXCEL ──
+function copiarTabla() {
+  const filas = document.querySelectorAll('#tabla tr');
+  if (!filas.length) { toast('No hay datos para copiar', 'warning'); return; }
+
+  // Encabezados
+  const headers = ['Fecha','Paciente','Afiliado','Código','Arancel','Pieza','Cara','Obra Social'];
+  let texto = headers.join('\t') + '\n';
+
+  filas.forEach(tr => {
+    const celdas = tr.querySelectorAll('td');
+    const fila = [];
+    // Fecha
+    fila.push(celdas[0] ? celdas[0].textContent.trim() : '');
+    // Paciente
+    fila.push(celdas[1] ? celdas[1].textContent.trim() : '');
+    // Afiliado
+    fila.push(celdas[2] ? celdas[2].textContent.trim() : '');
+    // Código (sin badge DUP)
+    fila.push(celdas[3] ? celdas[3].textContent.replace('DUP','').trim() : '');
+    // Arancel — quitar $ y convertir a número
+    const arancel = celdas[4] ? celdas[4].textContent.trim().replace('$','').replace(/\./g,'').replace(',','.') : '';
+    fila.push(arancel === '—' ? '' : arancel);
+    // Pieza
+    fila.push(celdas[5] ? celdas[5].textContent.trim() : '');
+    // Cara
+    fila.push(celdas[6] ? celdas[6].textContent.trim() : '');
+    // Obra Social
+    fila.push(celdas[7] ? celdas[7].textContent.trim() : '');
+    texto += fila.join('\t') + '\n';
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    toast('✓ Copiado — pegá en Excel con Ctrl+V', 'success');
+  }).catch(() => {
+    // Fallback para tablets
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('✓ Copiado — pegá en Excel con Ctrl+V', 'success');
+  });
+}
+
+// ── INIT ──
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+cargar();
+</script>
+</body>
+</html>
