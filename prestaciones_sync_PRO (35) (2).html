@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prestaciones PRO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f0f2f5; --card:#fff; --primary:#1a6fd4; --primary-light:#e8f0fb;
+      --primary-dark:#1459b0; --danger:#e53935; --danger-light:#fdecea;
+      --success:#2e7d32; --success-light:#e8f5e9; --warning:#f57c00;
+      --warning-light:#fff3e0; --text:#1a1d23; --text-muted:#6b7280;
+      --border:#e2e6ea; --shadow:0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg:0 8px 32px rgba(0,0,0,0.12); --radius:12px; --radius-sm:8px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:16px; font-size:15px; -webkit-font-smoothing:antialiased; }
+    .header { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    .header-icon { width:40px; height:40px; background:var(--primary); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    h1 { font-size:1.4rem; font-weight:600; }
+    .subtitle { font-size:0.8rem; color:var(--text-muted); }
+    .tabs { display:flex; gap:4px; background:var(--card); padding:4px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; overflow-x:auto; }
+    .tab { flex:1; padding:10px 16px; border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter',sans-serif; font-size:0.875rem; font-weight:500; color:var(--text-muted); white-space:nowrap; transition:all 0.2s; }
+    .tab.active { background:var(--primary); color:white; box-shadow:0 2px 8px rgba(26,111,212,0.35); }
+    .tab:hover:not(.active) { background:var(--primary-light); color:var(--primary); }
+    .panel { display:none; } .panel.active { display:block; }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
+    .card-title { font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:14px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:600px){ .grid-2 { grid-template-columns:1fr; } .estado-grid { grid-template-columns:1fr !important; } }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:0.78rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; }
+    input,select { padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--text); background:white; transition:border-color 0.2s; width:100%; }
+    input:focus,select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,111,212,0.12); }
+    input.error { border-color:var(--danger); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; transition:all 0.2s; }
+    .btn:active { transform:scale(0.97); }
+    .btn-primary { background:var(--primary); color:white; }
+    .btn-primary:hover { background:var(--primary-dark); }
+    .btn-danger { background:var(--danger); color:white; }
+    .btn-ghost { background:var(--bg); color:var(--text-muted); border:1.5px solid var(--border); }
+    .btn-ghost:hover { background:var(--border); color:var(--text); }
+    .btn-full { width:100%; margin-top:14px; padding:14px; font-size:1rem; }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:white; padding:12px 24px; border-radius:30px; font-size:0.9rem; font-weight:500; z-index:9999; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; white-space:nowrap; }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+    #toast.success { background:var(--success); } #toast.error { background:var(--danger); } #toast.warning { background:var(--warning); }
+    .filtros-row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+    .filtros-row .field { flex:1; min-width:140px; }
+    .filtros-row .btn { margin-top:22px; white-space:nowrap; }
+    .table-wrapper { overflow-x:auto; border-radius:var(--radius-sm); border:1px solid var(--border); }
+    table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+    thead th { background:var(--bg); padding:11px 14px; text-align:left; font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+    tbody td { padding:11px 14px; border-bottom:1px solid var(--border); font-size:0.875rem; vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--primary-light); }
+    .duplicate td { background:var(--danger-light) !important; }
+    .duplicate td:first-child { border-left:3px solid var(--danger); }
+    .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:0.72rem; font-weight:600; }
+    .badge-dup { background:var(--danger-light); color:var(--danger); }
+    .action-btn { width:30px; height:30px; border:none; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s; }
+    .action-btn:hover { transform:scale(1.1); }
+    .btn-del { background:var(--danger-light); color:var(--danger); }
+    .btn-del:hover { background:var(--danger); color:white; }
+    .btn-edit { background:var(--primary-light); color:var(--primary); }
+    .btn-edit:hover { background:var(--primary); color:white; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+    .stat-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; display:flex; flex-direction:column; gap:4px; }
+    .stat-label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .stat-value { font-size:1.8rem; font-weight:600; color:var(--text); line-height:1; }
+    .stat-value.money { color:var(--success); font-size:1.5rem; }
+    .stat-value.warn { color:var(--warning); }
+    .empty { text-align:center; padding:40px 20px; color:var(--text-muted); }
+    .empty-icon { font-size:2.5rem; margin-bottom:8px; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .count-bar { display:flex; justify-content:space-between; align-items:center; padding:8px 4px; font-size:0.82rem; color:var(--text-muted); flex-wrap:wrap; gap:6px; }
+    .count-bar strong { color:var(--text); }
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; padding:16px; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:white; border-radius:var(--radius); padding:24px; width:100%; max-width:420px; box-shadow:var(--shadow-lg); animation:slideUp 0.25s ease; }
+    @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .modal h3 { margin-bottom:6px; } .modal p { color:var(--text-muted); font-size:0.9rem; margin-bottom:20px; }
+    .modal-actions { display:flex; gap:10px; } .modal-actions .btn { flex:1; }
+    .autocomplete-wrap { position:relative; }
+    .mes-selector { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+    .preview-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--radius-sm); background:var(--bg); margin-bottom:6px; font-size:0.82rem; animation:fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .preview-row:first-child { background:var(--primary-light); border-left:3px solid var(--primary); }
+    .preview-chip { background:white; border:1px solid var(--border); border-radius:20px; padding:2px 8px; font-size:0.75rem; font-family:'JetBrains Mono',monospace; white-space:nowrap; }
+    .preview-paciente { font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🦷</div>
+  <div>
+    <h1>Prestaciones PRO</h1>
+    <div class="subtitle" id="sync-status">Cargando...</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('cargar')">➕ Cargar</button>
+  <button class="tab" onclick="showTab('historial')">📋 Historial</button>
+  <button class="tab" onclick="showTab('resumen')">📊 Resumen</button>
+  <button class="tab" onclick="showTab('cobros')">💰 Cobros</button>
+</div>
+
+<!-- TAB CARGAR -->
+<div id="tab-cargar" class="panel active">
+  <div class="card">
+    <div class="card-title">Nueva prestación</div>
+    <div class="grid-2">
+      <div class="field autocomplete-wrap" style="grid-column:1/-1">
+        <label>Paciente</label>
+        <input id="paciente" placeholder="APELLIDO, NOMBRE"
+               list="pacientes-datalist"
+               oninput="this.value=this.value.toUpperCase(); onPacienteInput()"
+               autocomplete="off">
+        <datalist id="pacientes-datalist"></datalist>
+      </div>
+      <div class="field">
+        <label>Obra Social</label>
+        <select id="obrasocial" onchange="autocompletarArancel()">
+          <option value="">— Seleccionar —</option>
+          <option value="OMINT">OMINT</option>
+          <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>N° Afiliado</label>
+        <input id="afiliado" placeholder="Ej: 123456789">
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input id="fecha" type="date">
+      </div>
+      <div class="field">
+        <label>Código</label>
+        <input id="codigo" placeholder="Ej: 01.01" oninput="autocompletarArancel()" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Arancel ($)</label>
+        <input id="arancel" type="number" placeholder="0" min="0" step="1">
+        <div id="codigo-desc" style="display:none; font-size:0.78rem; margin-top:3px; padding:4px 8px; background:var(--success-light); border-radius:6px; color:var(--success);"></div>
+      </div>
+      <div class="field">
+        <label>Pieza</label>
+        <input id="pieza" placeholder="Ej: 14">
+      </div>
+      <div class="field">
+        <label>Cara</label>
+        <input id="cara" placeholder="Ej: V, D, M...">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-guardar" onclick="agregar()">☁️ Guardar prestación</button>
+  </div>
+
+  <div class="card" id="preview-card" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="card-title" style="margin:0">Cargadas hoy</div>
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:0.8rem" onclick="showTab('historial')">Ver todas →</button>
+    </div>
+    <div id="preview-lista"></div>
+  </div>
+
+  <div id="dup-warning" class="card" style="display:none;border-left:4px solid var(--danger);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.4rem">⚠️</span>
+      <div>
+        <div style="font-weight:600;color:var(--danger)">Posible duplicado detectado</div>
+        <div id="dup-detail" style="font-size:0.85rem;color:var(--text-muted);margin-top:2px;"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="cancelarDup()">Cancelar</button>
+      <button class="btn btn-danger" onclick="forzarGuardar()">Guardar igual</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB HISTORIAL -->
+<div id="tab-historial" class="panel">
+  <div class="card">
+    <div class="card-title">Filtros</div>
+    <div class="filtros-row">
+      <div class="field"><label>Buscar</label><input id="buscador" placeholder="Paciente..." oninput="render()"></div>
+      <div class="field"><label>Desde</label><input id="desde" type="date" onchange="render()"></div>
+      <div class="field"><label>Hasta</label><input id="hasta" type="date" onchange="render()"></div>
+      <div class="field">
+        <label>Mes</label>
+        <select id="mes" onchange="filtrarMes()">
+          <option value="">— Todos —</option>
+          <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+          <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+          <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+          <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Obra Social</label>
+        <select id="filtro-os" onchange="render()">
+          <option value="">— Todas —</option>
+          <option value="OMINT">OMINT</option>
+          <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" onclick="esteMes()">Este mes</button>
+      <button class="btn btn-ghost" onclick="limpiarFiltros()">✕ Limpiar</button>
+    </div>
+  </div>
+  <div class="count-bar">
+    <span>Mostrando <strong id="count-visible">0</strong> prestaciones</span>
+    <span id="count-dup-warn" style="color:var(--danger);display:none">⚠️ <strong id="count-dup">0</strong> duplicados</span>
+    <button class="btn btn-ghost" style="padding:5px 14px;font-size:0.8rem" onclick="copiarTabla()">📋 Copiar para Excel</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th onclick="toggleOrden()" style="cursor:pointer;user-select:none">Fecha <span id="orden-icon">↓</span></th>
+          <th>Paciente</th><th>Afiliado</th><th>Código</th><th>Arancel</th><th>Pieza</th><th>Cara</th><th>Obra Social</th><th>—</th>
+        </tr></thead>
+        <tbody id="tabla"></tbody>
+      </table>
+    </div>
+    <div id="empty-state" class="empty" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-text">No hay prestaciones que coincidan.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB RESUMEN -->
+<div id="tab-resumen" class="panel">
+  <div class="mes-selector">
+    <div class="field">
+      <label>Mes a analizar</label>
+      <select id="mes-resumen" onchange="renderResumen()">
+        <option value="">— Todos —</option>
+        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+        <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+        <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+        <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Obra Social</label>
+      <select id="filtro-os-resumen" onchange="renderResumen()">
+        <option value="">— Todas —</option>
+        <option value="OMINT">OMINT</option>
+        <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:22px" onclick="seleccionarMesActual()">Este mes</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total prestaciones</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Pacientes únicos</div><div class="stat-value" id="stat-pacientes">—</div></div>
+    <div class="stat-card"><div class="stat-label">Facturación estimada</div><div class="stat-value money" id="stat-monto">—</div></div>
+    <div class="stat-card"><div class="stat-label">Duplicados</div><div class="stat-value warn" id="stat-dup">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Por código</div>
+    <div class="table-wrapper"><table><thead><tr><th>Código</th><th>Cantidad</th><th>Facturación</th></tr></thead><tbody id="tabla-codigos"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Por paciente</div>
+    <div class="table-wrapper"><table><thead><tr><th>Paciente</th><th>Prestaciones</th><th>Facturación</th></tr></thead><tbody id="tabla-pacientes"></tbody></table></div>
+  </div>
+</div>
+
+<!-- TAB COBROS -->
+<div id="tab-cobros" class="panel">
+
+  <!-- Sub-tabs -->
+  <div style="display:flex;gap:4px;background:var(--card);padding:4px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;">
+    <button id="subtab-btn-cobrar" class="tab active" style="font-size:0.82rem;padding:8px 14px" onclick="showSubtab('cobrar')">💾 Registrar cobro</button>
+    <button id="subtab-btn-presupuesto" class="tab" style="font-size:0.82rem;padding:8px 14px" onclick="showSubtab('presupuesto')">📋 Nuevo presupuesto</button>
+    <button id="subtab-btn-estado" class="tab" style="font-size:0.82rem;padding:8px 14px" onclick="showSubtab('estado')">📊 Estado de cuentas</button>
+    <button id="subtab-btn-historial" class="tab" style="font-size:0.82rem;padding:8px 14px" onclick="showSubtab('historial')">🕐 Historial cobros</button>
+  </div>
+
+  <!-- SUBTAB: REGISTRAR COBRO -->
+  <div id="subtab-cobrar">
+    <div class="card">
+      <div class="card-title">Registrar cobro</div>
+      <div class="grid-2">
+        <div class="field autocomplete-wrap" style="grid-column:1/-1">
+          <label>Paciente</label>
+          <input id="cobro-paciente" placeholder="APELLIDO, NOMBRE"
+                 list="cobros-pacientes-datalist"
+                 oninput="this.value=this.value.toUpperCase(); onCobroPacienteInput()"
+                 onchange="onCobroPacienteInput()"
+                 autocomplete="off">
+          <datalist id="cobros-pacientes-datalist"></datalist>
+        <div id="cobro-paciente-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow);z-index:100;display:none;max-height:220px;overflow-y:auto"></div>
+        </div>
+        <div class="field">
+          <label>Fecha</label>
+          <input id="cobro-fecha" type="date">
+        </div>
+        <div class="field">
+          <label>Monto ($)</label>
+          <input id="cobro-monto" type="number" placeholder="0" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Medio de pago</label>
+          <select id="cobro-medio">
+            <option value="">— Seleccionar —</option>
+            <option value="Efectivo">💵 Efectivo</option>
+            <option value="Transferencia">🏦 Transferencia</option>
+            <option value="MercadoPago">📱 MercadoPago</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Concepto (opcional)</label>
+          <input id="cobro-concepto" placeholder="Ej: Saldo tratamiento, Corona...">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-guardar-cobro" onclick="guardarCobro()">💾 Registrar cobro</button>
+    </div>
+
+    <!-- Resumen del paciente al tipear -->
+    <div class="card" id="cobro-saldo-card" style="display:none">
+      <div class="card-title" style="margin-bottom:12px">Estado de cuenta del paciente</div>
+      <div id="cobro-saldo-info"></div>
+    </div>
+  </div>
+
+  <!-- SUBTAB: NUEVO PRESUPUESTO -->
+  <div id="subtab-presupuesto" style="display:none">
+    <div class="card">
+      <div class="card-title">Nuevo presupuesto / deuda</div>
+      <div class="grid-2">
+        <div class="field autocomplete-wrap" style="grid-column:1/-1">
+          <label>Paciente</label>
+          <input id="presup-paciente" placeholder="APELLIDO, NOMBRE"
+                 list="presup-pacientes-datalist"
+                 oninput="this.value=this.value.toUpperCase()"
+                 autocomplete="off">
+          <datalist id="presup-pacientes-datalist"></datalist>
+          <div id="presup-paciente-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow);z-index:100;display:none;max-height:220px;overflow-y:auto"></div>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Descripción del tratamiento</label>
+          <input id="presup-descripcion" placeholder="Ej: Conductoterapia + corona pieza 14">
+        </div>
+        <div class="field">
+          <label>Monto total ($)</label>
+          <input id="presup-monto" type="number" placeholder="0" min="0" step="1">
+        </div>
+        <div class="field">
+          <label>Fecha</label>
+          <input id="presup-fecha" type="date">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-guardar-presup" onclick="guardarPresupuesto()">📋 Guardar presupuesto</button>
+    </div>
+
+    <!-- Lista presupuestos existentes -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:16px 20px 10px;"><div class="card-title" style="margin:0">Presupuestos registrados</div></div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>Fecha</th><th>Paciente</th><th>Tratamiento</th><th>Total</th><th>—</th>
+          </tr></thead>
+          <tbody id="tabla-presupuestos"></tbody>
+        </table>
+      </div>
+      <div id="presup-empty" class="empty" style="display:none">
+        <div class="empty-icon">📋</div>
+        <div>No hay presupuestos registrados.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBTAB: ESTADO DE CUENTAS -->
+  <div id="subtab-estado" style="display:none">
+    <div class="card">
+      <div class="card-title">Filtrar por paciente</div>
+      <div class="filtros-row">
+        <div class="field" style="flex:2"><label>Paciente</label>
+          <input id="estado-buscador" placeholder="Escribí para filtrar..." oninput="renderEstado()" list="estado-pacientes-datalist">
+          <datalist id="estado-pacientes-datalist"></datalist>
+        </div>
+        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';renderEstado()">✕ Ver todos</button>
+      </div>
+    </div>
+    <div id="estado-lista"></div>
+  </div>
+
+  <!-- SUBTAB: HISTORIAL COBROS -->
+  <div id="subtab-historial" style="display:none">
+    <div class="card">
+      <div class="card-title">Filtros</div>
+      <div class="filtros-row">
+        <div class="field"><label>Buscar paciente</label><input id="cobros-buscador" placeholder="Paciente..." oninput="renderCobros()"></div>
+        <div class="field"><label>Desde</label><input id="cobros-desde" type="date" onchange="renderCobros()"></div>
+        <div class="field"><label>Hasta</label><input id="cobros-hasta" type="date" onchange="renderCobros()"></div>
+        <div class="field">
+          <label>Medio</label>
+          <select id="cobros-medio-filtro" onchange="renderCobros()">
+            <option value="">— Todos —</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="MercadoPago">MercadoPago</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost" onclick="cobrosEsteMes()">Este mes</button>
+        <button class="btn btn-ghost" onclick="limpiarFiltrosCobros()">✕ Limpiar</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="cobros-stats" style="display:none">
+      <div class="stat-card"><div class="stat-label">Total cobros</div><div class="stat-value" id="cobros-stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Total cobrado</div><div class="stat-value money" id="cobros-stat-monto">—</div></div>
+      <div class="stat-card"><div class="stat-label">Efectivo</div><div class="stat-value" id="cobros-stat-efectivo" style="font-size:1.2rem">—</div></div>
+      <div class="stat-card"><div class="stat-label">Transferencia + MP</div><div class="stat-value" id="cobros-stat-digital" style="font-size:1.2rem">—</div></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr>
+            <th>Fecha</th><th>Paciente</th><th>Monto</th><th>Medio</th><th>Concepto</th><th>—</th>
+          </tr></thead>
+          <tbody id="tabla-cobros"></tbody>
+        </table>
+      </div>
+      <div id="cobros-empty" class="empty" style="display:none">
+        <div class="empty-icon">💸</div>
+        <div>No hay cobros registrados.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL BORRAR COBRO -->
+<div id="modal-borrar-cobro" class="modal-backdrop">
+  <div class="modal">
+    <h3>🗑️ Borrar cobro</h3>
+    <p>¿Estás segura de que querés eliminar este cobro?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModalCobro()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-borrar-cobro" onclick="confirmarBorrarCobro()">Sí, borrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BORRAR PRESUPUESTO -->
+<div id="modal-borrar-presup" class="modal-backdrop">
+  <div class="modal">
+    <h3>🗑️ Borrar presupuesto</h3>
+    <p>¿Estás segura de que querés eliminar este presupuesto?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModalPresup()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-borrar-presup" onclick="confirmarBorrarPresup()">Sí, borrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BORRAR -->
+<div id="modal-borrar" class="modal-backdrop">
+  <div class="modal">
+    <h3>🗑️ Borrar prestación</h3>
+    <p>¿Estás segura de que querés eliminar este registro?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-borrar" onclick="confirmarBorrar()">Sí, borrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcw3T9KALUAm3cKjflHMeziaIkQb3ppUlHCqZeJIczy2t5iW-aV-p_BSSuMKuwsGD7/exec";
+
+const ARANCELES = {
+  "01.01":13345,
+  "01.04":19775,
+  "02.01":36081,
+  "02.02":36081,
+  "02.08":36081,
+  "02.16":36081,
+  "02.09":36081,
+  "03.01":59315,
+  "03.02":93909,
+  "03.05":24722,
+  "03.22":42015,
+  "03.24":14831,
+  "03.25":19881,
+  "03.26":20760,
+  "05.01":19775,
+  "05.02":25208,
+  "05.05":14831,
+  "05.06":16960,
+  "07.01":17301,
+  "07.02":88971,
+  "07.04":27185,
+  "07.05":74141,
+  "07.06.01":39542,
+  "07.06.02":39542,
+  "07.06.04":39542,
+  "08.01":16804,
+  "08.01M":28824,
+  "08.02":27185,
+  "08.03":27675,
+  "08.04":32622,
+  "08.17":73220,
+  "08.18":30430,
+  "08.20":30430,
+  "09.01.01":6714,
+  "09.01.02":6714,
+  "09.01.04":22240,
+  "09.01.05":39047,
+  "09.02.04":24722,
+  "09.02.05":24722,
+  "09.02.10":17301,
+  "10.01":32127,
+  "10.02":34103,
+  "10.03":22240,
+  "10.04":30640,
+  "10.05":24722,
+  "10.06":20760,
+  "10.07":34592,
+  "10.08":21248,
+  "10.09":101820,
+  "10.10":99345,
+  "10.11":51896,
+  "10.12":52398,
+  "10.13":39542,
+  "10.14":42015,
+  "10.16":51896,
+  "10.20":37069,
+  "10.22":49919,
+  "10.23":79082,
+  "10.24":84022,
+  "10.25":88971,
+  "10.26":24722
+};
+const DESCRIPCIONES = {
+  "01.01":"Consulta, diagnóstico, fichado y plan de tratamiento.",
+  "01.04":"Consulta de urgencia que resuelve la demanda espontánea.",
+  "02.01":"Obturación con amalgama cavidad simple.",
+  "02.02":"Obturación con amalgama cavidad compuesta y / o compleja.",
+  "02.08":"Restauración con material estético, incluye composites, resinas de fot",
+  "02.16":"Restauración  con material estético, incluye composites, resinas de fo",
+  "02.09":"Reconstrucción de ángulo en dientes anteriores.",
+  "03.01":"Tratamiento uniradicular.",
+  "03.02":"Tratamiento multiradicular. Dos  conductos o más.",
+  "03.05":"Biopulpectomía parcial.",
+  "03.22":"Retratamiento de endodoncia.",
+  "03.24":"Retiro de pernos,coronas,tornillos,perforación de coronas",
+  "03.25":"Preparación para aislacion, incluye gingivectomia, reconstruccion dent",
+  "03.26":"Acopio de pasta alcalina.",
+  "05.01":"Tartectomía y cepillado mecánico.",
+  "05.02":"Consulta preventiva. Incluye cepillado y aplic. de Fluor. Detección, c",
+  "05.05":"Selladores de puntos y fisuras por pieza dentaria.",
+  "05.06":"Aplicación de cariostáticos en piezas dentarias permanentes y temporar",
+  "07.01":"Consultas de Motivación en menores de 14 años incluido",
+  "07.02":"Mantenedor de espacio fijo o removible",
+  "07.04":"Tratamiento de dientes temporarios con formocresol.",
+  "07.05":"Corona de acero provisoria por destrucción coronaria.",
+  "07.06.01":"Reducción de luxación con inmovilización dentaria.",
+  "07.06.02":"Luxación total (reimplante e inmovilización dentaria).",
+  "07.06.04":"Fractura amelodentinaria. Protección pulpar coronas provisorias.",
+  "08.01":"Consulta periodontal. Diagnóstico, pronóstico y plan de tratamiento. I",
+  "08.01M":"Consulta de mantenimiento periodontal",
+  "08.02":"Tratamiento de Gingivitis marginal crónica",
+  "08.03":"Tratamiento de periodontitis destructiva leve o moderada, con bolsas d",
+  "08.04":"Tratamiento de periodontitis severa con bolsas de más de 6 mm o más co",
+  "08.17":"Ferulización (temporaria o definitiva). Incluye alambre.",
+  "08.18":"Cirugia periodontal a colgajo. Por pieza dentaria",
+  "08.20":"Tratamiento de perimplantitis.",
+  "09.01.01":"Rx. Periapical técnica de cono corto o cono largo.",
+  "09.01.02":"Bitte wing.",
+  "09.01.04":"Media Seriada  de 7 placas. Técnica de cono corto o cono largo",
+  "09.01.05":"Seriada de 14  placas. Técnica de cono corto o cono largo.",
+  "09.02.04":"Pantomografía o radiografía panorámica",
+  "09.02.05":"Tele-radiografía cefalométrica",
+  "09.02.10":"Trazado cefalométrico",
+  "10.01":"Extracción dentaria simple.",
+  "10.02":"Plástica comunicación  buco-sinusal como riesgo previsto simultáneo a ",
+  "10.03":"Biopsia por punción o aspiración.",
+  "10.04":"Alveolectomía estabilizadora por zona (6 zonas).",
+  "10.05":"Reimplante dentario inmediato al traumatismo.",
+  "10.06":"Incisión y drenaje de abscesos por vía intrabucal.",
+  "10.07":"Biopsia por escisión.",
+  "10.08":"Alargamiento quirúrgico de la corona clínica.",
+  "10.09":"Extracción de piezas dentarias en retención ósea",
+  "10.10":"Germectomía.",
+  "10.11":"Liberación de dientes retenidos.",
+  "10.12":"Apicectomía.",
+  "10.13":"Tratamiento de osteomelitis.",
+  "10.14":"Extracción de cuerpo extraño.",
+  "10.16":"Frenectomía.",
+  "10.20":"Extracción dentaria por alveolectomía.",
+  "10.22":"Extracción dentaria con retención mucosa.",
+  "10.23":"Extirpación quistes, tumores de tejidos duros o blandos h/ 1 cm.",
+  "10.24":"Extirpación quistes, tumores de tejidos duros o blandos h/ 3 cm.",
+  "10.25":"Extirpación quistes, tumores de tejidos duros/ blandos + de 3 cm",
+  "10.26":"Tratamiento de fracturas dentoalveolares simples."
+};
+const ARANCELES_SWISS = {
+  "0101":14503,
+  "0104":17076,
+  "0202":29853,
+  "020801":40000,
+  "0301":93094,
+  "0302":124474,
+  "0305":34580,
+  "0306":18870,
+  "0307":15251,
+  "03101":9302,
+  "03104":21371,
+  "0501":11443,
+  "0502":11403,
+  "0505":8768,
+  "0506":9302,
+  "060900":4093,
+  "0701":20222,
+  "070101":9508,
+  "0702":137046,
+  "0703":222070,
+  "0704":56484,
+  "0705":92840,
+  "070601":35180,
+  "070602":37035,
+  "0801":15587,
+  "0802":12501,
+  "0803":11669,
+  "080301":7385,
+  "0804":15961,
+  "080401":14820,
+  "0805":6556,
+  "0807":13001,
+  "090101":4639,
+  "090102":4986,
+  "090103":8848,
+  "090104":18870,
+  "090105":28186,
+  "090201":8848,
+  "090202":12677,
+  "090203":17943,
+  "090204":19548,
+  "090205":20292,
+  "090206":15961,
+  "090208":12015,
+  "1001":24800,
+  "1002":18494,
+  "1003":12539,
+  "1004":13024,
+  "1005":17117,
+  "1006":13024,
+  "1007":14236,
+  "1008":14284,
+  "1009":19347,
+  "100901":60576,
+  "100902":79368,
+  "100903":92060,
+  "1010":92060,
+  "1011":23323,
+  "1012":31463,
+  "1013":26274,
+  "1014":20262,
+  "1015":17811,
+  "1016":26182,
+  "1017":37973,
+  "1019":25174,
+  "1020":26688,
+  "991000":228170
+};
+const DESCRIPCIONES_SWISS = {
+  "0101":"Examen diagnóstico, fichado y plan de tratamiento",
+  "0104":"Consulta de urgencia",
+  "0202":"Restauraciones con amalgama",
+  "020801":"Restauraciones con fotocurado",
+  "0301":"Endodoncia unirradicular (incluye Rx pre y post)",
+  "0302":"Endodoncia multirradicular (incluye Rx pre y post)",
+  "0305":"Biopulpectomía parcial",
+  "0306":"Protección pulpar directa",
+  "0307":"Acopio de pasta alcalina",
+  "03101":"Interconsulta con especialista con derivación",
+  "03104":"Desobturación de conductos",
+  "0501":"Consulta preventiva periódica para mayores",
+  "0502":"Consulta preventiva periódica para menores",
+  "0505":"Sellador de fosas y fisuras",
+  "0506":"Cariostáticos mineralizantes",
+  "060900":"Fotos (5) para cada etapa",
+  "0701":"Consulta fichado y motivación",
+  "070101":"Certificado bucodental",
+  "0702":"Mantenedor de espacio fijo",
+  "0703":"Mantenedor de espacio removible",
+  "0704":"Tratamiento con formocresol en dentición temporaria",
+  "0705":"Corona metálica de acero y similares",
+  "070601":"Reducción de luxación con inmovilización dentaria",
+  "070602":"Luxación total - reimplante e inmovilización",
+  "0801":"Consulta de estudio - diagnóstico - pronóstico",
+  "0802":"Tratamiento de gingivitis marginal crónica",
+  "0803":"Periodontitis leve o moderada - bolsas hasta 5mm",
+  "080301":"Periodontitis leve o moderada - sólo 2 piezas",
+  "0804":"Periodontitis severa - bolsas 6mm o más",
+  "080401":"Periodontitis severa - sólo 2 piezas",
+  "0805":"Desgaste selectivo o armonización oclusal",
+  "0807":"Terapia de mantenimiento",
+  "090101":"Rx periapical - cono corto o cono largo",
+  "090102":"Bite-Wing",
+  "090103":"Oclusal 6x8 cm",
+  "090104":"Media seriada de 7 películas",
+  "090105":"Seriada de 14 películas",
+  "090201":"Extrabucal - primera exposición",
+  "090202":"Extrabucal - exposiciones subsiguientes",
+  "090203":"Articulación Temporo-Mandibular - 6 tomas",
+  "090204":"Pantomografía",
+  "090205":"Tele-radiografía cefalométrica",
+  "090206":"Sialografía",
+  "090208":"Trazados computados",
+  "1001":"Extracción dentaria simple o restos radiculares",
+  "1002":"Plástica de comunicación buco-sinusal",
+  "1003":"Biopsia por punción o aspiración",
+  "1004":"Alveolectomía estabilizadora - por zona",
+  "1005":"Reimplante dentario inmediato al traumatismo",
+  "1006":"Incisión y drenaje de abscesos intrabucal",
+  "1007":"Biopsia por escisión",
+  "1008":"Alargamiento quirúrgico de la corona clínica",
+  "1009":"Extracción por alveolectomía externa",
+  "100901":"Extracción retenida - retención mucosa",
+  "100902":"Extracción retenido óseo",
+  "100903":"Extracción en retención mucosa y/u ósea",
+  "1010":"Germectomía",
+  "1011":"Liberación de dientes retenidos",
+  "1012":"Apicectomía",
+  "1013":"Tratamiento de osteomielitis",
+  "1014":"Extracción de cuerpo extraño",
+  "1015":"Alveolectomía correctiva - por zona",
+  "1016":"Radectomía",
+  "1017":"Frenectomía lingual con anestesia local",
+  "1019":"Extirpación de quiste de hasta 2 cm",
+  "1020":"Extirpación de épulis",
+  "991000":"Atención pacientes especiales en quirófano"
+};
+
+let tablaAranceles = ARANCELES;
+let tablaDesc = DESCRIPCIONES;
+
+function autocompletarArancel() {
+  const codigo = document.getElementById('codigo').value.trim();
+  const os = document.getElementById('obrasocial').value;
+  tablaAranceles = (os === 'SWISS MEDICAL') ? ARANCELES_SWISS : ARANCELES;
+  tablaDesc = (os === 'SWISS MEDICAL') ? DESCRIPCIONES_SWISS : DESCRIPCIONES;
+  const campoArancel = document.getElementById('arancel');
+  const infoEl = document.getElementById('codigo-desc');
+  if (tablaAranceles[codigo] !== undefined) {
+    campoArancel.value = tablaAranceles[codigo];
+    campoArancel.style.borderColor = 'var(--success)';
+    if (infoEl) { infoEl.textContent = '✓ ' + (tablaDesc[codigo] || codigo); infoEl.style.display = 'block'; }
+  } else {
+    campoArancel.style.borderColor = '';
+    if (infoEl) infoEl.style.display = 'none';
+  }
+}
+
+let datos = [], pendingData = null, rowToDelete = null;
+let ordenFecha = 'desc';
+let toastTimer;
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['cargar','historial','resumen','cobros'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'resumen') renderResumen();
+  if (name === 'cobros') { renderCobros(); actualizarDatalistCobros(); actualizarDatalistPresup(); }
+}
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 2800);
+}
+
+function clave(d) {
+  return (d.fecha+'|'+d.paciente+'|'+d.codigo+'|'+d.pieza+'|'+d.cara).toLowerCase().trim();
+}
+
+function formatMoney(n) {
+  if (!n && n !== 0) return '—';
+  const num = Number(n);
+  if (isNaN(num)) return '—';
+  return '$' + num.toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function normalizarFecha(val) {
+  if (!val) return '';
+  if (val.includes('T')) return val.split('T')[0];
+  if (val.length > 10) {
+    try {
+      const dt = new Date(val);
+      if (!isNaN(dt.getTime())) {
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth()+1).padStart(2,'0');
+        const d = String(dt.getDate()).padStart(2,'0');
+        return y+'-'+m+'-'+d;
+      }
+    } catch(e) {}
+  }
+  return val;
+}
+
+async function cargar(silencioso=false) {
+  if (!silencioso) setSyncStatus('⏳ Sincronizando...');
+  try {
+    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const raw = await res.json();
+    datos = raw.map(d => {
+      const obj = {};
+      Object.keys(d).forEach(k => {
+        let val = d[k] !== null && d[k] !== undefined ? String(d[k]).trim() : '';
+        const kk = k.toLowerCase().trim().replace(/\s+/g,'');
+        if (kk === 'fecha') val = normalizarFecha(val);
+        if (kk === 'codigo' && val && val.indexOf('.') > 0) {
+          const p = val.split('.');
+          if (p[0].length === 1) val = '0' + val;
+        }
+        obj[kk] = val;
+      });
+      obj._rowIndex = Number(d.rowIndex) || 0;
+      return obj;
+    });
+    setSyncStatus('✅ Sync: ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}));
+    render();
+    renderPreview();
+    actualizarDatalist();
+    actualizarDatalistCobros();
+    actualizarDatalistPresup();
+  } catch(e) {
+    setSyncStatus('❌ Sin conexión');
+    toast('Error al conectar con Google Sheets', 'error');
+  }
+}
+
+function setSyncStatus(msg) { document.getElementById('sync-status').textContent = msg; }
+
+function agregar() {
+  const d = leerFormulario();
+  if (!d.paciente || !d.fecha || !d.codigo) {
+    toast('Completá Paciente, Fecha y Código', 'warning');
+    ['paciente','fecha','codigo'].forEach(id => {
+      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
+    });
+    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
+    return;
+  }
+  if (datos.some(ex => clave(ex) === clave(d))) {
+    pendingData = d;
+    document.getElementById('dup-detail').textContent = d.paciente + ' — ' + d.codigo + ' — Pieza ' + (d.pieza||'—') + ' — ' + d.fecha;
+    document.getElementById('dup-warning').style.display = 'block';
+    document.getElementById('btn-guardar').disabled = true;
+    return;
+  }
+  guardarEnSheets(d);
+}
+
+function leerFormulario() {
+  return {
+    paciente:   document.getElementById('paciente').value.trim(),
+    obrasocial: document.getElementById('obrasocial').value,
+    afiliado:   document.getElementById('afiliado').value.trim(),
+    fecha:      document.getElementById('fecha').value,
+    codigo:     document.getElementById('codigo').value.trim(),
+    arancel:    document.getElementById('arancel').value.trim(),
+    pieza:      document.getElementById('pieza').value.trim(),
+    cara:       document.getElementById('cara').value.trim()
+  };
+}
+
+function cancelarDup() {
+  pendingData = null;
+  document.getElementById('dup-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+}
+
+function forzarGuardar() {
+  document.getElementById('dup-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+  guardarEnSheets(pendingData);
+  pendingData = null;
+}
+
+async function guardarEnSheets(d) {
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const params = new URLSearchParams({
+      action:'save', fecha:d.fecha||'', paciente:d.paciente||'',
+      obrasocial:d.obrasocial||'', afiliado:d.afiliado||'',
+      codigo:d.codigo||'', arancel:d.arancel||'',
+      pieza:d.pieza||'', cara:d.cara||''
+    });
+    await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
+    guardarCacheAfiliado(d.paciente, d.afiliado);
+    toast('✓ Guardando...', 'success');
+    await new Promise(r => setTimeout(r, 2500));
+    limpiarFormulario();
+    await cargar(true);
+  } catch(e) {
+    toast('Error de conexión al guardar', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '☁️ Guardar prestación';
+  }
+}
+
+function limpiarFormulario() {
+  ['codigo','arancel','pieza','cara'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('codigo-desc').style.display = 'none';
+  document.getElementById('arancel').style.borderColor = '';
+  cancelarEdicion();
+}
+
+function pedirBorrar(rowIndex) {
+  rowToDelete = rowIndex;
+  document.getElementById('modal-borrar').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-borrar').classList.remove('open');
+  rowToDelete = null;
+}
+
+async function confirmarBorrar() {
+  if (!rowToDelete) return;
+  cerrarModal();
+  const btn = document.getElementById('btn-confirmar-borrar');
+  btn.disabled = true;
+  try {
+    await fetch(SCRIPT_URL + '?action=delete&rowIndex=' + rowToDelete + '&t=' + Date.now(), {mode:'no-cors'});
+    toast('🗑️ Eliminando...', 'warning');
+    await new Promise(r => setTimeout(r, 2500));
+    await cargar(true);
+  } catch(e) {
+    toast('Error al borrar', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toggleOrden() {
+  ordenFecha = ordenFecha === 'desc' ? 'asc' : 'desc';
+  document.getElementById('orden-icon').textContent = ordenFecha === 'desc' ? '↓' : '↑';
+  render();
+}
+
+function filtrarMes() {
+  const mes = document.getElementById('mes').value;
+  if (mes === '') { render(); return; }
+  const año = new Date().getFullYear();
+  document.getElementById('desde').value = new Date(año, mes, 1).toISOString().split('T')[0];
+  document.getElementById('hasta').value = new Date(año, parseInt(mes)+1, 0).toISOString().split('T')[0];
+  render();
+}
+
+function esteMes() {
+  const hoy = new Date();
+  document.getElementById('desde').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+  document.getElementById('hasta').value = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).toISOString().split('T')[0];
+  render();
+}
+
+function limpiarFiltros() {
+  ['buscador','desde','hasta'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mes').value = '';
+  document.getElementById('filtro-os').value = '';
+  render();
+}
+
+function render() {
+  const filtro = document.getElementById('buscador').value.toLowerCase();
+  const desde = document.getElementById('desde').value;
+  const hasta = document.getElementById('hasta').value;
+  const filtroOS = document.getElementById('filtro-os').value;
+  const claves = {};
+  datos.forEach(d => { const c = clave(d); claves[c] = (claves[c]||0)+1; });
+  const visibles = datos.filter(d => {
+    if (filtro && !d.paciente.toLowerCase().includes(filtro)) return false;
+    if (desde && d.fecha < desde) return false;
+    if (hasta && d.fecha > hasta) return false;
+    if (filtroOS && d.obrasocial !== filtroOS) return false;
+    return true;
+  }).sort((a,b) => ordenFecha === 'desc' ? b.fecha.localeCompare(a.fecha) : a.fecha.localeCompare(b.fecha));
+
+  const dupCount = visibles.filter(d => claves[clave(d)] > 1).length;
+  document.getElementById('count-visible').textContent = visibles.length;
+  document.getElementById('count-dup').textContent = dupCount;
+  document.getElementById('count-dup-warn').style.display = dupCount > 0 ? 'inline' : 'none';
+
+  const tbody = document.getElementById('tabla');
+  tbody.innerHTML = '';
+  if (!visibles.length) { document.getElementById('empty-state').style.display = 'block'; return; }
+  document.getElementById('empty-state').style.display = 'none';
+
+  visibles.forEach(d => {
+    const esDup = claves[clave(d)] > 1;
+    const tr = document.createElement('tr');
+    if (esDup) tr.classList.add('duplicate');
+    tr.innerHTML = `
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${d.fecha ? d.fecha.split('-').reverse().join('/') : ''}</td>
+      <td style="font-weight:500">${d.paciente||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${d.afiliado||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${d.codigo||''}${esDup?' <span class="badge badge-dup">DUP</span>':''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:500">${d.arancel ? formatMoney(d.arancel) : '—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${d.pieza||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${d.cara||''}</td>
+      <td style="font-size:0.85rem;color:var(--primary);font-weight:500">${d.obrasocial||''}</td>
+      <td style="display:flex;gap:4px;">
+        <button class="action-btn btn-edit" title="Editar" onclick="editarFila(${JSON.stringify(d).replace(/"/g,'&quot;')})">✏️</button>
+        <button class="action-btn btn-del" title="Borrar" onclick="pedirBorrar(${d._rowIndex})">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function seleccionarMesActual() {
+  document.getElementById('mes-resumen').value = new Date().getMonth();
+  renderResumen();
+}
+
+function renderResumen() {
+  const mesVal = document.getElementById('mes-resumen').value;
+  const osResumen = document.getElementById('filtro-os-resumen').value;
+  const año = new Date().getFullYear();
+  let filtrados = datos;
+  if (mesVal !== '') {
+    const mes = parseInt(mesVal);
+    filtrados = filtrados.filter(d => d.fecha >= new Date(año,mes,1).toISOString().split('T')[0] && d.fecha <= new Date(año,mes+1,0).toISOString().split('T')[0]);
+  }
+  if (osResumen) filtrados = filtrados.filter(d => d.obrasocial === osResumen);
+
+  const totalPrest = filtrados.length;
+  const pacientesUnicos = new Set(filtrados.map(d => d.paciente.toLowerCase().trim())).size;
+  const montoTotal = filtrados.reduce((acc,d) => acc + (parseFloat(d.arancel)||0), 0);
+  const claves = {};
+  filtrados.forEach(d => { const c = clave(d); claves[c] = (claves[c]||0)+1; });
+  const dupTotal = filtrados.filter(d => claves[clave(d)] > 1).length;
+
+  document.getElementById('stat-total').textContent = totalPrest;
+  document.getElementById('stat-pacientes').textContent = pacientesUnicos;
+  document.getElementById('stat-monto').textContent = formatMoney(montoTotal);
+  document.getElementById('stat-dup').textContent = dupTotal;
+
+  const porCodigo = {};
+  filtrados.forEach(d => {
+    const c = d.codigo||'(sin código)';
+    if (!porCodigo[c]) porCodigo[c] = {cant:0,monto:0};
+    porCodigo[c].cant++; porCodigo[c].monto += parseFloat(d.arancel)||0;
+  });
+  const tbodyCod = document.getElementById('tabla-codigos');
+  tbodyCod.innerHTML = Object.entries(porCodigo).sort((a,b)=>b[1].cant-a[1].cant)
+    .map(([cod,v]) => `<tr><td><strong>${cod}</strong></td><td>${v.cant}</td><td style="font-family:'JetBrains Mono',monospace">${formatMoney(v.monto)}</td></tr>`).join('');
+  if (!tbodyCod.innerHTML) tbodyCod.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos</td></tr>';
+
+  const porPaciente = {};
+  filtrados.forEach(d => {
+    const p = d.paciente||'(sin nombre)';
+    if (!porPaciente[p]) porPaciente[p] = {cant:0,monto:0};
+    porPaciente[p].cant++; porPaciente[p].monto += parseFloat(d.arancel)||0;
+  });
+  const tbodyPac = document.getElementById('tabla-pacientes');
+  tbodyPac.innerHTML = Object.entries(porPaciente).sort((a,b)=>b[1].cant-a[1].cant)
+    .map(([pac,v]) => `<tr><td style="font-weight:500">${pac}</td><td>${v.cant}</td><td style="font-family:'JetBrains Mono',monospace">${formatMoney(v.monto)}</td></tr>`).join('');
+  if (!tbodyPac.innerHTML) tbodyPac.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Sin datos</td></tr>';
+}
+
+function renderPreview() {
+  const hoy = new Date().toISOString().split('T')[0];
+  const recientes = datos.filter(d => d.fecha === hoy).slice(-8).reverse();
+  const card = document.getElementById('preview-card');
+  if (!recientes.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  document.getElementById('preview-lista').innerHTML = recientes.map(d => `
+    <div class="preview-row">
+      <span class="preview-paciente">${d.paciente||''}</span>
+      <span class="preview-chip">${d.codigo||''}</span>
+      ${d.pieza ? `<span class="preview-chip">Pza ${d.pieza}</span>` : ''}
+      ${d.arancel ? `<span class="preview-chip" style="color:var(--success);border-color:var(--success)">${formatMoney(d.arancel)}</span>` : ''}
+    </div>`).join('');
+}
+
+function copiarTabla() {
+  const filas = document.querySelectorAll('#tabla tr');
+  if (!filas.length) { toast('No hay datos para copiar', 'warning'); return; }
+  let texto = ['Fecha','Paciente','Afiliado','Código','Arancel','Pieza','Cara','Obra Social'].join('\t') + '\n';
+  filas.forEach(tr => {
+    const celdas = tr.querySelectorAll('td');
+    const arancel = celdas[4] ? celdas[4].textContent.trim().replace('$','').replace(/\./g,'').replace(',','.') : '';
+    texto += [
+      celdas[0]?.textContent.trim()||'',
+      celdas[1]?.textContent.trim()||'',
+      celdas[2]?.textContent.trim()||'',
+      celdas[3]?.textContent.replace('DUP','').trim()||'',
+      arancel === '—' ? '' : arancel,
+      celdas[5]?.textContent.trim()||'',
+      celdas[6]?.textContent.trim()||'',
+      celdas[7]?.textContent.trim()||''
+    ].join('\t') + '\n';
+  });
+  navigator.clipboard.writeText(texto).then(() => toast('✓ Copiado — pegá en Excel con Ctrl+V', 'success'))
+    .catch(() => { const ta = document.createElement('textarea'); ta.value = texto; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('✓ Copiado', 'success'); });
+}
+
+function editarFila(d) {
+  document.getElementById('paciente').value = d.paciente || '';
+  document.getElementById('obrasocial').value = d.obrasocial || '';
+  document.getElementById('afiliado').value = d.afiliado || '';
+  document.getElementById('fecha').value = d.fecha || '';
+  document.getElementById('codigo').value = d.codigo || '';
+  document.getElementById('arancel').value = d.arancel || '';
+  document.getElementById('pieza').value = d.pieza || '';
+  document.getElementById('cara').value = d.cara || '';
+  autocompletarArancel();
+  document.getElementById('btn-guardar').innerHTML = '✏️ Guardar corrección';
+  document.getElementById('btn-guardar').style.background = 'var(--warning)';
+  let banner = document.getElementById('edit-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'edit-banner';
+    banner.style = 'background:var(--warning-light);border-left:4px solid var(--warning);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;';
+    banner.innerHTML = '<span>⚠️ Editando — al guardar se agrega una fila nueva corregida. Borrá la original desde Sheets.</span><button onclick="cancelarEdicion()" style="border:none;background:none;cursor:pointer;font-size:1.2rem;color:var(--warning)">✕</button>';
+    const card = document.querySelector('#tab-cargar .card');
+    card.insertBefore(banner, card.firstChild);
+  }
+  banner.style.display = 'flex';
+  showTab('cargar');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicion() {
+  const banner = document.getElementById('edit-banner');
+  if (banner) banner.style.display = 'none';
+  document.getElementById('btn-guardar').innerHTML = '☁️ Guardar prestación';
+  document.getElementById('btn-guardar').style.background = '';
+}
+
+let pacientesMap = {};
+
+function getPacientesCache() {
+  try { return JSON.parse(localStorage.getItem('pacientes_cache')||'{}'); } catch(e) { return {}; }
+}
+
+function guardarCacheAfiliado(paciente, afiliado) {
+  if (!paciente || !afiliado) return;
+  const cache = getPacientesCache();
+  cache[paciente.toLowerCase()] = {nombre:paciente, afiliado};
+  localStorage.setItem('pacientes_cache', JSON.stringify(cache));
+}
+
+function actualizarDatalist() {
+  const cache = getPacientesCache();
+  const pacientesSheets = {};
+  datos.forEach(d => {
+    if (d.paciente) {
+      const key = d.paciente.trim().toLowerCase();
+      pacientesSheets[key] = {nombre: d.paciente.trim(), afiliado: d.afiliado||''};
+    }
+  });
+  const combinado = {...pacientesSheets, ...cache};
+  pacientesMap = {};
+  const datalist = document.getElementById('pacientes-datalist');
+  datalist.innerHTML = Object.values(combinado)
+    .sort((a,b) => a.nombre.localeCompare(b.nombre))
+    .map(p => {
+      pacientesMap[p.nombre.toLowerCase()] = p.afiliado;
+      return `<option value="${p.nombre}">`;
+    }).join('');
+}
+
+function onPacienteInput() {
+  actualizarDatalist();
+  const val = document.getElementById('paciente').value.trim().toLowerCase();
+  if (pacientesMap[val] !== undefined) {
+    document.getElementById('afiliado').value = pacientesMap[val];
+  }
+}
+
+// ─── SUBTABS COBROS ─────────────────────────────────────────────────────────
+
+function showSubtab(name) {
+  ['cobrar','presupuesto','estado','historial'].forEach(s => {
+    document.getElementById('subtab-' + s).style.display = s === name ? '' : 'none';
+    document.getElementById('subtab-btn-' + s).classList.toggle('active', s === name);
+  });
+  if (name === 'estado') renderEstado();
+  if (name === 'historial') renderCobros();
+  if (name === 'presupuesto') renderPresupuestos();
+}
+
+// ─── PRESUPUESTOS ────────────────────────────────────────────────────────────
+
+let datosPresupuestos = [];
+let presupToDelete = null;
+let presupListos = false;
+
+async function cargarPresupuestos(silencioso=false) {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=readPresupuestos&t=' + Date.now());
+    const raw = await res.json();
+    datosPresupuestos = Array.isArray(raw) ? raw.map(d => ({
+      fecha:       (d.fecha||'').trim(),
+      paciente:    (d.paciente||'').trim(),
+      descripcion: (d.descripcion||'').trim(),
+      monto:       d.monto||'',
+      _rowIndex:   Number(d.rowIndex)||0
+    })) : [];
+    presupListos = true;
+    if (!silencioso) { renderPresupuestos(); renderEstado(); }
+  } catch(e) {
+    if (!silencioso) toast('Error al cargar presupuestos', 'error');
+  }
+}
+
+function actualizarDatalistPresup() {
+  const nombres = getPacientesUnicos();
+  ['presup-pacientes-datalist','estado-pacientes-datalist'].forEach(id => {
+    const dl = document.getElementById(id);
+    if (dl) dl.innerHTML = nombres.map(n => `<option value="${n}">`).join('');
+  });
+}
+
+async function guardarPresupuesto() {
+  const pac   = document.getElementById('presup-paciente').value.trim();
+  const desc  = document.getElementById('presup-descripcion').value.trim();
+  const monto = document.getElementById('presup-monto').value.trim();
+  const fecha = document.getElementById('presup-fecha').value;
+  if (!pac || !desc || !monto) {
+    toast('Completá Paciente, Descripción y Monto', 'warning');
+    ['presup-paciente','presup-descripcion','presup-monto'].forEach(id => {
+      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
+    });
+    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
+    return;
+  }
+  const btn = document.getElementById('btn-guardar-presup');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const params = new URLSearchParams({ action:'savePresupuesto', paciente:pac, descripcion:desc, monto, fecha });
+    await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
+    toast('✓ Presupuesto guardado', 'success');
+    document.getElementById('presup-descripcion').value = '';
+    document.getElementById('presup-monto').value = '';
+    await new Promise(r => setTimeout(r, 2000));
+    await cargarPresupuestos(true);
+    renderPresupuestos();
+  } catch(e) {
+    toast('Error al guardar presupuesto', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '📋 Guardar presupuesto';
+  }
+}
+
+function renderPresupuestos() {
+  const tbody = document.getElementById('tabla-presupuestos');
+  const empty = document.getElementById('presup-empty');
+  if (!datosPresupuestos.length) {
+    tbody.innerHTML = ''; empty.style.display = 'block'; return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = [...datosPresupuestos].sort((a,b) => b.fecha.localeCompare(a.fecha)).map(d => `
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;white-space:nowrap">${d.fecha ? d.fecha.split('-').reverse().join('/') : ''}</td>
+      <td style="font-weight:500">${d.paciente||''}</td>
+      <td style="font-size:0.85rem;color:var(--text-muted)">${d.descripcion||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary)">${formatMoney(d.monto)}</td>
+      <td><button class="action-btn btn-del" onclick="pedirBorrarPresup(${d._rowIndex})">🗑️</button></td>
+    </tr>`).join('');
+}
+
+// ─── ESTADO DE CUENTAS ───────────────────────────────────────────────────────
+
+function renderEstado() {
+  const filtro = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
+  const lista = document.getElementById('estado-lista');
+
+  // Agrupar presupuestos por paciente
+  const pacientes = {};
+  datosPresupuestos.forEach(p => {
+    const k = p.paciente.toUpperCase();
+    if (!pacientes[k]) pacientes[k] = { nombre: p.paciente, presupuestos: [], cobros: [] };
+    pacientes[k].presupuestos.push(p);
+  });
+  // Sumar cobros por paciente (aunque no tenga presupuesto)
+  datosCobros.forEach(c => {
+    const k = c.paciente.toUpperCase();
+    if (!pacientes[k]) pacientes[k] = { nombre: c.paciente, presupuestos: [], cobros: [] };
+    pacientes[k].cobros.push(c);
+  });
+
+  let keys = Object.keys(pacientes).sort();
+  if (filtro) keys = keys.filter(k => k.includes(filtro));
+
+  if (!keys.length) {
+    lista.innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">🔍</div><div>No hay pacientes que coincidan.</div></div></div>`;
+    return;
+  }
+
+  lista.innerHTML = keys.map(k => {
+    const pac = pacientes[k];
+    const totalPresup = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
+    const totalCobrado = pac.cobros.reduce((s,c) => s+(parseFloat(c.monto)||0), 0);
+    const saldo = totalPresup - totalCobrado;
+    const saldoColor = saldo <= 0 ? 'var(--success)' : 'var(--danger)';
+    const saldoLabel = saldo <= 0 ? '✅ Saldado' : `Debe ${formatMoney(saldo)}`;
+
+    const presupRows = pac.presupuestos.length ? pac.presupuestos.map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.85rem">
+        <div>
+          <span style="color:var(--text-muted);font-size:0.75rem">${p.fecha ? p.fecha.split('-').reverse().join('/') : ''}</span>
+          <span style="margin-left:8px">${p.descripcion||'(sin descripción)'}</span>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary);white-space:nowrap">${formatMoney(p.monto)}</span>
+      </div>`).join('') : `<div style="color:var(--text-muted);font-size:0.85rem;padding:6px 0">Sin presupuestos registrados</div>`;
+
+    const cobroRows = pac.cobros.length ? pac.cobros.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.85rem">
+        <div>
+          <span style="color:var(--text-muted);font-size:0.75rem">${c.fecha ? c.fecha.split('-').reverse().join('/') : ''}</span>
+          <span style="margin-left:8px">${c.medio||''}</span>
+          ${c.concepto ? `<span style="margin-left:6px;color:var(--text-muted)">${c.concepto}</span>` : ''}
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--success);white-space:nowrap">${formatMoney(c.monto)}</span>
+      </div>`).join('') : `<div style="color:var(--text-muted);font-size:0.85rem;padding:6px 0">Sin cobros registrados</div>`;
+
+    return `
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:700;font-size:1rem">${pac.nombre}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">${pac.presupuestos.length} presupuesto(s) · ${pac.cobros.length} pago(s)</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:600">Saldo</div>
+          <div style="font-size:1.3rem;font-weight:700;color:${saldoColor}">${saldoLabel}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap" class="estado-grid">
+        <div>
+          <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:6px">
+            Presupuestos · <span style="color:var(--primary)">${formatMoney(totalPresup)}</span>
+          </div>
+          ${presupRows}
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:6px">
+            Pagos recibidos · <span style="color:var(--success)">${formatMoney(totalCobrado)}</span>
+          </div>
+          ${cobroRows}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pedirBorrarPresup(rowIndex) {
+  presupToDelete = rowIndex;
+  document.getElementById('modal-borrar-presup').classList.add('open');
+}
+function cerrarModalPresup() {
+  document.getElementById('modal-borrar-presup').classList.remove('open');
+  presupToDelete = null;
+}
+async function confirmarBorrarPresup() {
+  if (!presupToDelete) return;
+  cerrarModalPresup();
+  const btn = document.getElementById('btn-confirmar-borrar-presup');
+  btn.disabled = true;
+  try {
+    await fetch(SCRIPT_URL + '?action=deletePresupuesto&rowIndex=' + presupToDelete + '&t=' + Date.now(), {mode:'no-cors'});
+    toast('🗑️ Eliminando presupuesto...', 'warning');
+    await new Promise(r => setTimeout(r, 2000));
+    await cargarPresupuestos(true);
+    renderPresupuestos();
+    renderEstado();
+  } catch(e) {
+    toast('Error al borrar', 'error');
+  } finally { btn.disabled = false; }
+}
+
+// ─── FIN PRESUPUESTOS ────────────────────────────────────────────────────────
+
+// ─── COBROS ────────────────────────────────────────────────────────────────
+
+let datosCobros = [];
+let cobroToDelete = null;
+let cobrosListos = false;
+
+async function cargarCobros(silencioso=false) {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=readCobros&t=' + Date.now());
+    const raw = await res.json();
+    datosCobros = Array.isArray(raw) ? raw.map(d => ({
+      fecha:     (d.fecha||'').trim(),
+      paciente:  (d.paciente||'').trim(),
+      monto:     d.monto||'',
+      medio:     (d.medio||'').trim(),
+      concepto:  (d.concepto||'').trim(),
+      _rowIndex: Number(d.rowIndex)||0
+    })) : [];
+    cobrosListos = true;
+    if (!silencioso) renderCobros();
+  } catch(e) {
+    if (!silencioso) toast('Error al cargar cobros', 'error');
+  }
+}
+
+function actualizarDatalistCobros() {
+  // Poblar datalist nativo (filtra desde el inicio del texto)
+  const dl = document.getElementById('cobros-pacientes-datalist');
+  if (!dl) return;
+  const nombres = getPacientesUnicos();
+  dl.innerHTML = nombres.map(n => `<option value="${n}">`).join('');
+}
+
+function getPacientesUnicos() {
+  const dePrestaciones = datos.map(d => d.paciente).filter(Boolean);
+  const deCobros = datosCobros.map(d => d.paciente).filter(Boolean);
+  const dePresups = datosPresupuestos.map(d => d.paciente).filter(Boolean);
+  return [...new Set([...dePrestaciones, ...deCobros, ...dePresups])].sort();
+}
+
+// Autocomplete personalizado que busca en cualquier posición del nombre
+function setupAutocompleteCustom(inputId, dropdownId) {
+  const input = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', function() {
+    const val = this.value.trim().toUpperCase();
+    dropdown.innerHTML = '';
+    if (!val || val.length < 2) { dropdown.style.display='none'; return; }
+    const matches = getPacientesUnicos().filter(n => n.toUpperCase().includes(val));
+    if (!matches.length) { dropdown.style.display='none'; return; }
+    matches.slice(0,8).forEach(nombre => {
+      const div = document.createElement('div');
+      div.textContent = nombre;
+      div.style.cssText = 'padding:9px 14px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid var(--border)';
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        input.value = nombre;
+        dropdown.style.display = 'none';
+        input.dispatchEvent(new Event('change'));
+      });
+      div.addEventListener('mouseover', () => div.style.background='var(--primary-light)');
+      div.addEventListener('mouseout',  () => div.style.background='');
+      dropdown.appendChild(div);
+    });
+    dropdown.style.display = 'block';
+  });
+
+  input.addEventListener('blur', () => setTimeout(() => dropdown.style.display='none', 150));
+  input.addEventListener('focus', () => input.dispatchEvent(new Event('input')));
+}
+
+function onCobroPacienteInput() {
+  const pac = document.getElementById('cobro-paciente').value.trim().toUpperCase();
+  if (!pac) { document.getElementById('cobro-saldo-card').style.display='none'; return; }
+  if (!cobrosListos || !presupListos) {
+    setTimeout(() => onCobroPacienteInput(), 600);
+    return;
+  }
+  mostrarSaldoPaciente(pac);
+}
+
+function mostrarSaldoPaciente(pac) {
+  const card = document.getElementById('cobro-saldo-card');
+  const info = document.getElementById('cobro-saldo-info');
+  if (!pac) { card.style.display='none'; return; }
+  const exactos = datosCobros.filter(d => d.paciente.toUpperCase() === pac);
+  const parciales = datosCobros.filter(d => d.paciente.toUpperCase().includes(pac));
+  const cobros = exactos.length ? exactos : parciales;
+  const presups = datosPresupuestos.filter(d => d.paciente.toUpperCase() === pac || d.paciente.toUpperCase().includes(pac));
+  if (!cobros.length && !presups.length) { card.style.display='none'; return; }
+  const totalCobrado = cobros.reduce((s,d) => s+(parseFloat(d.monto)||0), 0);
+  const totalPresup  = presups.reduce((s,d) => s+(parseFloat(d.monto)||0), 0);
+  const saldo = totalPresup - totalCobrado;
+  const ultimo = cobros.length ? [...cobros].sort((a,b)=>b.fecha.localeCompare(a.fecha))[0] : null;
+  card.style.display = 'block';
+  info.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:stretch">
+      ${totalPresup ? `<div style="background:var(--primary-light);border-radius:var(--radius-sm);padding:12px 16px;flex:1;min-width:120px">
+        <div style="font-size:0.72rem;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:0.05em">Presupuestado</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--primary)">${formatMoney(totalPresup)}</div>
+      </div>` : ''}
+      <div style="background:var(--success-light);border-radius:var(--radius-sm);padding:12px 16px;flex:1;min-width:120px">
+        <div style="font-size:0.72rem;font-weight:600;color:var(--success);text-transform:uppercase;letter-spacing:0.05em">Pagado</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--success)">${formatMoney(totalCobrado)}</div>
+        ${ultimo ? `<div style="font-size:0.75rem;color:var(--success);margin-top:2px">Último: ${ultimo.fecha.split('-').reverse().join('/')} · ${formatMoney(ultimo.monto)}</div>` : ''}
+      </div>
+      ${totalPresup ? `<div style="background:${saldo<=0?'var(--success-light)':'var(--danger-light)'};border-radius:var(--radius-sm);padding:12px 16px;flex:1;min-width:120px">
+        <div style="font-size:0.72rem;font-weight:600;color:${saldo<=0?'var(--success)':'var(--danger)'};text-transform:uppercase;letter-spacing:0.05em">Saldo</div>
+        <div style="font-size:1.4rem;font-weight:700;color:${saldo<=0?'var(--success)':'var(--danger)'}">
+          ${saldo<=0 ? '✅ Saldado' : formatMoney(saldo)}
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+
+async function guardarCobro() {
+  const pac    = document.getElementById('cobro-paciente').value.trim();
+  const fecha  = document.getElementById('cobro-fecha').value;
+  const monto  = document.getElementById('cobro-monto').value.trim();
+  const medio  = document.getElementById('cobro-medio').value;
+  const concep = document.getElementById('cobro-concepto').value.trim();
+
+  if (!pac || !fecha || !monto || !medio) {
+    toast('Completá Paciente, Fecha, Monto y Medio de pago', 'warning');
+    ['cobro-paciente','cobro-fecha','cobro-monto','cobro-medio'].forEach(id => {
+      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
+    });
+    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
+    return;
+  }
+
+  const btn = document.getElementById('btn-guardar-cobro');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const params = new URLSearchParams({
+      action:'saveCobro', fecha, paciente:pac, monto, medio, concepto:concep
+    });
+    await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
+    toast('✓ Cobro registrado', 'success');
+    // limpiar solo monto y concepto, mantener paciente y fecha para carga rápida
+    document.getElementById('cobro-monto').value = '';
+    document.getElementById('cobro-concepto').value = '';
+    document.getElementById('cobro-medio').value = '';
+    await new Promise(r => setTimeout(r, 2000));
+    await cargarCobros(true);
+    mostrarSaldoPaciente(pac.toUpperCase());
+    renderCobros();
+  } catch(e) {
+    toast('Error al guardar cobro', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Registrar cobro';
+  }
+}
+
+function renderCobros() {
+  const filtro = (document.getElementById('cobros-buscador')?.value||'').toLowerCase();
+  const desde  = document.getElementById('cobros-desde')?.value||'';
+  const hasta  = document.getElementById('cobros-hasta')?.value||'';
+  const medio  = document.getElementById('cobros-medio-filtro')?.value||'';
+
+  const visibles = datosCobros.filter(d => {
+    if (filtro && !d.paciente.toLowerCase().includes(filtro)) return false;
+    if (desde && d.fecha < desde) return false;
+    if (hasta && d.fecha > hasta) return false;
+    if (medio && d.medio !== medio) return false;
+    return true;
+  }).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  // KPIs
+  const statsEl = document.getElementById('cobros-stats');
+  if (visibles.length) {
+    statsEl.style.display = 'grid';
+    const totalMonto = visibles.reduce((s,d) => s+(parseFloat(d.monto)||0), 0);
+    const efectivo   = visibles.filter(d=>d.medio==='Efectivo').reduce((s,d)=>s+(parseFloat(d.monto)||0),0);
+    const digital    = visibles.filter(d=>d.medio==='Transferencia'||d.medio==='MercadoPago').reduce((s,d)=>s+(parseFloat(d.monto)||0),0);
+    document.getElementById('cobros-stat-total').textContent = visibles.length;
+    document.getElementById('cobros-stat-monto').textContent = formatMoney(totalMonto);
+    document.getElementById('cobros-stat-efectivo').textContent = formatMoney(efectivo);
+    document.getElementById('cobros-stat-digital').textContent = formatMoney(digital);
+  } else {
+    statsEl.style.display = 'none';
+  }
+
+  const MEDIO_ICON = {Efectivo:'💵',Transferencia:'🏦',MercadoPago:'📱',Otro:'💳'};
+  const tbody = document.getElementById('tabla-cobros');
+  const empty = document.getElementById('cobros-empty');
+  if (!visibles.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = visibles.map(d => `
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;white-space:nowrap">${d.fecha ? d.fecha.split('-').reverse().join('/') : ''}</td>
+      <td style="font-weight:500">${d.paciente||''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:600">${formatMoney(d.monto)}</td>
+      <td style="font-size:0.85rem">${MEDIO_ICON[d.medio]||''} ${d.medio||''}</td>
+      <td style="font-size:0.82rem;color:var(--text-muted)">${d.concepto||'—'}</td>
+      <td><button class="action-btn btn-del" title="Borrar" onclick="pedirBorrarCobro(${d._rowIndex})">🗑️</button></td>
+    </tr>`).join('');
+}
+
+function cobrosEsteMes() {
+  const hoy = new Date();
+  document.getElementById('cobros-desde').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+  document.getElementById('cobros-hasta').value = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).toISOString().split('T')[0];
+  renderCobros();
+}
+
+function limpiarFiltrosCobros() {
+  ['cobros-buscador','cobros-desde','cobros-hasta'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('cobros-medio-filtro').value='';
+  renderCobros();
+}
+
+function pedirBorrarCobro(rowIndex) {
+  cobroToDelete = rowIndex;
+  document.getElementById('modal-borrar-cobro').classList.add('open');
+}
+
+function cerrarModalCobro() {
+  document.getElementById('modal-borrar-cobro').classList.remove('open');
+  cobroToDelete = null;
+}
+
+async function confirmarBorrarCobro() {
+  if (!cobroToDelete) return;
+  cerrarModalCobro();
+  const btn = document.getElementById('btn-confirmar-borrar-cobro');
+  btn.disabled = true;
+  try {
+    await fetch(SCRIPT_URL + '?action=deleteCobro&rowIndex=' + cobroToDelete + '&t=' + Date.now(), {mode:'no-cors'});
+    toast('🗑️ Eliminando cobro...', 'warning');
+    await new Promise(r => setTimeout(r, 2000));
+    await cargarCobros(true);
+    renderCobros();
+  } catch(e) {
+    toast('Error al borrar cobro', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── FIN COBROS ─────────────────────────────────────────────────────────────
+
+
+cargar();
+document.getElementById('cobro-fecha').value = new Date().toISOString().split('T')[0];
+document.getElementById('presup-fecha').value = new Date().toISOString().split('T')[0];
+cargarCobros();
+cargarPresupuestos();
+// Inicializar autocompletes personalizados (buscan desde cualquier posición)
+setupAutocompleteCustom('cobro-paciente', 'cobro-paciente-dropdown');
+setupAutocompleteCustom('presup-paciente', 'presup-paciente-dropdown');
+</script>
+</body>
+</html>
