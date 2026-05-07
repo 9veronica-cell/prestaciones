@@ -335,8 +335,10 @@
 
   <!-- SUBTAB: NUEVO PRESUPUESTO -->
   <div id="subtab-presupuesto" style="display:none">
+
+    <!-- Formulario presupuesto -->
     <div class="card">
-      <div class="card-title">Nuevo presupuesto / deuda</div>
+      <div class="card-title">Datos del paciente</div>
       <div class="grid-2">
         <div class="field autocomplete-wrap" style="grid-column:1/-1">
           <label>Paciente</label>
@@ -347,25 +349,54 @@
           <datalist id="presup-pacientes-datalist"></datalist>
           <div id="presup-paciente-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow);z-index:100;display:none;max-height:220px;overflow-y:auto"></div>
         </div>
-        <div class="field" style="grid-column:1/-1">
-          <label>Descripción del tratamiento</label>
-          <input id="presup-descripcion" placeholder="Ej: Conductoterapia + corona pieza 14">
+        <div class="field">
+          <label>Prepaga</label>
+          <select id="presup-os">
+            <option value="">— Seleccionar —</option>
+            <option value="OMINT">OMINT</option>
+            <option value="SWISS MEDICAL">SWISS MEDICAL</option>
+            <option value="Particular">Particular</option>
+          </select>
         </div>
         <div class="field">
-          <label>Monto total ($)</label>
-          <input id="presup-monto" type="number" placeholder="0" min="0" step="1">
+          <label>N° Afiliado</label>
+          <input id="presup-afiliado" placeholder="Ej: 123456789">
         </div>
         <div class="field">
           <label>Fecha</label>
           <input id="presup-fecha" type="date">
         </div>
       </div>
-      <button class="btn btn-primary btn-full" id="btn-guardar-presup" onclick="guardarPresupuesto()">📋 Guardar presupuesto</button>
     </div>
 
-    <!-- Lista presupuestos existentes -->
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div style="padding:16px 20px 10px;"><div class="card-title" style="margin:0">Presupuestos registrados</div></div>
+    <!-- Ítems del presupuesto -->
+    <div class="card">
+      <div class="card-title">Tratamientos</div>
+      <div id="presup-items-lista"></div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="agregarItemPresup()">+ Agregar tratamiento</button>
+    </div>
+
+    <!-- Botones acción -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-primary" style="flex:1" onclick="previsualizarPresupuesto()">👁️ Vista previa</button>
+      <button class="btn btn-primary" style="flex:1;background:#25D366" onclick="compartirPresupuestoWsp()">📱 WhatsApp</button>
+      <button class="btn btn-ghost" style="flex:1" id="btn-guardar-presup" onclick="guardarPresupuesto()">💾 Guardar</button>
+    </div>
+
+    <!-- Vista previa PDF -->
+    <div id="presup-preview-wrap" style="display:none">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+          <div class="card-title" style="margin:0">Vista previa</div>
+          <button class="btn btn-primary" style="padding:8px 16px;font-size:0.85rem" onclick="descargarPDF()">⬇️ Descargar PDF</button>
+        </div>
+        <div id="presup-preview" style="padding:32px;background:white;font-family:'Inter',sans-serif"></div>
+      </div>
+    </div>
+
+    <!-- Lista presupuestos guardados -->
+    <div class="card" style="padding:0;overflow:hidden;margin-top:8px">
+      <div style="padding:16px 20px 10px;"><div class="card-title" style="margin:0">Presupuestos guardados</div></div>
       <div class="table-wrapper">
         <table>
           <thead><tr>
@@ -376,7 +407,7 @@
       </div>
       <div id="presup-empty" class="empty" style="display:none">
         <div class="empty-icon">📋</div>
-        <div>No hay presupuestos registrados.</div>
+        <div>No hay presupuestos guardados.</div>
       </div>
     </div>
   </div>
@@ -1439,8 +1470,184 @@ function showSubtab(name) {
   });
   if (name === 'estado') renderEstado();
   if (name === 'historial') renderCobros();
-  if (name === 'presupuesto') renderPresupuestos();
+  if (name === 'presupuesto') {
+    renderPresupuestos();
+    if (!itemsPresup.length) renderItemsPresup();
+  }
 }
+
+// ─── PRESUPUESTO PARA PACIENTE ───────────────────────────────────────────────
+
+let itemsPresup = [];
+
+function agregarItemPresup() {
+  const id = Date.now();
+  itemsPresup.push({ id, desc: '', monto: '' });
+  renderItemsPresup();
+  // Focus en el último campo descripción
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.presup-item-desc');
+    if (inputs.length) inputs[inputs.length-1].focus();
+  }, 50);
+}
+
+function eliminarItemPresup(id) {
+  itemsPresup = itemsPresup.filter(i => i.id !== id);
+  renderItemsPresup();
+}
+
+function renderItemsPresup() {
+  const lista = document.getElementById('presup-items-lista');
+  if (!itemsPresup.length) {
+    lista.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">Agregá al menos un tratamiento</div>`;
+    return;
+  }
+  lista.innerHTML = itemsPresup.map((item, i) => `
+    <div style="display:grid;grid-template-columns:1fr 160px 36px;gap:8px;align-items:center;margin-bottom:8px">
+      <input class="presup-item-desc" placeholder="Descripción del tratamiento"
+             value="${item.desc}"
+             oninput="itemsPresup[${i}].desc=this.value"
+             style="padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:'Inter',sans-serif">
+      <input class="presup-item-monto" placeholder="$ Monto" type="number" min="0"
+             value="${item.monto}"
+             oninput="itemsPresup[${i}].monto=this.value"
+             style="padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:'Inter',sans-serif;text-align:right">
+      <button onclick="eliminarItemPresup(${item.id})"
+              style="width:36px;height:36px;border:none;border-radius:var(--radius-sm);background:var(--danger-light);color:var(--danger);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>`).join('');
+}
+
+function getPresupData() {
+  return {
+    paciente: document.getElementById('presup-paciente').value.trim(),
+    os:       document.getElementById('presup-os').value,
+    afiliado: document.getElementById('presup-afiliado').value.trim(),
+    fecha:    document.getElementById('presup-fecha').value,
+    items:    itemsPresup.filter(i => i.desc || i.monto)
+  };
+}
+
+function htmlPresupuesto(d) {
+  const fecha = d.fecha ? d.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
+  const total = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
+  const itemsHTML = d.items.map(i => `
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e6ea;font-size:14px">${i.desc||''}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e6ea;text-align:right;font-size:14px;white-space:nowrap;font-family:monospace">${i.monto ? formatMoney(i.monto) : '—'}</td>
+    </tr>`).join('');
+
+  return `
+    <div style="max-width:600px;margin:0 auto;font-family:'Inter',Arial,sans-serif;color:#1a1d23">
+      <!-- Encabezado -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #1a6fd4">
+        <div>
+          <div style="font-size:22px;font-weight:700;color:#1a6fd4">🦷 Presupuesto Odontológico</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:4px">Fecha: ${fecha}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#6b7280;line-height:1.7">
+          <div style="font-weight:700;color:#1a1d23;font-size:13px">VERÓNICA ORTIZ</div>
+          <div>Odontóloga · M.P. 45197</div>
+          <div>📞 11 2393-3085</div>
+        </div>
+      </div>
+
+      <!-- Datos paciente -->
+      <div style="background:#f0f2f5;border-radius:10px;padding:16px 20px;margin-bottom:24px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:10px">Datos del paciente</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><span style="font-size:11px;color:#6b7280">Paciente</span><br><strong style="font-size:14px">${d.paciente||'—'}</strong></div>
+          <div><span style="font-size:11px;color:#6b7280">Prepaga</span><br><strong style="font-size:14px">${d.os||'Particular'}</strong></div>
+          ${d.afiliado ? `<div><span style="font-size:11px;color:#6b7280">N° Afiliado</span><br><strong style="font-size:14px">${d.afiliado}</strong></div>` : ''}
+        </div>
+      </div>
+
+      <!-- Tabla tratamientos -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:10px">Tratamientos</div>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e6ea;border-radius:8px;overflow:hidden">
+          <thead>
+            <tr style="background:#1a6fd4">
+              <th style="padding:10px 12px;text-align:left;font-size:12px;color:white;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Tratamiento</th>
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:white;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Valor</th>
+            </tr>
+          </thead>
+          <tbody>${itemsHTML}</tbody>
+          <tfoot>
+            <tr style="background:#f0f2f5">
+              <td style="padding:12px;font-weight:700;font-size:15px">TOTAL</td>
+              <td style="padding:12px;text-align:right;font-weight:700;font-size:15px;color:#1a6fd4;font-family:monospace">${formatMoney(total)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Pie -->
+      <div style="border-top:1px solid #e2e6ea;padding-top:16px;font-size:11px;color:#6b7280;text-align:center">
+        Este presupuesto tiene una validez de 30 días desde la fecha de emisión.
+      </div>
+    </div>`;
+}
+
+function previsualizarPresupuesto() {
+  const d = getPresupData();
+  if (!d.paciente || !d.items.length) {
+    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
+  }
+  const wrap = document.getElementById('presup-preview-wrap');
+  document.getElementById('presup-preview').innerHTML = htmlPresupuesto(d);
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function descargarPDF() {
+  const d = getPresupData();
+  const contenido = htmlPresupuesto(d);
+  const nombre = (d.paciente || 'Presupuesto').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const fecha = d.fecha ? d.fecha.replaceAll('-','') : new Date().toISOString().split('T')[0].replaceAll('-','');
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Presupuesto - ${nombre}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body { margin:0; padding:32px; font-family:'Inter',Arial,sans-serif; background:white; }
+      @media print { body { padding:20px; } }
+    </style>
+  </head><body>
+    ${contenido}
+    <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function compartirPresupuestoWsp() {
+  const d = getPresupData();
+  if (!d.paciente || !d.items.length) {
+    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
+  }
+  const fecha = d.fecha ? d.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
+  const total = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
+  const itemsTexto = d.items.filter(i=>i.desc||i.monto).map(i =>
+    `• ${i.desc||'Tratamiento'}${i.monto ? ': ' + formatMoney(i.monto) : ''}`
+  ).join('\n');
+
+  const nombre = d.paciente.split(',').reverse().map(s=>s.trim()).join(' ');
+  const msg = `🦷 *PRESUPUESTO ODONTOLÓGICO*\n`
+    + `📅 Fecha: ${fecha}\n\n`
+    + `*Paciente:* ${d.paciente}\n`
+    + (d.os ? `*Prepaga:* ${d.os}\n` : '')
+    + (d.afiliado ? `*Afiliado:* ${d.afiliado}\n` : '')
+    + `\n*Tratamientos:*\n${itemsTexto}\n\n`
+    + `*TOTAL: ${formatMoney(total)}*\n\n`
+    + `_Presupuesto válido por 30 días_\n`
+    + `─────────────────\n`
+    + `Verónica Ortiz · Odontóloga\nM.P. 45197 · 📞 11 2393-3085`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ─── FIN PRESUPUESTO PARA PACIENTE ──────────────────────────────────────────
 
 // ─── PRESUPUESTOS ────────────────────────────────────────────────────────────
 
@@ -1475,33 +1682,31 @@ function actualizarDatalistPresup() {
 }
 
 async function guardarPresupuesto() {
-  const pac   = document.getElementById('presup-paciente').value.trim();
-  const desc  = document.getElementById('presup-descripcion').value.trim();
-  const monto = document.getElementById('presup-monto').value.trim();
-  const fecha = document.getElementById('presup-fecha').value;
-  if (!pac || !desc || !monto) {
-    toast('Completá Paciente, Descripción y Monto', 'warning');
-    ['presup-paciente','presup-descripcion','presup-monto'].forEach(id => {
-      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
-    });
-    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
-    return;
+  const d = getPresupData();
+  if (!d.paciente || !d.items.length) {
+    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
   }
+  const desc  = d.items.map(i => i.desc).filter(Boolean).join(' + ');
+  const monto = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
   const btn = document.getElementById('btn-guardar-presup');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
   try {
-    const params = new URLSearchParams({ action:'savePresupuesto', paciente:pac, descripcion:desc, monto, fecha });
+    const params = new URLSearchParams({ action:'savePresupuesto', paciente:d.paciente, descripcion:desc, monto, fecha:d.fecha });
     await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
     toast('✓ Presupuesto guardado', 'success');
-    document.getElementById('presup-descripcion').value = '';
-    document.getElementById('presup-monto').value = '';
+    itemsPresup = [];
+    renderItemsPresup();
+    document.getElementById('presup-paciente').value = '';
+    document.getElementById('presup-os').value = '';
+    document.getElementById('presup-afiliado').value = '';
+    document.getElementById('presup-preview-wrap').style.display = 'none';
     await new Promise(r => setTimeout(r, 2000));
     await cargarPresupuestos(true);
     renderPresupuestos();
   } catch(e) {
     toast('Error al guardar presupuesto', 'error');
   } finally {
-    btn.disabled = false; btn.innerHTML = '📋 Guardar presupuesto';
+    btn.disabled = false; btn.innerHTML = '💾 Guardar';
   }
 }
 
