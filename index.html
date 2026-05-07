@@ -390,9 +390,34 @@
           <input id="estado-buscador" placeholder="Escribí para filtrar..." oninput="renderEstado()" list="estado-pacientes-datalist">
           <datalist id="estado-pacientes-datalist"></datalist>
         </div>
-        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';renderEstado()">✕ Ver todos</button>
+        <div class="field">
+          <label>Mostrar</label>
+          <select id="estado-filtro-saldo" onchange="renderEstado()">
+            <option value="">— Todos —</option>
+            <option value="deuda">Solo con deuda</option>
+            <option value="saldado">Solo saldados</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';document.getElementById('estado-filtro-saldo').value='';renderEstado()">✕ Ver todos</button>
       </div>
     </div>
+
+    <!-- KPI deuda total -->
+    <div id="estado-kpi" class="stats-grid" style="display:none;margin-bottom:16px">
+      <div class="stat-card" style="border-left:4px solid var(--danger)">
+        <div class="stat-label">Pacientes con deuda</div>
+        <div class="stat-value warn" id="estado-kpi-count">—</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--danger)">
+        <div class="stat-label">Total adeudado</div>
+        <div class="stat-value" id="estado-kpi-total" style="color:var(--danger)">—</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--success)">
+        <div class="stat-label">Total cobrado</div>
+        <div class="stat-value money" id="estado-kpi-cobrado">—</div>
+      </div>
+    </div>
+
     <div id="estado-lista"></div>
   </div>
 
@@ -1500,8 +1525,9 @@ function renderPresupuestos() {
 // ─── ESTADO DE CUENTAS ───────────────────────────────────────────────────────
 
 function renderEstado() {
-  const filtro = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
-  const lista = document.getElementById('estado-lista');
+  const filtro      = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
+  const filtroSaldo = document.getElementById('estado-filtro-saldo')?.value||'';
+  const lista       = document.getElementById('estado-lista');
 
   // Agrupar presupuestos por paciente
   const pacientes = {};
@@ -1510,7 +1536,6 @@ function renderEstado() {
     if (!pacientes[k]) pacientes[k] = { nombre: p.paciente, presupuestos: [], cobros: [] };
     pacientes[k].presupuestos.push(p);
   });
-  // Sumar cobros por paciente (aunque no tenga presupuesto)
   datosCobros.forEach(c => {
     const k = c.paciente.toUpperCase();
     if (!pacientes[k]) pacientes[k] = { nombre: c.paciente, presupuestos: [], cobros: [] };
@@ -1520,14 +1545,51 @@ function renderEstado() {
   let keys = Object.keys(pacientes).sort();
   if (filtro) keys = keys.filter(k => k.includes(filtro));
 
+  // Calcular saldo por paciente y aplicar filtro
+  keys = keys.filter(k => {
+    const pac = pacientes[k];
+    const totalPresup  = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
+    const totalCobrado = pac.cobros.reduce((s,c) => s+(parseFloat(c.monto)||0), 0);
+    const saldo = totalPresup - totalCobrado;
+    if (filtroSaldo === 'deuda')   return saldo > 0;
+    if (filtroSaldo === 'saldado') return saldo <= 0 && totalPresup > 0;
+    return true;
+  });
+
+  // KPIs — calcular sobre TODOS los pacientes con presupuesto (sin filtro de nombre)
+  const todosConPresup = Object.keys(pacientes).filter(k => pacientes[k].presupuestos.length > 0);
+  const conDeuda = todosConPresup.filter(k => {
+    const pac = pacientes[k];
+    const saldo = pac.presupuestos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0)
+                - pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
+    return saldo > 0;
+  });
+  const totalAdeudado = conDeuda.reduce((sum,k) => {
+    const pac = pacientes[k];
+    return sum + pac.presupuestos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0)
+               - pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
+  }, 0);
+  const totalCobradoGlobal = Object.values(pacientes).reduce((sum,pac) =>
+    sum + pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0), 0);
+
+  const kpiEl = document.getElementById('estado-kpi');
+  if (conDeuda.length > 0) {
+    kpiEl.style.display = 'grid';
+    document.getElementById('estado-kpi-count').textContent = conDeuda.length;
+    document.getElementById('estado-kpi-total').textContent = formatMoney(totalAdeudado);
+    document.getElementById('estado-kpi-cobrado').textContent = formatMoney(totalCobradoGlobal);
+  } else {
+    kpiEl.style.display = 'none';
+  }
+
   if (!keys.length) {
-    lista.innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">🔍</div><div>No hay pacientes que coincidan.</div></div></div>`;
+    lista.innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">${filtroSaldo==='deuda'?'🎉':'🔍'}</div><div>${filtroSaldo==='deuda'?'¡No hay deudas pendientes!':'No hay pacientes que coincidan.'}</div></div></div>`;
     return;
   }
 
   lista.innerHTML = keys.map(k => {
     const pac = pacientes[k];
-    const totalPresup = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
+    const totalPresup  = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
     const totalCobrado = pac.cobros.reduce((s,c) => s+(parseFloat(c.monto)||0), 0);
     const saldo = totalPresup - totalCobrado;
     const saldoColor = saldo <= 0 ? 'var(--success)' : 'var(--danger)';
@@ -1553,7 +1615,7 @@ function renderEstado() {
       </div>`).join('') : `<div style="color:var(--text-muted);font-size:0.85rem;padding:6px 0">Sin cobros registrados</div>`;
 
     return `
-    <div class="card" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:14px;border-left:4px solid ${saldoColor}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
         <div>
           <div style="font-weight:700;font-size:1rem">${pac.nombre}</div>
