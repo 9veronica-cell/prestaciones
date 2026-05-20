@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odontograma · Verónica Ortiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --primary: #1a6fd4;
+  --primary-light: #e8f0fb;
+  --primary-dark: #1459b0;
+  --text: #1a1d23;
+  --text-muted: #6b7280;
+  --border: #e2e6ea;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  /* Condiciones */
+  --caries: #1a6fd4;
+  --corona: #e53935;
+  --obturacion: #e53935;
+  --exodoncia: #1a6fd4;
+  --ausente: #e53935;
+  --sano: #1a6fd4;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 16px;
+  font-size: 15px;
+}
+
+.header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.header-icon {
+  width: 44px; height: 44px; background: var(--primary);
+  border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+h1 { font-size: 1.3rem; font-weight: 700; }
+.subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+.card {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px;
+}
+.card-title {
+  font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 14px;
+}
+
+/* Selector tipo */
+.tipo-selector {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.tipo-btn {
+  padding: 8px 18px; border: 2px solid var(--border);
+  border-radius: 30px; font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  background: white; color: var(--text-muted); transition: all 0.2s;
+}
+.tipo-btn.active {
+  border-color: var(--primary); background: var(--primary);
+  color: white;
+}
+
+/* Paciente */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+input, select {
+  padding: 10px 13px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; color: var(--text); background: white;
+  transition: border-color 0.2s; width: 100%;
+}
+input:focus, select:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,111,212,0.1);
+}
+
+/* Leyenda condiciones */
+.leyenda {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;
+}
+.leyenda-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 20px; border: 1.5px solid;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; user-select: none;
+}
+.leyenda-item.sel { color: white !important; }
+.leyenda-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Odontograma SVG container */
+.odonto-wrap {
+  overflow-x: auto; padding: 8px 0;
+  scrollbar-width: thin;
+}
+.odonto-svg { display: block; margin: 0 auto; min-width: 520px; }
+
+/* Pieza dental SVG */
+.diente { cursor: pointer; }
+.diente:hover .cara-hover { opacity: 0.15; }
+.cara-hover { opacity: 0; fill: #000; transition: opacity 0.15s; }
+.diente-num {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  fill: var(--text-muted); text-anchor: middle; pointer-events: none;
+}
+.cara { stroke: #999; stroke-width: 0.8; transition: fill 0.15s; }
+.cara.cara-sano { fill: white; }
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: white;
+  padding: 10px 22px; border-radius: 30px;
+  font-size: 0.88rem; font-weight: 500; z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.success { background: #2e7d32; }
+#toast.error { background: #e53935; }
+#toast.info { background: var(--primary); }
+
+/* Voz */
+.voz-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border: none; border-radius: 30px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  background: var(--primary); color: white;
+}
+.voz-btn.grabando {
+  background: #e53935; animation: pulsar 1.2s infinite;
+}
+@keyframes pulsar {
+  0%,100% { box-shadow: 0 0 0 0 rgba(229,57,53,0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(229,57,53,0); }
+}
+.voz-transcript {
+  min-height: 44px; padding: 10px 14px;
+  background: var(--bg); border-radius: var(--radius-sm);
+  font-size: 0.88rem; color: var(--text-muted);
+  border: 1.5px dashed var(--border); margin-top: 10px;
+  font-style: italic;
+}
+
+/* Registro */
+.registro-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-radius: var(--radius-sm);
+  background: var(--bg); margin-bottom: 6px; font-size: 0.85rem;
+  border-left: 3px solid var(--primary);
+}
+.registro-item .pieza-badge {
+  font-family: 'DM Mono', monospace; font-size: 0.82rem;
+  font-weight: 600; color: var(--primary);
+}
+.btn-del-reg {
+  width: 26px; height: 26px; border: none; border-radius: 6px;
+  background: #fdecea; color: #e53935; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center;
+  justify-content: center; transition: all 0.15s;
+}
+.btn-del-reg:hover { background: #e53935; color: white; }
+
+/* Botones */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; padding: 10px 18px; border: none; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-ghost {
+  background: var(--bg); color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--border); }
+.btn-full { width: 100%; margin-top: 10px; padding: 13px; font-size: 0.95rem; }
+
+.acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+/* Odontograma temporal badge */
+.tipo-label {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tipo-adulto { background: #e8f0fb; color: var(--primary); }
+.tipo-temporal { background: #fff3e0; color: #f57c00; }
+
+@media(max-width:600px){
+  .grid-2 { grid-template-columns: 1fr; }
+  .leyenda { gap: 4px; }
+  .leyenda-item { font-size: 0.72rem; padding: 4px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🦷</div>
+  <div>
+    <h1>Odontograma</h1>
+    <div class="subtitle">Verónica Ortiz · M.P. 45197</div>
+  </div>
+</div>
+
+<!-- Datos paciente -->
+<div class="card">
+  <div class="card-title">Datos del paciente</div>
+  <div class="grid-2">
+    <div class="field" style="grid-column:1/-1">
+      <label>Paciente</label>
+      <input id="pac-nombre" placeholder="APELLIDO, NOMBRE" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input id="pac-fecha" type="date">
+    </div>
+    <div class="field">
+      <label>Prepaga</label>
+      <select id="pac-os">
+        <option value="">— Seleccionar —</option>
+        <option>OMINT</option>
+        <option>SWISS MEDICAL</option>
+        <option>Particular</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Tipo de odontograma -->
+<div class="card">
+  <div class="card-title">Tipo de dentición</div>
+  <div class="tipo-selector">
+    <button class="tipo-btn active" onclick="setTipo('adulto', this)">🦷 Adulto (permanente)</button>
+    <button class="tipo-btn" onclick="setTipo('temporal', this)">🧒 Temporal (niños)</button>
+  </div>
+
+  <!-- Leyenda / selector condición -->
+  <div class="card-title">Condición a registrar</div>
+  <div class="leyenda" id="leyenda">
+    <div style="font-size:0.72rem;font-weight:700;color:#1a6fd4;align-self:center;padding:4px 6px;background:#e8f0fb;border-radius:20px">🔵 A tratar</div>
+    <div class="leyenda-item sel" data-cond="caries" onclick="selCond('caries',this)"
+         style="color:#1a6fd4;border-color:#1a6fd4;background:#1a6fd4">
+      <div class="leyenda-dot" style="background:white"></div> Caries
+    </div>
+    <div class="leyenda-item" data-cond="exodoncia" onclick="selCond('exodoncia',this)"
+         style="color:#1a6fd4;border-color:#1a6fd4">
+      <div class="leyenda-dot" style="background:#1a6fd4"></div> Exodoncia
+    </div>
+    <div style="font-size:0.72rem;font-weight:700;color:#e53935;align-self:center;padding:4px 6px;background:#fdecea;border-radius:20px;margin-left:4px">🔴 Existente</div>
+    <div class="leyenda-item" data-cond="obturacion" onclick="selCond('obturacion',this)"
+         style="color:#e53935;border-color:#e53935">
+      <div class="leyenda-dot" style="background:#e53935"></div> Obturación
+    </div>
+    <div class="leyenda-item" data-cond="corona" onclick="selCond('corona',this)"
+         style="color:#e53935;border-color:#e53935">
+      <div class="leyenda-dot" style="background:#e53935"></div> Corona
+    </div>
+    <div class="leyenda-item" data-cond="ausente" onclick="selCond('ausente',this)"
+         style="color:#e53935;border-color:#e53935">
+      <div class="leyenda-dot" style="background:#e53935"></div> Ausente
+    </div>
+    <div class="leyenda-item" data-cond="sano" onclick="selCond('sano',this)"
+         style="color:#6b7280;border-color:#e2e6ea">
+      <div class="leyenda-dot" style="background:#e2e6ea"></div> Borrar
+    </div>
+  </div>
+
+  <!-- SVG Odontograma -->
+  <div class="odonto-wrap">
+    <svg id="odonto-svg" class="odonto-svg" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div style="text-align:center;font-size:0.75rem;color:var(--text-muted);margin-top:6px">
+    Tocá una pieza para marcar la condición seleccionada · Tocá de nuevo para cambiar cara
+  </div>
+</div>
+
+<!-- Dictado por voz -->
+<div class="card">
+  <div class="card-title">Dictado por voz</div>
+  <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+    <button class="voz-btn" id="btn-voz" onclick="toggleVoz()">
+      🎙️ <span id="voz-label">Iniciar dictado</span>
+    </button>
+    <div style="flex:1;min-width:200px">
+      <div class="voz-transcript" id="voz-transcript">
+        Decí por ejemplo: "pieza 14 caries mesial" o "pieza 36 ausente"...
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted)">
+    💡 Comandos: <strong>pieza [número] [condición] [cara]</strong> · Caras: mesial, distal, vestibular, lingual, oclusal · Condiciones: caries, obturación, corona, exodoncia, ausente, sano
+  </div>
+</div>
+
+<!-- Registro de hallazgos -->
+<div class="card">
+  <div class="card-title">Hallazgos registrados</div>
+  <div id="hallazgos-lista">
+    <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">
+      Tocá piezas en el odontograma o usá el dictado por voz
+    </div>
+  </div>
+  <div class="acciones">
+    <button class="btn btn-primary" onclick="guardarOdontograma()" style="flex:1">💾 Guardar odontograma</button>
+    <button class="btn btn-ghost" onclick="imprimirOdontograma()">🖨️ Imprimir</button>
+    <button class="btn btn-ghost" onclick="limpiarTodo()" style="color:#e53935;border-color:#e53935">🗑️ Limpiar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── ESTADO ──────────────────────────────────────────────────────────────────
+let tipoActual = 'adulto';
+let condActual = 'caries';
+let hallazgos = {}; // { "14": { caras: {M:'caries', D:'obturacion'...}, estado:'caries' } }
+let toastTimer;
+
+const COND_COLORS = {
+  caries:     '#1a6fd4',  // azul — existente
+  obturacion: '#1a6fd4',  // azul — existente
+  corona:     '#1a6fd4',  // azul — existente
+  ausente:    '#1a6fd4',  // azul — existente
+  exodoncia:  '#e53935',  // rojo — indicado
+  endodoncia: '#e53935',  // rojo — indicado
+  tratamiento:'#e53935',  // rojo — indicado
+  sano:       'white'
+};
+
+const COND_LABELS = {
+  caries:'Caries', obturacion:'Obturación', corona:'Corona',
+  exodoncia:'Exodoncia', ausente:'Ausente', sano:'Sano'
+};
+
+// Piezas adulto: cuadrantes FDI
+const ADULTO = {
+  sup: [18,17,16,15,14,13,12,11, 21,22,23,24,25,26,27,28],
+  inf: [48,47,46,45,44,43,42,41, 31,32,33,34,35,36,37,38]
+};
+// Piezas temporal
+const TEMPORAL = {
+  sup: [55,54,53,52,51, 61,62,63,64,65],
+  inf: [85,84,83,82,81, 71,72,73,74,75]
+};
+
+// ─── RENDER ODONTOGRAMA ──────────────────────────────────────────────────────
+function setTipo(tipo, btn) {
+  tipoActual = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOdontograma();
+}
+
+function selCond(cond, el) {
+  condActual = cond;
+  document.querySelectorAll('.leyenda-item').forEach(li => {
+    const c = li.dataset.cond;
+    const color = getComputedStyle(document.documentElement).getPropertyValue('--'+c).trim() ||
+      ({caries:'#1a6fd4',obturacion:'#e53935',corona:'#e53935',exodoncia:'#1a6fd4',ausente:'#e53935',sano:'#6b7280'}[c]);
+    li.classList.remove('sel');
+    li.style.background = 'white';
+    li.style.color = color;
+  });
+  el.classList.add('sel');
+  el.style.background = ({caries:'#1a6fd4',obturacion:'#e53935',corona:'#e53935',exodoncia:'#1a6fd4',ausente:'#e53935',sano:'#6b7280'}[cond]);
+  el.style.color = 'white';
+}
+
+function renderOdontograma() {
+  const svg = document.getElementById('odonto-svg');
+  const piezas = tipoActual === 'adulto' ? ADULTO : TEMPORAL;
+  const totalSup = piezas.sup.length;
+  const totalInf = piezas.inf.length;
+  const total = Math.max(totalSup, totalInf);
+  const W = total * 32 + 20;
+  const H = 200;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.style.minWidth = Math.max(520, W) + 'px';
+
+  let html = '';
+  const offsetX = (W - total * 32) / 2;
+
+  // Superior
+  piezas.sup.forEach((num, i) => {
+    const x = offsetX + i * 32 + 4;
+    const y = 20;
+    html += diienteSVG(num, x, y, 'sup');
+  });
+
+  // Línea media
+  html += `<line x1="${offsetX}" y1="${H/2}" x2="${W - offsetX}" y2="${H/2}" stroke="#e2e6ea" stroke-width="1" stroke-dasharray="4,3"/>`;
+  html += `<text x="${W/2}" y="${H/2 - 5}" text-anchor="middle" font-size="8" fill="#e2e6ea" font-family="DM Sans">SUPERIOR</text>`;
+  html += `<text x="${W/2}" y="${H/2 + 12}" text-anchor="middle" font-size="8" fill="#e2e6ea" font-family="DM Sans">INFERIOR</text>`;
+
+  // Inferior (invertido visualmente)
+  piezas.inf.forEach((num, i) => {
+    const x = offsetX + i * 32 + 4;
+    const y = H / 2 + 16;
+    html += diienteSVG(num, x, y, 'inf');
+  });
+
+  svg.innerHTML = html;
+}
+
+function diienteSVG(num, x, y, arco) {
+  const w = 26, h = 60;
+  const mid = w / 2;
+  const estado = hallazgos[num] || {};
+  const caras = estado.caras || {};
+  const global = estado.global || 'sano';
+
+  // Colores por cara
+  const cM = COND_COLORS[caras.M || 'sano'];
+  const cD = COND_COLORS[caras.D || 'sano'];
+  const cV = COND_COLORS[caras.V || 'sano'];
+  const cL = COND_COLORS[caras.L || 'sano'];
+  const cO = COND_COLORS[caras.O || 'sano'];
+
+  const globalColor = global !== 'sano' ? COND_COLORS[global] : null;
+
+  // Si tiene estado global (ausente, corona, exodoncia) renderiza diferente
+  let dienteCuerpo = '';
+  if (global === 'ausente') {
+    dienteCuerpo = `
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#f5f5f5" stroke="#9e9e9e" stroke-width="1" rx="3"/>
+      <line x1="${x+3}" y1="${y+3}" x2="${x+w-3}" y2="${y+h-3}" stroke="#9e9e9e" stroke-width="1.5"/>
+      <line x1="${x+w-3}" y1="${y+3}" x2="${x+3}" y2="${y+h-3}" stroke="#9e9e9e" stroke-width="1.5"/>`;
+  } else if (global === 'exodoncia') {
+    dienteCuerpo = `
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#efebe9" stroke="#6d4c41" stroke-width="1.5" rx="3"/>
+      <line x1="${x+4}" y1="${y+4}" x2="${x+w-4}" y2="${y+h-4}" stroke="#6d4c41" stroke-width="2"/>
+      <line x1="${x+w-4}" y1="${y+4}" x2="${x+4}" y2="${y+h-4}" stroke="#6d4c41" stroke-width="2"/>`;
+  } else if (global === 'corona') {
+    dienteCuerpo = `
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff8e1" stroke="${COND_COLORS.corona}" stroke-width="2" rx="3"/>
+      <rect x="${x+3}" y="${y+3}" width="${w-6}" height="${h-6}" fill="${COND_COLORS.corona}" opacity="0.3" rx="2"/>
+      <text x="${x+mid}" y="${y+h/2+4}" text-anchor="middle" font-size="10" fill="${COND_COLORS.corona}" font-weight="bold">C</text>`;
+  } else {
+    // 5 caras: M(izq), D(der), V(arr), L(abj), O(centro)
+    const cx = x + mid, cy = y + h/2;
+    const r = 8; // centro oclusal
+    dienteCuerpo = `
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="white" stroke="#ccc" stroke-width="0.8" rx="3"/>
+      <!-- Cara M -->
+      <polygon points="${x},${y} ${x+6},${y+8} ${x+6},${y+h-8} ${x},${y+h}"
+               fill="${cM}" stroke="#bbb" stroke-width="0.5" opacity="0.85"/>
+      <!-- Cara D -->
+      <polygon points="${x+w},${y} ${x+w-6},${y+8} ${x+w-6},${y+h-8} ${x+w},${y+h}"
+               fill="${cD}" stroke="#bbb" stroke-width="0.5" opacity="0.85"/>
+      <!-- Cara V -->
+      <polygon points="${x},${y} ${x+w},${y} ${x+w-6},${y+8} ${x+6},${y+8}"
+               fill="${cV}" stroke="#bbb" stroke-width="0.5" opacity="0.85"/>
+      <!-- Cara L -->
+      <polygon points="${x+6},${y+h-8} ${x+w-6},${y+h-8} ${x+w},${y+h} ${x},${y+h}"
+               fill="${cL}" stroke="#bbb" stroke-width="0.5" opacity="0.85"/>
+      <!-- Cara O (oclusal/centro) -->
+      <rect x="${x+6}" y="${y+8}" width="${w-12}" height="${h-16}"
+            fill="${cO}" stroke="#bbb" stroke-width="0.5" opacity="0.85"/>
+      <!-- Borde exterior -->
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#aaa" stroke-width="1" rx="3"/>`;
+  }
+
+  const numY = arco === 'sup' ? y - 5 : y + h + 12;
+
+  return `
+    <g class="diente" onclick="clickPieza(${num}, event)" data-num="${num}">
+      ${dienteCuerpo}
+      <text x="${x + mid}" y="${numY}" class="diente-num">${num}</text>
+    </g>`;
+}
+
+function clickPieza(num, event) {
+  if (condActual === 'ausente' || condActual === 'exodoncia' || condActual === 'corona') {
+    // Estado global
+    if (!hallazgos[num]) hallazgos[num] = { caras: {}, global: 'sano' };
+    if (hallazgos[num].global === condActual) {
+      hallazgos[num].global = 'sano'; // toggle
+    } else {
+      hallazgos[num] = { caras: {}, global: condActual };
+    }
+    agregarHallazgo(num, null, condActual);
+  } else {
+    // Ciclar cara: O → M → D → V → L → O
+    if (!hallazgos[num]) hallazgos[num] = { caras: {}, global: 'sano' };
+    const carasOrden = ['O','M','D','V','L'];
+    const caraActual = hallazgos[num]._ultimaCara;
+    const idx = caraActual ? (carasOrden.indexOf(caraActual) + 1) % carasOrden.length : 0;
+    const cara = carasOrden[idx];
+    hallazgos[num]._ultimaCara = cara;
+    if (condActual === 'sano') {
+      delete hallazgos[num].caras[cara];
+    } else {
+      hallazgos[num].caras[cara] = condActual;
+    }
+    agregarHallazgo(num, cara, condActual);
+  }
+  renderOdontograma();
+  renderHallazgos();
+}
+
+function marcarPieza(num, cara, cond) {
+  if (!hallazgos[num]) hallazgos[num] = { caras: {}, global: 'sano' };
+  if (cond === 'ausente' || cond === 'exodoncia' || cond === 'corona') {
+    hallazgos[num] = { caras: {}, global: cond };
+  } else if (cara) {
+    hallazgos[num].caras[cara.toUpperCase()] = cond;
+  } else {
+    hallazgos[num].global = cond === 'sano' ? 'sano' : cond;
+  }
+  renderOdontograma();
+  renderHallazgos();
+}
+
+// ─── HALLAZGOS ───────────────────────────────────────────────────────────────
+let registros = []; // [{id, num, cara, cond, texto}]
+
+function agregarHallazgo(num, cara, cond) {
+  if (cond === 'sano') {
+    registros = registros.filter(r => !(r.num === num && r.cara === cara));
+  } else {
+    // Evitar duplicado exacto
+    const existe = registros.find(r => r.num === num && r.cara === cara && r.cond === cond);
+    if (!existe) {
+      const caraLabel = cara ? { O:'oclusal', M:'mesial', D:'distal', V:'vestibular', L:'lingual' }[cara] : '';
+      registros.push({
+        id: Date.now() + Math.random(),
+        num, cara, cond,
+        texto: `Pieza ${num} — ${COND_LABELS[cond]}${caraLabel ? ' ' + caraLabel : ''}`
+      });
+    }
+  }
+  renderHallazgos();
+}
+
+function renderHallazgos() {
+  const lista = document.getElementById('hallazgos-lista');
+  if (!registros.length) {
+    lista.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">Tocá piezas en el odontograma o usá el dictado por voz</div>`;
+    return;
+  }
+  lista.innerHTML = registros.map(r => `
+    <div class="registro-item" style="border-left-color:${COND_COLORS[r.cond]}">
+      <div>
+        <span class="pieza-badge">Pieza ${r.num}</span>
+        <span style="margin-left:8px;font-weight:500">${COND_LABELS[r.cond]}</span>
+        ${r.cara ? `<span style="margin-left:6px;color:var(--text-muted);font-size:0.8rem">${{O:'oclusal',M:'mesial',D:'distal',V:'vestibular',L:'lingual'}[r.cara]||''}</span>` : ''}
+      </div>
+      <button class="btn-del-reg" onclick="eliminarRegistro(${r.id})">✕</button>
+    </div>`).join('');
+}
+
+function eliminarRegistro(id) {
+  registros = registros.filter(r => r.id !== id);
+  renderHallazgos();
+}
+
+function limpiarTodo() {
+  if (!confirm('¿Borrar todo el odontograma?')) return;
+  hallazgos = {};
+  registros = [];
+  renderOdontograma();
+  renderHallazgos();
+}
+
+// ─── DICTADO POR VOZ ─────────────────────────────────────────────────────────
+let reconocimiento = null;
+let grabando = false;
+
+const CARA_MAP = {
+  mesial:'M', distal:'D', vestibular:'V', lingual:'L',
+  oclusal:'O', palatino:'L', bucal:'V', incisal:'O'
+};
+const COND_MAP = {
+  caries:'caries', carie:'caries', 'carie':'caries',
+  obturacion:'obturacion', obturación:'obturacion', obturada:'obturacion', obturado:'obturacion',
+  restauracion:'obturacion', restauración:'obturacion',
+  corona:'corona', coronado:'corona', coronada:'corona',
+  exodoncia:'exodoncia', extraccion:'exodoncia', extracción:'exodoncia', extraer:'exodoncia',
+  ausente:'ausente', perdido:'ausente', perdida:'ausente', falta:'ausente',
+  sano:'sano', sana:'sano', normal:'sano', limpio:'sano'
+};
+
+function toggleVoz() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    toast('Tu navegador no soporta reconocimiento de voz. Usá Chrome.', 'error'); return;
+  }
+  if (grabando) {
+    reconocimiento.stop();
+    grabando = false;
+    document.getElementById('btn-voz').classList.remove('grabando');
+    document.getElementById('voz-label').textContent = 'Iniciar dictado';
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  reconocimiento = new SR();
+  reconocimiento.lang = 'es-AR';
+  reconocimiento.continuous = true;
+  reconocimiento.interimResults = true;
+
+  reconocimiento.onresult = (e) => {
+    const transcripto = Array.from(e.results)
+      .map(r => r[0].transcript).join(' ').toLowerCase().trim();
+    document.getElementById('voz-transcript').textContent = transcripto;
+    if (e.results[e.results.length-1].isFinal) {
+      procesarComando(transcripto);
+    }
+  };
+
+  reconocimiento.onerror = (e) => {
+    toast('Error de micrófono: ' + e.error, 'error');
+    grabando = false;
+    document.getElementById('btn-voz').classList.remove('grabando');
+    document.getElementById('voz-label').textContent = 'Iniciar dictado';
+  };
+
+  reconocimiento.onend = () => {
+    if (grabando) reconocimiento.start(); // continuar
+  };
+
+  reconocimiento.start();
+  grabando = true;
+  document.getElementById('btn-voz').classList.add('grabando');
+  document.getElementById('voz-label').textContent = 'Grabando... (tocá para detener)';
+  toast('🎙️ Escuchando...', 'info');
+}
+
+function procesarComando(texto) {
+  // Normalizar
+  texto = texto.replace(/número|numero|nro\.?|n°|#/g, '')
+               .replace(/pieza/g, 'pieza')
+               .trim();
+
+  // Extraer número de pieza
+  const matchPieza = texto.match(/pieza\s+(\d{1,2})/i);
+  if (!matchPieza) return;
+  const numPieza = parseInt(matchPieza[1]);
+
+  // Validar pieza
+  const todasPiezas = [...ADULTO.sup, ...ADULTO.inf, ...TEMPORAL.sup, ...TEMPORAL.inf];
+  if (!todasPiezas.includes(numPieza)) {
+    toast(`Pieza ${numPieza} no reconocida`, 'error'); return;
+  }
+
+  // Extraer condición
+  let condEncontrada = null;
+  const palabras = texto.split(/\s+/);
+  for (const p of palabras) {
+    const norm = p.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if (COND_MAP[norm] || COND_MAP[p]) {
+      condEncontrada = COND_MAP[norm] || COND_MAP[p];
+      break;
+    }
+  }
+  if (!condEncontrada) return;
+
+  // Extraer cara
+  let caraEncontrada = null;
+  for (const p of palabras) {
+    const norm = p.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if (CARA_MAP[norm] || CARA_MAP[p]) {
+      caraEncontrada = CARA_MAP[norm] || CARA_MAP[p];
+      break;
+    }
+  }
+
+  marcarPieza(numPieza, caraEncontrada, condEncontrada);
+  const caraLabel = caraEncontrada ? ' cara ' + Object.entries(CARA_MAP).find(([k,v])=>v===caraEncontrada)?.[0] : '';
+  toast(`✓ Pieza ${numPieza} — ${COND_LABELS[condEncontrada]}${caraLabel}`, 'success');
+}
+
+// ─── GUARDAR / IMPRIMIR ──────────────────────────────────────────────────────
+function guardarOdontograma() {
+  const paciente = document.getElementById('pac-nombre').value.trim();
+  if (!paciente) { toast('Completá el nombre del paciente', 'error'); return; }
+  const data = {
+    paciente, fecha: document.getElementById('pac-fecha').value,
+    os: document.getElementById('pac-os').value,
+    tipo: tipoActual, hallazgos, registros
+  };
+  const key = 'odonto_' + paciente.toLowerCase().replace(/\s+/g,'_');
+  localStorage.setItem(key, JSON.stringify(data));
+  toast('✓ Odontograma guardado', 'success');
+}
+
+function imprimirOdontograma() {
+  const paciente = document.getElementById('pac-nombre').value.trim() || 'Paciente';
+  const fecha = document.getElementById('pac-fecha').value;
+  const os = document.getElementById('pac-os').value;
+  const svgContent = document.getElementById('odonto-svg').outerHTML;
+  const hallazgosHTML = registros.length
+    ? registros.map(r => `<li style="margin-bottom:4px;font-size:13px">
+        <strong>Pieza ${r.num}</strong> — ${COND_LABELS[r.cond]}
+        ${r.cara ? ' ('+({O:'oclusal',M:'mesial',D:'distal',V:'vestibular',L:'lingual'}[r.cara]||'')+')'  : ''}
+      </li>`).join('')
+    : '<li style="color:#9e9e9e">Sin hallazgos registrados</li>';
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8"><title>Odontograma - ${paciente}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      body { margin:0; padding:28px; font-family:'DM Sans',Arial,sans-serif; color:#1a1d23; background:white; }
+      .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:16px; border-bottom:3px solid #1a6fd4; }
+      .titulo { font-size:20px; font-weight:700; color:#1a6fd4; }
+      .sello { text-align:right; font-size:12px; color:#6b7280; line-height:1.8; }
+      .datos { background:#f4f6f9; border-radius:8px; padding:14px; margin-bottom:20px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+      .dato label { font-size:10px; font-weight:600; text-transform:uppercase; color:#9e9e9e; display:block; }
+      .dato span { font-size:13px; font-weight:600; }
+      .odonto-wrap { overflow-x:auto; margin-bottom:20px; text-align:center; }
+      .hallazgos h3 { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:#9e9e9e; margin-bottom:10px; }
+      ul { list-style:none; padding:0; column-count:2; }
+      @media print { body { padding:16px; } }
+    </style>
+  </head><body>
+    <div class="header">
+      <div>
+        <div class="titulo">🦷 Odontograma</div>
+        <div style="font-size:12px;color:#9e9e9e;margin-top:3px">${fecha ? fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR')}</div>
+      </div>
+      <div class="sello">
+        <strong style="color:#1a1d23;font-size:13px">VERÓNICA ORTIZ</strong><br>
+        Odontóloga · M.P. 45197<br>
+        📞 11 2393-3085
+      </div>
+    </div>
+    <div class="datos">
+      <div class="dato"><label>Paciente</label><span>${paciente}</span></div>
+      <div class="dato"><label>Prepaga</label><span>${os||'—'}</span></div>
+      <div class="dato"><label>Dentición</label><span>${tipoActual==='adulto'?'Permanente':'Temporal'}</span></div>
+    </div>
+    <div class="odonto-wrap">${svgContent}</div>
+    <div class="hallazgos">
+      <h3>Hallazgos clínicos</h3>
+      <ul>${hallazgosHTML}</ul>
+    </div>
+    <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 2800);
+}
+
+document.getElementById('pac-fecha').value = new Date().toISOString().split('T')[0];
+renderOdontograma();
+renderHallazgos();
+</script>
+</body>
+</html>
