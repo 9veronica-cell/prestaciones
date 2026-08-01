@@ -181,6 +181,20 @@
       <button class="btn btn-danger" onclick="forzarGuardar()">Guardar igual</button>
     </div>
   </div>
+
+  <div id="garantia-warning" class="card" style="display:none;border-left:4px solid var(--warning);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.4rem">⏳</span>
+      <div>
+        <div style="font-weight:600;color:var(--warning)">Código en período de garantía</div>
+        <div id="garantia-detail" style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;line-height:1.6"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="cancelarGarantia()">Cancelar</button>
+      <button class="btn" style="background:var(--warning);color:white" onclick="forzarGuardarGarantia()">Guardar igual</button>
+    </div>
+  </div>
 </div>
 
 <!-- TAB HISTORIAL -->
@@ -335,10 +349,8 @@
 
   <!-- SUBTAB: NUEVO PRESUPUESTO -->
   <div id="subtab-presupuesto" style="display:none">
-
-    <!-- Formulario presupuesto -->
     <div class="card">
-      <div class="card-title">Datos del paciente</div>
+      <div class="card-title">Nuevo presupuesto / deuda</div>
       <div class="grid-2">
         <div class="field autocomplete-wrap" style="grid-column:1/-1">
           <label>Paciente</label>
@@ -349,54 +361,25 @@
           <datalist id="presup-pacientes-datalist"></datalist>
           <div id="presup-paciente-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow);z-index:100;display:none;max-height:220px;overflow-y:auto"></div>
         </div>
-        <div class="field">
-          <label>Prepaga</label>
-          <select id="presup-os">
-            <option value="">— Seleccionar —</option>
-            <option value="OMINT">OMINT</option>
-            <option value="SWISS MEDICAL">SWISS MEDICAL</option>
-            <option value="Particular">Particular</option>
-          </select>
+        <div class="field" style="grid-column:1/-1">
+          <label>Descripción del tratamiento</label>
+          <input id="presup-descripcion" placeholder="Ej: Conductoterapia + corona pieza 14">
         </div>
         <div class="field">
-          <label>N° Afiliado</label>
-          <input id="presup-afiliado" placeholder="Ej: 123456789">
+          <label>Monto total ($)</label>
+          <input id="presup-monto" type="number" placeholder="0" min="0" step="1">
         </div>
         <div class="field">
           <label>Fecha</label>
           <input id="presup-fecha" type="date">
         </div>
       </div>
+      <button class="btn btn-primary btn-full" id="btn-guardar-presup" onclick="guardarPresupuesto()">📋 Guardar presupuesto</button>
     </div>
 
-    <!-- Ítems del presupuesto -->
-    <div class="card">
-      <div class="card-title">Tratamientos</div>
-      <div id="presup-items-lista"></div>
-      <button class="btn btn-ghost" style="width:100%;margin-top:8px;border-style:dashed" onclick="agregarItemPresup()">+ Agregar tratamiento</button>
-    </div>
-
-    <!-- Botones acción -->
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="btn btn-primary" style="flex:1" onclick="previsualizarPresupuesto()">👁️ Vista previa</button>
-      <button class="btn btn-primary" style="flex:1;background:#25D366" onclick="compartirPresupuestoWsp()">📱 WhatsApp</button>
-      <button class="btn btn-ghost" style="flex:1" id="btn-guardar-presup" onclick="guardarPresupuesto()">💾 Guardar</button>
-    </div>
-
-    <!-- Vista previa PDF -->
-    <div id="presup-preview-wrap" style="display:none">
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
-          <div class="card-title" style="margin:0">Vista previa</div>
-          <button class="btn btn-primary" style="padding:8px 16px;font-size:0.85rem" onclick="descargarPDF()">⬇️ Descargar PDF</button>
-        </div>
-        <div id="presup-preview" style="padding:32px;background:white;font-family:'Inter',sans-serif"></div>
-      </div>
-    </div>
-
-    <!-- Lista presupuestos guardados -->
-    <div class="card" style="padding:0;overflow:hidden;margin-top:8px">
-      <div style="padding:16px 20px 10px;"><div class="card-title" style="margin:0">Presupuestos guardados</div></div>
+    <!-- Lista presupuestos existentes -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:16px 20px 10px;"><div class="card-title" style="margin:0">Presupuestos registrados</div></div>
       <div class="table-wrapper">
         <table>
           <thead><tr>
@@ -407,7 +390,7 @@
       </div>
       <div id="presup-empty" class="empty" style="display:none">
         <div class="empty-icon">📋</div>
-        <div>No hay presupuestos guardados.</div>
+        <div>No hay presupuestos registrados.</div>
       </div>
     </div>
   </div>
@@ -421,34 +404,9 @@
           <input id="estado-buscador" placeholder="Escribí para filtrar..." oninput="renderEstado()" list="estado-pacientes-datalist">
           <datalist id="estado-pacientes-datalist"></datalist>
         </div>
-        <div class="field">
-          <label>Mostrar</label>
-          <select id="estado-filtro-saldo" onchange="renderEstado()">
-            <option value="">— Todos —</option>
-            <option value="deuda">Solo con deuda</option>
-            <option value="saldado">Solo saldados</option>
-          </select>
-        </div>
-        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';document.getElementById('estado-filtro-saldo').value='';renderEstado()">✕ Ver todos</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';renderEstado()">✕ Ver todos</button>
       </div>
     </div>
-
-    <!-- KPI deuda total -->
-    <div id="estado-kpi" class="stats-grid" style="display:none;margin-bottom:16px">
-      <div class="stat-card" style="border-left:4px solid var(--danger)">
-        <div class="stat-label">Pacientes con deuda</div>
-        <div class="stat-value warn" id="estado-kpi-count">—</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid var(--danger)">
-        <div class="stat-label">Total adeudado</div>
-        <div class="stat-value" id="estado-kpi-total" style="color:var(--danger)">—</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid var(--success)">
-        <div class="stat-label">Total cobrado</div>
-        <div class="stat-value money" id="estado-kpi-cobrado">—</div>
-      </div>
-    </div>
-
     <div id="estado-lista"></div>
   </div>
 
@@ -995,6 +953,15 @@ function agregar() {
     document.getElementById('btn-guardar').disabled = true;
     return;
   }
+  // Verificar garantía
+  const alertaGarantia = verificarGarantia(d);
+  if (alertaGarantia) {
+    pendingData = d;
+    document.getElementById('garantia-detail').innerHTML = alertaGarantia;
+    document.getElementById('garantia-warning').style.display = 'block';
+    document.getElementById('btn-guardar').disabled = true;
+    return;
+  }
   guardarEnSheets(d);
 }
 
@@ -1470,184 +1437,8 @@ function showSubtab(name) {
   });
   if (name === 'estado') renderEstado();
   if (name === 'historial') renderCobros();
-  if (name === 'presupuesto') {
-    renderPresupuestos();
-    if (!itemsPresup.length) renderItemsPresup();
-  }
+  if (name === 'presupuesto') renderPresupuestos();
 }
-
-// ─── PRESUPUESTO PARA PACIENTE ───────────────────────────────────────────────
-
-let itemsPresup = [];
-
-function agregarItemPresup() {
-  const id = Date.now();
-  itemsPresup.push({ id, desc: '', monto: '' });
-  renderItemsPresup();
-  // Focus en el último campo descripción
-  setTimeout(() => {
-    const inputs = document.querySelectorAll('.presup-item-desc');
-    if (inputs.length) inputs[inputs.length-1].focus();
-  }, 50);
-}
-
-function eliminarItemPresup(id) {
-  itemsPresup = itemsPresup.filter(i => i.id !== id);
-  renderItemsPresup();
-}
-
-function renderItemsPresup() {
-  const lista = document.getElementById('presup-items-lista');
-  if (!itemsPresup.length) {
-    lista.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem">Agregá al menos un tratamiento</div>`;
-    return;
-  }
-  lista.innerHTML = itemsPresup.map((item, i) => `
-    <div style="display:grid;grid-template-columns:1fr 160px 36px;gap:8px;align-items:center;margin-bottom:8px">
-      <input class="presup-item-desc" placeholder="Descripción del tratamiento"
-             value="${item.desc}"
-             oninput="itemsPresup[${i}].desc=this.value"
-             style="padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:'Inter',sans-serif">
-      <input class="presup-item-monto" placeholder="$ Monto" type="number" min="0"
-             value="${item.monto}"
-             oninput="itemsPresup[${i}].monto=this.value"
-             style="padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:'Inter',sans-serif;text-align:right">
-      <button onclick="eliminarItemPresup(${item.id})"
-              style="width:36px;height:36px;border:none;border-radius:var(--radius-sm);background:var(--danger-light);color:var(--danger);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
-    </div>`).join('');
-}
-
-function getPresupData() {
-  return {
-    paciente: document.getElementById('presup-paciente').value.trim(),
-    os:       document.getElementById('presup-os').value,
-    afiliado: document.getElementById('presup-afiliado').value.trim(),
-    fecha:    document.getElementById('presup-fecha').value,
-    items:    itemsPresup.filter(i => i.desc || i.monto)
-  };
-}
-
-function htmlPresupuesto(d) {
-  const fecha = d.fecha ? d.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
-  const total = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
-  const itemsHTML = d.items.map(i => `
-    <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e6ea;font-size:14px">${i.desc||''}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e6ea;text-align:right;font-size:14px;white-space:nowrap;font-family:monospace">${i.monto ? formatMoney(i.monto) : '—'}</td>
-    </tr>`).join('');
-
-  return `
-    <div style="max-width:600px;margin:0 auto;font-family:'Inter',Arial,sans-serif;color:#1a1d23">
-      <!-- Encabezado -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #1a6fd4">
-        <div>
-          <div style="font-size:22px;font-weight:700;color:#1a6fd4">🦷 Presupuesto Odontológico</div>
-          <div style="font-size:12px;color:#6b7280;margin-top:4px">Fecha: ${fecha}</div>
-        </div>
-        <div style="text-align:right;font-size:12px;color:#6b7280;line-height:1.7">
-          <div style="font-weight:700;color:#1a1d23;font-size:13px">VERÓNICA ORTIZ</div>
-          <div>Odontóloga · M.P. 45197</div>
-          <div>📞 11 2393-3085</div>
-        </div>
-      </div>
-
-      <!-- Datos paciente -->
-      <div style="background:#f0f2f5;border-radius:10px;padding:16px 20px;margin-bottom:24px">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:10px">Datos del paciente</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><span style="font-size:11px;color:#6b7280">Paciente</span><br><strong style="font-size:14px">${d.paciente||'—'}</strong></div>
-          <div><span style="font-size:11px;color:#6b7280">Prepaga</span><br><strong style="font-size:14px">${d.os||'Particular'}</strong></div>
-          ${d.afiliado ? `<div><span style="font-size:11px;color:#6b7280">N° Afiliado</span><br><strong style="font-size:14px">${d.afiliado}</strong></div>` : ''}
-        </div>
-      </div>
-
-      <!-- Tabla tratamientos -->
-      <div style="margin-bottom:20px">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6b7280;margin-bottom:10px">Tratamientos</div>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e6ea;border-radius:8px;overflow:hidden">
-          <thead>
-            <tr style="background:#1a6fd4">
-              <th style="padding:10px 12px;text-align:left;font-size:12px;color:white;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Tratamiento</th>
-              <th style="padding:10px 12px;text-align:right;font-size:12px;color:white;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Valor</th>
-            </tr>
-          </thead>
-          <tbody>${itemsHTML}</tbody>
-          <tfoot>
-            <tr style="background:#f0f2f5">
-              <td style="padding:12px;font-weight:700;font-size:15px">TOTAL</td>
-              <td style="padding:12px;text-align:right;font-weight:700;font-size:15px;color:#1a6fd4;font-family:monospace">${formatMoney(total)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Pie -->
-      <div style="border-top:1px solid #e2e6ea;padding-top:16px;font-size:11px;color:#6b7280;text-align:center">
-        Este presupuesto tiene una validez de 30 días desde la fecha de emisión.
-      </div>
-    </div>`;
-}
-
-function previsualizarPresupuesto() {
-  const d = getPresupData();
-  if (!d.paciente || !d.items.length) {
-    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
-  }
-  const wrap = document.getElementById('presup-preview-wrap');
-  document.getElementById('presup-preview').innerHTML = htmlPresupuesto(d);
-  wrap.style.display = 'block';
-  wrap.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function descargarPDF() {
-  const d = getPresupData();
-  const contenido = htmlPresupuesto(d);
-  const nombre = (d.paciente || 'Presupuesto').replace(/[^a-zA-Z0-9 ]/g, '').trim();
-  const fecha = d.fecha ? d.fecha.replaceAll('-','') : new Date().toISOString().split('T')[0].replaceAll('-','');
-
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head>
-    <meta charset="UTF-8">
-    <title>Presupuesto - ${nombre}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body { margin:0; padding:32px; font-family:'Inter',Arial,sans-serif; background:white; }
-      @media print { body { padding:20px; } }
-    </style>
-  </head><body>
-    ${contenido}
-    <script>window.onload=()=>{window.print();}<\/script>
-  </body></html>`);
-  win.document.close();
-}
-
-function compartirPresupuestoWsp() {
-  const d = getPresupData();
-  if (!d.paciente || !d.items.length) {
-    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
-  }
-  const fecha = d.fecha ? d.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
-  const total = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
-  const itemsTexto = d.items.filter(i=>i.desc||i.monto).map(i =>
-    `• ${i.desc||'Tratamiento'}${i.monto ? ': ' + formatMoney(i.monto) : ''}`
-  ).join('\n');
-
-  const nombre = d.paciente.split(',').reverse().map(s=>s.trim()).join(' ');
-  const msg = `🦷 *PRESUPUESTO ODONTOLÓGICO*\n`
-    + `📅 Fecha: ${fecha}\n\n`
-    + `*Paciente:* ${d.paciente}\n`
-    + (d.os ? `*Prepaga:* ${d.os}\n` : '')
-    + (d.afiliado ? `*Afiliado:* ${d.afiliado}\n` : '')
-    + `\n*Tratamientos:*\n${itemsTexto}\n\n`
-    + `*TOTAL: ${formatMoney(total)}*\n\n`
-    + `_Presupuesto válido por 30 días_\n`
-    + `─────────────────\n`
-    + `Verónica Ortiz · Odontóloga\nM.P. 45197 · 📞 11 2393-3085`;
-
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// ─── FIN PRESUPUESTO PARA PACIENTE ──────────────────────────────────────────
 
 // ─── PRESUPUESTOS ────────────────────────────────────────────────────────────
 
@@ -1682,31 +1473,33 @@ function actualizarDatalistPresup() {
 }
 
 async function guardarPresupuesto() {
-  const d = getPresupData();
-  if (!d.paciente || !d.items.length) {
-    toast('Completá el paciente y al menos un tratamiento', 'warning'); return;
+  const pac   = document.getElementById('presup-paciente').value.trim();
+  const desc  = document.getElementById('presup-descripcion').value.trim();
+  const monto = document.getElementById('presup-monto').value.trim();
+  const fecha = document.getElementById('presup-fecha').value;
+  if (!pac || !desc || !monto) {
+    toast('Completá Paciente, Descripción y Monto', 'warning');
+    ['presup-paciente','presup-descripcion','presup-monto'].forEach(id => {
+      if (!document.getElementById(id).value) document.getElementById(id).classList.add('error');
+    });
+    setTimeout(() => document.querySelectorAll('.error').forEach(el => el.classList.remove('error')), 2000);
+    return;
   }
-  const desc  = d.items.map(i => i.desc).filter(Boolean).join(' + ');
-  const monto = d.items.reduce((s,i) => s+(parseFloat(i.monto)||0), 0);
   const btn = document.getElementById('btn-guardar-presup');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
   try {
-    const params = new URLSearchParams({ action:'savePresupuesto', paciente:d.paciente, descripcion:desc, monto, fecha:d.fecha });
+    const params = new URLSearchParams({ action:'savePresupuesto', paciente:pac, descripcion:desc, monto, fecha });
     await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
     toast('✓ Presupuesto guardado', 'success');
-    itemsPresup = [];
-    renderItemsPresup();
-    document.getElementById('presup-paciente').value = '';
-    document.getElementById('presup-os').value = '';
-    document.getElementById('presup-afiliado').value = '';
-    document.getElementById('presup-preview-wrap').style.display = 'none';
+    document.getElementById('presup-descripcion').value = '';
+    document.getElementById('presup-monto').value = '';
     await new Promise(r => setTimeout(r, 2000));
     await cargarPresupuestos(true);
     renderPresupuestos();
   } catch(e) {
     toast('Error al guardar presupuesto', 'error');
   } finally {
-    btn.disabled = false; btn.innerHTML = '💾 Guardar';
+    btn.disabled = false; btn.innerHTML = '📋 Guardar presupuesto';
   }
 }
 
@@ -1730,9 +1523,8 @@ function renderPresupuestos() {
 // ─── ESTADO DE CUENTAS ───────────────────────────────────────────────────────
 
 function renderEstado() {
-  const filtro      = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
-  const filtroSaldo = document.getElementById('estado-filtro-saldo')?.value||'';
-  const lista       = document.getElementById('estado-lista');
+  const filtro = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
+  const lista = document.getElementById('estado-lista');
 
   // Agrupar presupuestos por paciente
   const pacientes = {};
@@ -1741,6 +1533,7 @@ function renderEstado() {
     if (!pacientes[k]) pacientes[k] = { nombre: p.paciente, presupuestos: [], cobros: [] };
     pacientes[k].presupuestos.push(p);
   });
+  // Sumar cobros por paciente (aunque no tenga presupuesto)
   datosCobros.forEach(c => {
     const k = c.paciente.toUpperCase();
     if (!pacientes[k]) pacientes[k] = { nombre: c.paciente, presupuestos: [], cobros: [] };
@@ -1750,51 +1543,14 @@ function renderEstado() {
   let keys = Object.keys(pacientes).sort();
   if (filtro) keys = keys.filter(k => k.includes(filtro));
 
-  // Calcular saldo por paciente y aplicar filtro
-  keys = keys.filter(k => {
-    const pac = pacientes[k];
-    const totalPresup  = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
-    const totalCobrado = pac.cobros.reduce((s,c) => s+(parseFloat(c.monto)||0), 0);
-    const saldo = totalPresup - totalCobrado;
-    if (filtroSaldo === 'deuda')   return saldo > 0;
-    if (filtroSaldo === 'saldado') return saldo <= 0 && totalPresup > 0;
-    return true;
-  });
-
-  // KPIs — calcular sobre TODOS los pacientes con presupuesto (sin filtro de nombre)
-  const todosConPresup = Object.keys(pacientes).filter(k => pacientes[k].presupuestos.length > 0);
-  const conDeuda = todosConPresup.filter(k => {
-    const pac = pacientes[k];
-    const saldo = pac.presupuestos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0)
-                - pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
-    return saldo > 0;
-  });
-  const totalAdeudado = conDeuda.reduce((sum,k) => {
-    const pac = pacientes[k];
-    return sum + pac.presupuestos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0)
-               - pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
-  }, 0);
-  const totalCobradoGlobal = Object.values(pacientes).reduce((sum,pac) =>
-    sum + pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0), 0);
-
-  const kpiEl = document.getElementById('estado-kpi');
-  if (conDeuda.length > 0) {
-    kpiEl.style.display = 'grid';
-    document.getElementById('estado-kpi-count').textContent = conDeuda.length;
-    document.getElementById('estado-kpi-total').textContent = formatMoney(totalAdeudado);
-    document.getElementById('estado-kpi-cobrado').textContent = formatMoney(totalCobradoGlobal);
-  } else {
-    kpiEl.style.display = 'none';
-  }
-
   if (!keys.length) {
-    lista.innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">${filtroSaldo==='deuda'?'🎉':'🔍'}</div><div>${filtroSaldo==='deuda'?'¡No hay deudas pendientes!':'No hay pacientes que coincidan.'}</div></div></div>`;
+    lista.innerHTML = `<div class="card"><div class="empty"><div class="empty-icon">🔍</div><div>No hay pacientes que coincidan.</div></div></div>`;
     return;
   }
 
   lista.innerHTML = keys.map(k => {
     const pac = pacientes[k];
-    const totalPresup  = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
+    const totalPresup = pac.presupuestos.reduce((s,p) => s+(parseFloat(p.monto)||0), 0);
     const totalCobrado = pac.cobros.reduce((s,c) => s+(parseFloat(c.monto)||0), 0);
     const saldo = totalPresup - totalCobrado;
     const saldoColor = saldo <= 0 ? 'var(--success)' : 'var(--danger)';
@@ -1820,7 +1576,7 @@ function renderEstado() {
       </div>`).join('') : `<div style="color:var(--text-muted);font-size:0.85rem;padding:6px 0">Sin cobros registrados</div>`;
 
     return `
-    <div class="card" style="margin-bottom:14px;border-left:4px solid ${saldoColor}">
+    <div class="card" style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
         <div>
           <div style="font-weight:700;font-size:1rem">${pac.nombre}</div>
@@ -2127,6 +1883,88 @@ async function confirmarBorrarCobro() {
 
 // ─── FIN COBROS ─────────────────────────────────────────────────────────────
 
+// ─── GARANTÍAS ───────────────────────────────────────────────────────────────
+
+const GARANTIA_REGLAS = {
+  '01.01': { dias: 365,  label: '1 vez por año',  porPieza: false },
+  '08.02': { dias: 180,  label: 'cada 6 meses',   porPieza: false },
+  '02.08': { dias: 1095, label: 'cada 3 años',    porPieza: true  },
+  '02.16': { dias: 1095, label: 'cada 3 años',    porPieza: true  },
+};
+
+let datosGarantia = [];
+let garantiaListos = false;
+
+async function cargarGarantias() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=readGarantias&t=' + Date.now());
+    const raw = await res.json();
+    datosGarantia = Array.isArray(raw) ? raw.map(d => ({
+      fecha:    (d.fecha||'').trim(),
+      paciente: (d.paciente||'').trim().toUpperCase(),
+      codigo:   (d.codigo||'').trim(),
+      pieza:    String(d.pieza||'').trim(),
+    })) : [];
+    garantiaListos = true;
+  } catch(e) {
+    garantiaListos = true;
+    console.warn('No se pudo cargar hoja Garantias:', e);
+  }
+}
+
+function verificarGarantia(d) {
+  const regla = GARANTIA_REGLAS[d.codigo];
+  if (!regla) return null;
+  const pacUpper = d.paciente.toUpperCase().trim();
+  const fechaNueva = new Date(d.fecha);
+
+  const historialLocal = datos.filter(r =>
+    r.codigo === d.codigo &&
+    r.paciente.toUpperCase().trim() === pacUpper &&
+    (!regla.porPieza || String(r.pieza||'').trim() === String(d.pieza||'').trim())
+  ).map(r => r.fecha);
+
+  const historialExterno = datosGarantia.filter(r =>
+    r.codigo === d.codigo &&
+    r.paciente === pacUpper &&
+    (!regla.porPieza || r.pieza === String(d.pieza||'').trim())
+  ).map(r => r.fecha);
+
+  const todo = [...historialLocal, ...historialExterno].sort().reverse();
+
+  for (const fecha of todo) {
+    const fechaAnterior = new Date(fecha + 'T00:00:00');
+    const diffDias = Math.floor((fechaNueva - fechaAnterior) / 86400000);
+    if (diffDias >= 0 && diffDias < regla.dias) {
+      const diasRestantes = regla.dias - diffDias;
+      const fechaLibre = new Date(fechaAnterior);
+      fechaLibre.setDate(fechaLibre.getDate() + regla.dias);
+      const fmt = f => new Date(f + (typeof f === 'string' && !f.includes('T') ? 'T00:00:00' : '')).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
+      const fmtLib = fechaLibre.toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
+      return `<strong>${d.codigo}</strong> — ${regla.label}${regla.porPieza ? ` · pieza <strong>${d.pieza}</strong>` : ''}<br>
+        Último registro: <strong>${fmt(fecha)}</strong><br>
+        Próxima fecha habilitada: <strong style="color:var(--warning)">${fmtLib}</strong>
+        &nbsp;·&nbsp; faltan <strong>${diasRestantes} días</strong>`;
+    }
+  }
+  return null;
+}
+
+function cancelarGarantia() {
+  pendingData = null;
+  document.getElementById('garantia-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+}
+
+function forzarGuardarGarantia() {
+  document.getElementById('garantia-warning').style.display = 'none';
+  document.getElementById('btn-guardar').disabled = false;
+  guardarEnSheets(pendingData);
+  pendingData = null;
+}
+
+// ─── FIN GARANTÍAS ────────────────────────────────────────────────────────────
+
 
 cargar();
 document.getElementById('cobro-fecha').value = new Date().toISOString().split('T')[0];
@@ -2134,6 +1972,7 @@ document.getElementById('presup-fecha').value = new Date().toISOString().split('
 cargarCobros();
 cargarPresupuestos();
 cargarPacientesDrapp();
+cargarGarantias();
 setupAutocompleteCustom('cobro-paciente', 'cobro-paciente-dropdown');
 setupAutocompleteCustom('presup-paciente', 'presup-paciente-dropdown');
 </script>
