@@ -9,8 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:#f0f2f5; --card:#fff; --primary:#1a6fd4; --primary-light:#e8f0fb;
-      --primary-dark:#1459b0; --danger:#e53935; --danger-light:#fdecea;
+      --bg:#f0f2f5; --card:#fff; --primary:#D63384; --primary-light:#fce4f3;
+      --primary-dark:#A0195E; --danger:#e53935; --danger-light:#fdecea;
       --success:#2e7d32; --success-light:#e8f5e9; --warning:#f57c00;
       --warning-light:#fff3e0; --text:#1a1d23; --text-muted:#6b7280;
       --border:#e2e6ea; --shadow:0 2px 12px rgba(0,0,0,0.08);
@@ -24,7 +24,7 @@
     .subtitle { font-size:0.8rem; color:var(--text-muted); }
     .tabs { display:flex; gap:4px; background:var(--card); padding:4px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; overflow-x:auto; }
     .tab { flex:1; padding:10px 16px; border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter',sans-serif; font-size:0.875rem; font-weight:500; color:var(--text-muted); white-space:nowrap; transition:all 0.2s; }
-    .tab.active { background:var(--primary); color:white; box-shadow:0 2px 8px rgba(26,111,212,0.35); }
+    .tab.active { background:var(--primary); color:white; box-shadow:0 2px 8px rgba(214,51,132,0.35); }
     .tab:hover:not(.active) { background:var(--primary-light); color:var(--primary); }
     .panel { display:none; } .panel.active { display:block; }
     .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
@@ -34,7 +34,7 @@
     .field { display:flex; flex-direction:column; gap:5px; }
     .field label { font-size:0.78rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; }
     input,select { padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--text); background:white; transition:border-color 0.2s; width:100%; }
-    input:focus,select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(26,111,212,0.12); }
+    input:focus,select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(214,51,132,0.12); }
     input.error { border-color:var(--danger); }
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; transition:all 0.2s; }
     .btn:active { transform:scale(0.97); }
@@ -97,7 +97,26 @@
 <body>
 
 <div class="header">
-  <div class="header-icon">🦷</div>
+  <div class="header-icon" style="background:white;border:2px solid #D63384;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="28" height="28">
+  <circle cx="20" cy="32" r="12" fill="#A0195E"/>
+  <circle cx="80" cy="32" r="12" fill="#A0195E"/>
+  <circle cx="20" cy="32" r="7" fill="#E87BB8"/>
+  <circle cx="80" cy="32" r="7" fill="#E87BB8"/>
+  <circle cx="50" cy="52" r="34" fill="#D63384"/>
+  <ellipse cx="50" cy="62" rx="22" ry="18" fill="#F0A0CC"/>
+  <circle cx="38" cy="47" r="6" fill="white"/>
+  <circle cx="62" cy="47" r="6" fill="white"/>
+  <circle cx="39" cy="48" r="3.5" fill="#1a1a1a"/>
+  <circle cx="63" cy="48" r="3.5" fill="#1a1a1a"/>
+  <circle cx="40" cy="47" r="1.2" fill="white"/>
+  <circle cx="64" cy="47" r="1.2" fill="white"/>
+  <ellipse cx="50" cy="57" rx="4" ry="3" fill="#A0195E"/>
+  <path d="M 36 65 Q 50 76 64 65" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <rect x="40" y="65" width="9" height="11" rx="2" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
+  <rect x="51" y="65" width="9" height="11" rx="2" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
+  <circle cx="30" cy="60" r="7" fill="#FF69B4" opacity="0.5"/>
+  <circle cx="70" cy="60" r="7" fill="#FF69B4" opacity="0.5"/>
+</svg></div>
   <div>
     <h1>Prestaciones PRO</h1>
     <div class="subtitle" id="sync-status">Cargando...</div>
