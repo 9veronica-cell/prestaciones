@@ -11,18 +11,18 @@
         :root {
       --bg: #f8f4f8;
       --card: #ffffff;
-      --primary: #c2185b;
-      --primary-light: #fce4f3;
-      --primary-dark: #880e4f;
-      --primary-gradient: linear-gradient(135deg, #e91e8c 0%, #c2185b 100%);
+      --primary: #E91E8C;
+      --primary-light: #F8BBD0;
+      --primary-dark: #C2185B;
+      --primary-gradient: linear-gradient(135deg, #E91E8C 0%, #E91E8C 100%);
       --danger: #e53935; --danger-light: #fdecea;
       --success: #2e7d32; --success-light: #e8f5e9;
       --warning: #f57c00; --warning-light: #fff3e0;
       --text: #1a1023; --text-muted: #8e7a8e;
       --border: #eddeed; --border-strong: #d4b8d4;
-      --shadow: 0 4px 20px rgba(194,24,91,0.08);
-      --shadow-md: 0 8px 30px rgba(194,24,91,0.12);
-      --shadow-lg: 0 16px 48px rgba(194,24,91,0.16);
+      --shadow: 0 4px 20px rgba(233,30,140,0.08);
+      --shadow-md: 0 8px 30px rgba(233,30,140,0.12);
+      --shadow-lg: 0 16px 48px rgba(233,30,140,0.16);
       --radius: 16px; --radius-sm: 10px; --radius-xs: 6px;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
@@ -30,7 +30,7 @@
       font-family:'Inter',sans-serif;
       background: var(--bg);
       background-image: radial-gradient(circle at 20% 0%, rgba(233,30,140,0.06) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 100%, rgba(194,24,91,0.04) 0%, transparent 50%);
+                        radial-gradient(circle at 80% 100%, rgba(233,30,140,0.04) 0%, transparent 50%);
       background-attachment: fixed;
       color: var(--text);
       min-height: 100vh;
@@ -50,7 +50,7 @@
       border: 2.5px solid var(--primary);
       border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(194,24,91,0.2);
+      box-shadow: 0 4px 16px rgba(233,30,140,0.2);
     }
     h1 {
       font-size: 1.5rem; font-weight: 800;
@@ -87,7 +87,7 @@
     .tab.active {
       background: var(--primary-gradient);
       color: white;
-      box-shadow: 0 4px 14px rgba(194,24,91,0.4);
+      box-shadow: 0 4px 14px rgba(233,30,140,0.4);
       transform: translateY(-1px);
     }
     .tab:hover:not(.active) { background: var(--primary-light); color: var(--primary); }
@@ -130,7 +130,7 @@
     input:focus, select:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(194,24,91,0.12);
+      box-shadow: 0 0 0 3px rgba(233,30,140,0.12);
       background: #fff9fd;
     }
     input.error { border-color: var(--danger); }
@@ -148,9 +148,9 @@
     .btn-primary {
       background: var(--primary-gradient);
       color: white;
-      box-shadow: 0 4px 14px rgba(194,24,91,0.35);
+      box-shadow: 0 4px 14px rgba(233,30,140,0.35);
     }
-    .btn-primary:hover { box-shadow: 0 6px 20px rgba(194,24,91,0.5); transform: translateY(-1px); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(233,30,140,0.5); transform: translateY(-1px); }
     .btn-danger { background: var(--danger); color: white; }
     .btn-ghost {
       background: white; color: var(--text-muted);
@@ -263,12 +263,12 @@
 <body>
 
 <div class="header">
-  <div class="header-icon" style="width:56px;height:56px;background:white;border:2.5px solid #c2185b;border-radius:16px;box-shadow:0 4px 16px rgba(194,24,91,0.2);display:flex;align-items:center;justify-content:center">
+  <div class="header-icon" style="width:56px;height:56px;background:white;border:2.5px solid #E91E8C;border-radius:16px;box-shadow:0 4px 16px rgba(233,30,140,0.2);display:flex;align-items:center;justify-content:center">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
-      <circle cx="20" cy="32" r="12" fill="#A0195E"/>
-      <circle cx="80" cy="32" r="12" fill="#A0195E"/>
-      <circle cx="20" cy="32" r="7" fill="#F48FB1"/>
-      <circle cx="80" cy="32" r="7" fill="#F48FB1"/>
+      <circle cx="20" cy="32" r="12" fill="#E91E8C"/>
+      <circle cx="80" cy="32" r="12" fill="#E91E8C"/>
+      <circle cx="20" cy="32" r="7" fill="#F8BBD0"/>
+      <circle cx="80" cy="32" r="7" fill="#F8BBD0"/>
       <circle cx="50" cy="52" r="34" fill="#E91E8C"/>
       <ellipse cx="50" cy="62" rx="22" ry="18" fill="#F8BBD0"/>
       <circle cx="38" cy="47" r="6" fill="white"/>
@@ -277,12 +277,12 @@
       <circle cx="63" cy="48" r="3.5" fill="#1a1a1a"/>
       <circle cx="40" cy="47" r="1.2" fill="white"/>
       <circle cx="64" cy="47" r="1.2" fill="white"/>
-      <ellipse cx="50" cy="57" rx="4" ry="3" fill="#880E4F"/>
-      <path d="M 36 65 Q 50 76 64 65" stroke="#880E4F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="57" rx="4" ry="3" fill="#C2185B"/>
+      <path d="M 36 65 Q 50 76 64 65" stroke="#C2185B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
       <rect x="40" y="64" width="9" height="12" rx="2.5" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
       <rect x="51" y="64" width="9" height="12" rx="2.5" fill="white" stroke="#f0f0f0" stroke-width="0.5"/>
-      <circle cx="30" cy="60" r="7" fill="#FF80AB" opacity="0.6"/>
-      <circle cx="70" cy="60" r="7" fill="#FF80AB" opacity="0.6"/>
+      <circle cx="30" cy="60" r="7" fill="#F8BBD0" opacity="0.6"/>
+      <circle cx="70" cy="60" r="7" fill="#F8BBD0" opacity="0.6"/>
     </svg>
   </div>
   <div>
@@ -2185,22 +2185,32 @@ async function cargarGarantias() {
   }
 }
 
+function normNombre(s) {
+  // Normaliza para comparar: mayúsculas, sin tildes, sin coma, sin espacios dobles
+  if (!s) return '';
+  return s.toUpperCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // quitar tildes
+    .replace(/,/g, '')           // quitar comas
+    .replace(/\s+/g, ' ')        // espacios simples
+    .trim();
+}
+
 function verificarGarantia(d) {
   const regla = GARANTIA_REGLAS[d.codigo];
   if (!regla) return null;
-  const pacUpper = d.paciente.toUpperCase().trim();
+  const pacNorm = normNombre(d.paciente);
   const fechaNueva = new Date(d.fecha);
 
   const historialLocal = datos.filter(r =>
     r.codigo === d.codigo &&
-    r.paciente.toUpperCase().trim() === pacUpper &&
+    normNombre(r.paciente) === pacNorm &&
     (!regla.porPieza || String(r.pieza||'').trim() === String(d.pieza||'').trim())
   ).map(r => r.fecha);
 
   const historialExterno = datosGarantia.filter(r =>
     r.codigo === d.codigo &&
-    r.paciente === pacUpper &&
-    (!regla.porPieza || r.pieza === String(d.pieza||'').trim())
+    normNombre(r.paciente) === pacNorm &&
+    (!regla.porPieza || String(r.pieza||'').trim() === String(d.pieza||'').trim())
   ).map(r => r.fecha);
 
   const todo = [...historialLocal, ...historialExterno].sort().reverse();
