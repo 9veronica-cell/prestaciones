@@ -1582,13 +1582,17 @@ function renderRecordatorios() {
   const ventana = parseInt(document.getElementById('rec-ventana')?.value || 30);
   const hoy = new Date(); hoy.setHours(0,0,0,0);
 
-  // Agrupar por paciente: quedarse con la última visita de cada uno
+  // Agrupar por paciente usando normNombre para unificar variantes
   const ultimaVisita = {};
   datos.forEach(d => {
     if (!d.paciente || !d.fecha) return;
-    const key = d.paciente.trim().toUpperCase();
+    const key = normNombre(d.paciente);
     if (!ultimaVisita[key] || d.fecha > ultimaVisita[key].fecha) {
-      ultimaVisita[key] = { paciente: d.paciente.trim(), fecha: d.fecha };
+      // Preferir el nombre con coma como nombre canónico
+      const nombreCanon = ultimaVisita[key]?.nombre?.includes(',')
+        ? ultimaVisita[key].nombre
+        : d.paciente.trim();
+      ultimaVisita[key] = { paciente: nombreCanon, fecha: d.fecha };
     }
   });
 
