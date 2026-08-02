@@ -1111,7 +1111,7 @@ function toast(msg, type='success') {
 }
 
 function clave(d) {
-  return (d.fecha+'|'+d.paciente+'|'+d.codigo+'|'+d.pieza+'|'+d.cara).toLowerCase().trim();
+  return (d.fecha+'|'+normNombre(d.paciente)+'|'+d.codigo.trim()+'|'+String(d.pieza||'').trim()+'|'+String(d.cara||'').trim().toUpperCase());
 }
 
 function formatMoney(n) {
