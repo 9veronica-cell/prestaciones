@@ -711,7 +711,7 @@
     <div class="stat-card" style="border-left:4px solid var(--danger)">
       <div class="stat-label">Vencidos</div>
       <div class="stat-value warn" id="rec-stat-vencidos">—</div>
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Más de 6 meses sin venir</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Más de 1 año sin venir</div>
     </div>
     <div class="stat-card" style="border-left:4px solid var(--warning)">
       <div class="stat-label">Próximos a vencer</div>
@@ -721,7 +721,7 @@
     <div class="stat-card" style="border-left:4px solid var(--success)">
       <div class="stat-label">Al día</div>
       <div class="stat-value" id="rec-stat-ok" style="color:var(--success)">—</div>
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Vinieron hace menos de 6 meses</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Vinieron hace menos de 1 año</div>
     </div>
   </div>
 
@@ -729,7 +729,7 @@
   <div id="rec-section-vencidos" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:1rem">🔴</span>
-      <span style="font-weight:600;color:var(--danger)">Vencidos — hace más de 6 meses</span>
+      <span style="font-weight:600;color:var(--danger)">Vencidos — hace más de 1 año</span>
     </div>
     <div id="rec-lista-vencidos"></div>
   </div>
@@ -1620,12 +1620,12 @@ function renderRecordatorios() {
     const ultima = new Date(p.fecha + 'T00:00:00');
     const diasDesde = Math.floor((hoy - ultima) / 86400000);
     const proximoControl = new Date(ultima);
-    proximoControl.setMonth(proximoControl.getMonth() + 6);
+    proximoControl.setDate(proximoControl.getDate() + 365);
     const diasParaControl = Math.floor((proximoControl - hoy) / 86400000);
 
     const obj = { ...p, diasDesde, diasParaControl, proximoControl };
 
-    if (diasDesde >= 180) vencidos.push(obj);
+    if (diasDesde >= 365) vencidos.push(obj);
     else if (diasParaControl <= ventana) proximos.push(obj);
     else ok.push(obj);
   });
