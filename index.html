@@ -1491,6 +1491,7 @@ function cancelarEdicion() {
 let pacientesMap = {};
 let datosDrapp = []; // { nombre, telefono, email, dni, obrasocial }
 let drappMap = {};   // nombre.toLowerCase() → { obrasocial, telefono, email, dni }
+let drappPhoneByNorm = {}; // normNombre(nombre) → telefono (para matchear variantes de escritura)
 
 async function cargarPacientesDrapp() {
   try {
@@ -1498,8 +1499,10 @@ async function cargarPacientesDrapp() {
     const raw = await res.json();
     datosDrapp = Array.isArray(raw) ? raw : [];
     drappMap = {};
+    drappPhoneByNorm = {};
     datosDrapp.forEach(p => {
       if (p.nombre) drappMap[p.nombre.toLowerCase()] = p;
+      if (p.nombre && p.telefono) drappPhoneByNorm[normNombre(p.nombre)] = p.telefono;
     });
     actualizarDatalist();
     actualizarDatalistCobros();
@@ -1654,6 +1657,18 @@ function renderRecordatorios() {
   document.getElementById('rec-lista-proximos').innerHTML = proximos.map(p => tarjetaRecordatorio(p, 'proximo')).join('');
 }
 
+function normalizarTelefonoWa(tel) {
+  if (!tel) return '';
+  let digits = String(tel).replace(/[^0-9]/g, '');
+  // Números argentinos: WhatsApp necesita el 9 de celular después del 54 (código país)
+  if (digits.startsWith('54') && !digits.startsWith('549')) {
+    digits = '549' + digits.slice(2);
+  }
+  return digits;
+}
+
+const DRAPP_BOOKING_URL = 'https://veronica-ortiz.cartilla.drapp.com.ar/equipos/003fac53/1c0df482/odontologia/consulta-general/2025-12-01';
+
 function tarjetaRecordatorio(p, tipo) {
   const esvencido = tipo === 'vencido';
   const color     = esvencido ? 'var(--danger)' : 'var(--warning)';
@@ -1665,10 +1680,16 @@ function tarjetaRecordatorio(p, tipo) {
     ? `Hace ${Math.floor(p.diasDesde/30)} meses sin venir (desde ${fechaUlti})`
     : `Control en ${p.diasParaControl} días — ${fechaCtrl}`;
 
+  const telefono = drappPhoneByNorm[normNombre(p.paciente)] || '';
+  const telWa = normalizarTelefonoWa(telefono);
+
   const msgWsp = encodeURIComponent(
-    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! 😊 Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. ¿Cuándo te quedaría bien sacar un turno? ¡Te esperamos! 🦷`
+    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! 😊 Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. Podés reservar tu turno acá: ${DRAPP_BOOKING_URL}  ¡Te esperamos! 🦷`
   );
-  const wspUrl = `https://wa.me/?text=${msgWsp}`;
+  const wspUrl = telWa
+    ? `https://wa.me/${telWa}?text=${msgWsp}`
+    : `https://wa.me/?text=${msgWsp}`;
+  const wspTitle = telWa ? '' : 'title="No encontré el teléfono en DrApp — vas a tener que elegir el contacto a mano"';
 
   return `
     <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid ${color}">
@@ -1676,7 +1697,7 @@ function tarjetaRecordatorio(p, tipo) {
         <div style="font-weight:700;font-size:0.95rem;margin-bottom:3px">${p.paciente}</div>
         <div style="font-size:0.82rem;color:${color};font-weight:500">${estadoTexto}</div>
       </div>
-      <a href="${wspUrl}" target="_blank"
+      <a href="${wspUrl}" target="_blank" ${wspTitle}
          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:white;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         WhatsApp
