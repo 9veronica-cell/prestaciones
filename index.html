@@ -1789,7 +1789,7 @@ function tarjetaRecordatorio(p, tipo) {
   const telWa = normalizarTelefonoWa(telefono);
 
   const msgWsp = encodeURIComponent(
-    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! \u{1F60A} Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. Podés reservar tu turno acá: ${DRAPP_BOOKING_URL}  ¡Te esperamos! \u{1F9B7}`
+    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. Podés reservar tu turno acá: ${DRAPP_BOOKING_URL}  ¡Te esperamos!`
   );
   const wspUrl = telWa
     ? `https://wa.me/${telWa}?text=${msgWsp}`
