@@ -555,19 +555,6 @@
           <input id="presup-descripcion" placeholder="Ej: Conductoterapia + corona pieza 14">
         </div>
         <div class="field">
-          <label>Prepaga</label>
-          <input id="presup-prepaga" placeholder="Ej: OMINT, Swiss Medical, Particular..." list="presup-prepaga-list">
-          <datalist id="presup-prepaga-list">
-            <option value="OMINT">
-            <option value="SWISS MEDICAL">
-            <option value="Particular">
-          </datalist>
-        </div>
-        <div class="field">
-          <label>N° Afiliado</label>
-          <input id="presup-afiliado" placeholder="Ej: 123456789">
-        </div>
-        <div class="field">
           <label>Monto total ($)</label>
           <input id="presup-monto" type="number" placeholder="0" min="0" step="1">
         </div>
@@ -585,7 +572,7 @@
       <div class="table-wrapper">
         <table>
           <thead><tr>
-            <th>Fecha</th><th>Paciente</th><th>Tratamiento</th><th>Prepaga</th><th>Total</th><th>—</th>
+            <th>Fecha</th><th>Paciente</th><th>Tratamiento</th><th>Total</th><th>—</th>
           </tr></thead>
           <tbody id="tabla-presupuestos"></tbody>
         </table>
@@ -724,7 +711,7 @@
     <div class="stat-card" style="border-left:4px solid var(--danger)">
       <div class="stat-label">Vencidos</div>
       <div class="stat-value warn" id="rec-stat-vencidos">—</div>
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Más de 1 año sin venir</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Más de 6 meses sin venir</div>
     </div>
     <div class="stat-card" style="border-left:4px solid var(--warning)">
       <div class="stat-label">Próximos a vencer</div>
@@ -734,7 +721,7 @@
     <div class="stat-card" style="border-left:4px solid var(--success)">
       <div class="stat-label">Al día</div>
       <div class="stat-value" id="rec-stat-ok" style="color:var(--success)">—</div>
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Vinieron hace menos de 1 año</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Vinieron hace menos de 6 meses</div>
     </div>
   </div>
 
@@ -742,7 +729,7 @@
   <div id="rec-section-vencidos" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:1rem">🔴</span>
-      <span style="font-weight:600;color:var(--danger)">Vencidos — hace más de 1 año</span>
+      <span style="font-weight:600;color:var(--danger)">Vencidos — hace más de 6 meses</span>
     </div>
     <div id="rec-lista-vencidos"></div>
   </div>
@@ -760,24 +747,6 @@
   <div id="rec-empty" class="empty" style="display:none">
     <div class="empty-icon">🎉</div>
     <div>¡Todos los pacientes están al día!</div>
-  </div>
-
-  <!-- Contactados -->
-  <div id="rec-section-contactados" style="display:none;margin-top:20px">
-    <div id="rec-contactados-toggle" onclick="const l=document.getElementById('rec-lista-contactados'); l.style.display = l.style.display==='none' ? '' : 'none';"
-         style="cursor:pointer;font-weight:600;color:var(--success);font-size:0.9rem;margin-bottom:10px;user-select:none">
-      ✅ Ya contactados
-    </div>
-    <div id="rec-lista-contactados" style="display:none"></div>
-  </div>
-
-  <!-- Excluidos -->
-  <div id="rec-section-excluidos" style="display:none;margin-top:20px">
-    <div id="rec-excluidos-toggle" onclick="const l=document.getElementById('rec-lista-excluidos'); l.style.display = l.style.display==='none' ? '' : 'none';"
-         style="cursor:pointer;font-weight:600;color:var(--text-muted);font-size:0.9rem;margin-bottom:10px;user-select:none">
-      🚫 Sacados de la lista
-    </div>
-    <div id="rec-lista-excluidos" style="display:none"></div>
   </div>
 
 </div>
@@ -808,15 +777,8 @@
 
 <div id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcw3T9KALUAm3cKjflHMeziaIkQb3ppUlHCqZeJIczy2t5iW-aV-p_BSSuMKuwsGD7/exec";
-
-// Respaldo de turnos reales de DrApp (export del 03/08/2026), usado en Recordatorios
-// para no depender solo de las prestaciones cargadas manualmente.
-// Formato: "NOMBRE NORMALIZADO": ["Nombre, Original", "YYYY-MM-DD ultima visita"]
-const TURNOS_HISTORICOS = {"WRIGHT WALTER":["Wright, Walter","2022-11-16"],"CAPURRO SOFIA":["Capurro, Sofia","2022-11-25"],"VACCARO ADRIANA":["Vaccaro, Adriana","2022-12-06"],"PEREYRA ALEJANDRO":["Pereyra, Alejandro","2022-12-06"],"BAMBERGER MICAELA":["Bamberger, Micaela","2022-12-05"],"SANCHEZ MICAELA":["Sanchez, Micaela","2022-12-13"],"BARREDO ULISES":["Barredo, Ulises","2022-12-15"],"JOAO CINTIA":["Joao, Cintia","2022-12-05"],"BALCARCE AGUSTINA":["Balcarce, Agustina","2022-12-19"],"GOMEZ FERNANDA":["Gomez, Fernanda","2022-12-13"],"AGEJAS ROBERTO":["Agejas, Roberto","2026-07-20"],"SILVA GRISELDA":["Silva, Griselda","2023-01-04"],"LERMITO FEDERICO":["Lermito, Federico","2023-01-12"],"CECILIA AMIGA":["Cecilia, Amiga","2023-01-25"],"DI PASQUO LORENA":["Di Pasquo, Lorena","2023-01-17"],"SCIARROTTA VANESA":["Sciarrotta, Vanesa","2023-01-26"],"DEL TORTO BARTOLOME":["Del Torto, Bartolome","2023-12-19"],"BAUDRON SILVIA":["Baudron, Silvia","2023-01-12"],"SEGRE AMBAR":["Segre, Ambar","2023-01-19"],"SOSA PAOLA":["Sosa, Paola","2023-01-18"],"LEGUIZAMON LUCIANA":["Leguizamon, Luciana","2023-01-11"],"DIAZ MONICA":["Diaz, Monica","2023-02-14"],"DEN APSOT":["Den, Apsot","2023-02-23"],"MARINO LUCIA":["Marino, Lucia","2023-02-14"],"ODINO JUAN MANUEL":["Odino, Juan Manuel","2026-01-29"],"LUBOS VERONICA":["Lubos, Veronica","2023-02-09"],"TURNER JUAN PABLO":["Turner, Juan Pablo","2025-04-07"],"APAT NATALIA":["Apat, Natalia","2025-09-11"],"POLLERO SOFIA":["Pollero, Sofia","2023-02-09"],"STRUCCHI LUCIANO":["Strucchi, Luciano","2023-03-28"],"TURNER CRISTIAN":["Turner, Cristian","2023-03-28"],"SOSA FABRICIO":["Sosa, Fabricio","2023-03-30"],"GASPARRI MARIA LAURA":["Gasparri, Maria Laura","2023-05-02"],"VELIZ KARINA":["Veliz, Karina","2023-04-12"],"CORIA LEON":["Coria, Leon","2023-04-21"],"DOMINGUEZ HERNAN":["Dominguez, Hernan","2023-04-05"],"ANGST MAURO":["Angst, Mauro","2023-04-04"],"IDDA JOAQUIN":["Idda, Joaquin","2024-06-06"],"VACCARO CARLOS":["Vaccaro, Carlos","2023-04-21"],"ROMERO JONATHAN":["Romero, Jonathan","2023-04-26"],"FOGLIA CAROLINA":["Foglia, Carolina","2023-04-19"],"CASTELUCCIO ILEANA":["Casteluccio, Ileana","2025-11-20"],"SUTO MARIANA":["Suto, Mariana","2023-04-20"],"MARCENARO FERNANDA":["Marcenaro, Fernanda","2023-04-12"],"TORRES HORACIO MIGUEL":["Torres, Horacio Miguel","2023-04-13"],"OLMOS EMILIA":["Olmos, Emilia","2023-04-25"],"CORNEJO SILVIA":["Cornejo, Silvia","2023-04-12"],"LANTARON MILAGROS":["Lantaron, Milagros","2023-05-02"],"ESTRUGA MARIA JOSE":["Estruga, Maria Jose","2024-10-16"],"FLUGEL MARIA":["Flugel, Maria","2023-04-18"],"SIRI PAULA":["Siri, Paula","2023-05-02"],"GARCIA MARIANA":["Garcia, Mariana","2023-04-26"],"MIQUELARENA MARIANO":["Miquelarena, Mariano","2026-03-30"],"RODRIGUEZ JULIETA":["Rodriguez, Julieta","2026-03-09"],"FRESCO MARTIN":["Fresco, Martin","2023-05-10"],"PEREYRA ANDREA SOLEDAD":["Pereyra, Andrea Soledad","2023-06-01"],"RODRIGUEZ MACARENA":["Rodriguez, Macarena","2023-05-16"],"CARCASIA MARCELO ALBERTO":["Carcasía, Marcelo Alberto","2023-05-30"],"DIRRHEIMER CLEMENTINA":["Dirrheimer, Clementina","2023-05-31"],"IERMITO LETICIA":["Iermito, Leticia","2023-05-17"],"GALLINI RITA":["Gallini, Rita","2025-10-23"],"INSAURRALDE SHARON":["Insaurralde, Sharon","2023-05-18"],"OTTONELLO JULIAN":["Ottonello, Julian","2023-05-24"],"GUTIERREZ DANTE":["Gutierrez, Dante","2023-05-17"],"ELIAS HIARA INES":["Elias, Hiara Ines","2023-05-10"],"W PETER":["W, Peter","2023-05-23"],"MENDOZA POLGARI IGNACIO":["Mendoza Polgari, Ignacio","2023-06-08"],"MALUENDEZ ALEJO":["Maluendez, Alejo","2023-06-28"],"HENDERSON HERNAN":["Henderson, Hernan","2023-06-06"],"MARQUISELLI VERONICA":["Marquiselli, Veronica","2023-06-14"],"VIDAL JULIETA":["Vidal, Julieta","2023-06-08"],"INSAURRALDE MILAGROS":["Insaurralde, Milagros","2024-02-05"],"SAN JOSE EDUARDO":["San José, Eduardo","2023-06-29"],"ALBANO VALENTIN":["Albano, Valentin","2023-07-25"],"SARRATEA LAURA":["Sarratea, Laura","2023-07-11"],"GRAZIANI GONZALO":["Graziani, Gonzalo","2023-07-25"],"MANSILLA CAMILA ALDANA":["Mansilla, Camila Aldana","2023-08-02"],"TAJES EUGENIA":["Tajes, Eugenia","2023-07-14"],"VOLONTE NICOLAS MATIAS":["Volonte, Nicolás Matías","2023-07-20"],"FLEISCHMANN AJAX":["Fleischmann, Ajax","2023-07-28"],"JIMENEZ JUAN TOMAS":["Jimenez, Juan Tomas","2023-07-13"],"GUBITOSI MALENA":["Gubitosi, Malena","2023-07-14"],"GALINANES SANTIAGO":["Galiñanes, Santiago","2023-07-21"],"TAIARIOL IVANO":["Taiariol, Ivano","2023-07-21"],"SCALLAN JULIANA":["Scallan, Juliana","2025-12-18"],"ROULIER MONICA":["Roulier, Mónica","2023-07-21"],"APAT MARIA PIA":["Apat, María Pía","2026-02-12"],"WEILL FRANCISCO":["Weill, Francisco","2023-08-15"],"VANOTTI EDUARDO":["Vanotti, Eduardo","2024-09-09"],"AZZARELLI IGNACIO":["Azzarelli, Ignacio","2024-06-13"],"VALLE LUCAS EZEQUIEL":["Valle, Lucas Ezequiel","2023-08-22"],"CONTRERAS CLYDE":["Contreras, Clyde","2024-07-16"],"BONARDI CARLA":["Bonardi, Carla","2023-08-08"],"CORDOBA LUCAS":["Córdoba, Lucas","2025-10-06"],"ROCCHESSO ROSA":["Rocchesso, Rosa","2023-08-08"],"RODRIGUEZ FEDERICO":["Rodriguez, Federico","2023-08-18"],"GARDEY FEDERICO":["Gardey, Federico","2023-09-20"],"LOPEZ PAULA":["Lopez, Paula","2023-09-28"],"LA BEST LUCY":["La Best, Lucy","2023-09-19"],"GIANNONI MATIAS":["Giannoni, Matias","2025-06-06"],"TARDINI GONZALO":["Tardini, Gonzalo","2023-10-03"],"QUIROGA NATIVIDAD":["Quiroga, Natividad","2023-09-12"],"APAT JUAN PABLO":["Apat, Juan Pablo","2023-09-19"],"FARINA BRUNO":["Fariña, Bruno","2023-09-08"],"BASSO FELIPE":["Basso, Felipe","2023-09-22"],"ANTONIOLLI ANALIA":["Antoniolli, Analía","2023-09-05"],"RAMOA MALENA":["Ramoa, Malena","2023-09-07"],"ACHOYAN DANIELA":["Achoyan, Daniela","2023-10-03"],"POLLERO JULIO":["Pollero, Julio","2023-09-07"],"DAGA MONICA":["Daga, Monica","2025-12-18"],"REDONDO OSCAR ALFREDO":["Redondo, Oscar Alfredo","2023-10-06"],"POLGARI ANA":["Polgari, Ana","2023-10-05"],"ALBANO LUZ":["Albano, Luz","2023-10-06"],"CONVERTI LAURA":["Converti, Laura","2023-11-28"],"ROVIRA PENELOPE":["Rovira, Penelope","2023-10-05"],"ALBANO MARTIN":["Albano, Martin","2023-10-06"],"BARRETO MARIA ESTER":["Barreto, Maria Ester","2023-10-09"],"SANDOVAL DEBORA":["Sandoval, Debora","2023-11-03"],"CARABAJAL JUAN":["Carabajal, Juan","2023-10-12"],"OJEDA LUCAS EMANUEL":["Ojeda, Lucas Emanuel","2023-11-09"],"RAMOS EZEQUIEL":["Ramos, Ezequiel","2023-11-07"],"CUITINO RICARDO":["Cuitiño, Ricardo","2023-11-08"],"ORTIZ LILIANA LAURA":["Ortiz, Liliana Laura","2024-09-20"],"SOSA PEYRET JUAN MANUEL":["Sosa Peyret, Juan Manuel","2023-11-23"],"ARDILES MAURICIO":["Ardiles, Mauricio","2023-11-10"],"MOLLO CLAUDIO MARCELO":["Mollo, Claudio Marcelo","2023-11-08"],"APPLEYARD TOMAS":["Appleyard, Tomas","2023-11-15"],"PERAZZI JESICA":["Perazzi, Jesica","2023-11-08"],"GRINBANK GERMAN":["Grinbank, German","2023-11-10"],"RAMOS RAMIRO":["Ramos, Ramiro","2023-11-16"],"COLLIA AGUSTINA":["Collia, Agustina","2023-11-10"],"LOPEZ FERROFINO EMANUEL":["Lopez Ferrofino, Emanuel","2023-11-15"],"MATIAS GINO":["Matias, Gino","2023-11-30"],"GIANNETTI PEDRO":["Giannetti, Pedro","2026-06-16"],"VIVOT DELFINA":["Vivot, Delfina","2023-12-22"],"PEREZ ELSA ALBA":["Perez, Elsa Alba","2023-12-28"],"BLANCO LORENA":["Blanco, Lorena","2023-12-07"],"BLANCO ESTEFANIA":["Blanco, Estefania","2023-12-06"],"TAJES FERNANDA":["Tajes, Fernanda","2026-07-17"],"PEREZ PAMELA LILIANA ANDREA":["Perez, Pamela Liliana Andrea","2023-12-19"],"AVALOS RENATA":["Avalos, Renata","2023-12-28"],"AGUIRRE ANA":["Aguirre, Ana","2023-12-06"],"GUILLERMO SUSANA Y":["Guillermo, Susana Y","2023-12-05"],"L NICOLAS":["L, Nicolas","2023-12-15"],"REISS LEANDRO":["Reiss, Leandro","2023-12-28"],"MUNOZ NICOLAS ERNESTO":["Muñoz, Nicolás Ernesto","2024-01-30"],"PECILE SANDRA":["Pecile, Sandra","2024-01-04"],"VUELTA MAURO":["Vuelta, Mauro","2024-01-09"],"CORRAL LUANA":["Corral, Luana","2024-01-04"],"FERNANDEZ ROBERTO":["Fernandez, Roberto","2024-01-29"],"MARIAN MARIA LAURA":["Marian, María Laura","2026-04-07"],"RODRIGUEZ ANALIA":["Rodriguez, Analia","2024-01-30"],"RUIZ RODRIGO":["Ruiz, Rodrigo","2024-01-08"],"CENERINI GABRIELA":["Cenerini, Gabriela","2024-01-30"],"RIGANTI NANCY":["Riganti, Nancy","2024-01-23"],"TURNER CATALINA":["Turner, Catalina","2024-12-10"],"SINTES ALEJO":["Sintes, Alejo","2024-02-01"],"DAVILA GRACIELA LUCIA":["Dávila, Graciela Lucia","2024-01-30"],"CORTI DANTE":["Corti, Dante","2024-02-01"],"NAVARRO FEDERICO":["Navarro, Federico","2024-02-02"],"AREVALO SEBASTIAN":["Arevalo, Sebastián","2024-01-26"],"VALENTI JOSE":["Valenti, José","2024-01-25"],"MARTIN OLIVIA":["Martin, Olivia","2024-01-05"],"ARMALEO RODOLFO":["Armaleo, Rodolfo","2024-01-09"],"BUKOWSKI CAROLINA":["Bukowski, Carolina","2024-02-27"],"PAGLIETTA MELINA":["Paglietta, Melina","2024-02-16"],"SHEMI MARINA":["Shemi, Marina","2024-02-16"],"TONANEZ LUIS ALBERTO":["Toñanez, Luis Alberto","2024-02-29"],"DE BRITO INES":["De Brito, Inés","2024-02-16"],"RIVERA LEONARDO":["Rivera, Leonardo","2024-02-29"],"PEREZ JOHANNSON LAUTARO NAHUEL":["Pérez Johannson, Lautaro Nahuel","2024-02-29"],"KVITKO NAHAMA":["Kvitko, Nahama","2024-03-26"],"BUSTO LUCAS NAHUEL":["Busto, Lucas Nahuel","2024-03-26"],"TISSERA PAULAL":["Tissera, Paulal","2024-03-26"],"SOSA LEONEL":["Sosa, Leonel","2024-03-21"],"TOMEI ADRIANA":["Tomei, Adriana","2025-04-15"],"GRIGNANI LUCAS":["Grignani, Lucas","2024-03-25"],"SAN JOSE AGUSTINA JULIETA":["San José, Agustína Julieta","2024-03-28"],"EPELBOIM MARISOL":["Epelboim, Marisol","2024-03-22"],"PAVON PIVETTA FEDERICO":["Pavon Pivetta, Federico","2024-03-05"],"GRIGNANI FELIPE":["Grignani, Felipe","2024-03-25"],"DIAZ JULIETA":["Diaz, Julieta","2024-03-21"],"CALVO GASTON":["Calvo, Gaston","2024-05-02"],"FREILE ANDREA":["Freile, Andrea","2025-07-15"],"CIUFFARSI GINO":["Ciuffarsi, Gino","2024-04-12"],"SUAREZ MONICA BEATRIZ":["Suárez, Mónica Beatriz","2024-04-19"],"CERIANI MANUEL":["Ceriani, Manuel","2024-04-18"],"ROBLES KARI":["Robles, Kari","2024-04-25"],"AVILA VERONICA TAMARA":["Avila, Veronica Tamara","2024-04-16"],"ACUNA MORENA":["Acuña, Morena","2024-04-09"],"MARINO JULIA BEATRIZ":["Marino, Julia Beatriz","2024-04-25"],"ALEGRE DAMIAN ALEJANDRO":["Alegre, Damian Alejandro","2024-04-26"],"CALVO PRISCILA":["Calvo, Priscila","2024-05-02"],"RODAS JULIETA":["Rodas, Julieta","2024-04-26"],"REYES LONGO MARIA BELEN":["Reyes Longo, Maria Belen","2024-05-14"],"SAGRADINI PIA":["Sagradini, Pia","2024-05-07"],"ORTIZ CARLOS":["Ortiz, Carlos","2024-05-07"],"DIMPERIO AGUSTINA":["Dimperio, Agustina","2024-05-07"],"COLOMBO NORA":["Colombo, Nora","2024-06-13"],"ALVAREZ PAGELLA NAHUEL":["Alvarez Pagella, Nahuel","2024-06-19"],"ROJAS CAMILA":["Rojas, Camila","2024-06-26"],"MOREYRA EDUARDO":["Moreyra, Eduardo","2024-06-26"],"FERNANDEZ MUNOZ JORGE":["Fernandez Muñoz, Jorge","2024-06-04"],"SCHWINDT AGUSTINA":["Schwindt, Agustina","2024-08-15"],"BANCHERO JORGE":["Banchero, Jorge","2024-06-25"],"GUERRI ESTEBAN":["Guerri, Esteban","2024-06-19"],"RUISI SILVINA":["Ruisi, Silvina","2024-06-12"],"DE BRITO JOAQUIN":["De Brito, Joaquín","2024-06-28"],"RUISI CINTIA":["Ruisi, Cintia","2024-06-25"],"DE TULLIO MARIA BELEN":["De Tullio, Maria Belén","2024-06-25"],"URANGA JACQUELINE":["Uranga, Jacqueline","2026-01-29"],"MEROLLA FERNANDO":["Merolla, Fernando","2024-06-04"],"RIEMERSMA SEBASTIAN":["Riemersma, Sebastian","2024-06-11"],"URIEN DELFINA":["Urien, Delfina","2024-06-25"],"ACHILLI GUADALUPE":["Achilli, Guadalupe","2024-06-07"],"BERTOLINO MARTIN":["Bertolino, Martin","2024-06-28"],"GIANNETTI LOLA":["Giannetti, Lola","2025-12-16"],"PALACIOS JUANA MORENA":["Palacios, Juana Morena","2024-06-26"],"ORIENTAL VIRGINIA":["Oriental, Virginia","2024-06-26"],"GOPAR ESTEVA REZZIO NDAAYA":["Gopar Esteva Rezzio, Ndaaya","2024-06-26"],"FALCO AGUSTINA":["Falco, Agustina","2024-07-30"],"LOPEZ JULIA":["Lopez, Julia","2025-10-30"],"PLANDE ALICIA":["Plande, Alicia","2024-07-05"],"LICCIARDELLO NICOLAS":["Licciardello, Nicolas","2024-07-12"],"VILLARRUBIA MATIAS":["Villarrubia, Matias","2024-07-24"],"GOPP PAREYRA ALEJANDRA":["Gopp Pareyra, Alejandra","2024-07-16"],"CESCHIN MELANIE":["Ceschin, Melanie","2024-08-02"],"FLORES COLOMBO MATEO":["Flores Colombo, Mateo","2024-07-10"],"ALEJO MONICA VALERIA":["Alejo, Mónica Valeria","2024-07-18"],"PENA AXEL MANUEL":["Peña, Axel Manuel","2024-07-04"],"GARCIA MARTIN":["Garcia, Martin","2024-07-05"],"VIGUERA MONICA MARCELA":["Viguera, Mónica Marcela","2024-07-12"],"DERMATOLOGO HB":["Dermatologo, Hb","2024-07-16"],"ALEGRE CAMILA":["Alegre, Camila","2024-07-23"],"ANDRADE GUILLERMO":["Andrade, Guillermo","2024-07-11"],"SAIJO VALENTIN":["Saijo, Valentin","2024-07-23"],"PAZ DANIELA VICTORIA":["Paz, Daniela Victoria","2024-07-18"],"INSAURRALDE SILVIA":["Insaurralde, Silvia","2024-08-23"],"ORTIGOZA FLORENCIA":["Ortigoza, Florencia","2024-08-09"],"RODRIGUEZ HERNAN":["Rodriguez, Hernan","2024-08-23"],"SCHOLEM PEREYRA ADRIEL BALTAZAR":["Scholem Pereyra, Adriel Baltazar","2024-08-13"],"BECKMANN DOLORES":["Beckmann, Dolores","2024-08-09"],"FRESCO VALENTINA":["Fresco, Valentina","2024-08-16"],"CHIRINO ANDREA":["Chirino, Andrea","2024-08-23"],"PALACIOS JUAN JOSE":["Palacios, Juan Jose","2024-08-08"],"MIKULIC MARIA EMILIA":["Mikulic, Maria Emilia","2024-08-20"],"ASCAZURI MARTINA":["Ascazuri, Martina","2024-08-13"],"ESERSKY ALEXIA":["Esersky, Alexia","2024-08-26"],"VELASQUEZ DIANA":["Velasquez, Diana","2024-08-06"],"OLMOS MITRE OLIVERIO":["Olmos Mitre, Oliverio","2024-08-20"],"GARCIA DE LEO FELIPE":["García De Leo, Felipe","2024-08-08"],"RIEMERSMA PAULA":["Riemersma, Paula","2025-08-25"],"CIUFFO THIAGO":["Ciuffo, Thiago","2024-08-27"],"TRINCA MATHEUS FELIPE":["Trinca, Matheus Felipe","2024-08-27"],"COVAS GONZALO":["Covas, Gonzalo","2024-08-22"],"NAVARRO SOLEDAD":["Navarro, Soledad","2024-12-20"],"RODRIGUEZ QUEVEDO JUAN CARLOS":["Rodriguez Quevedo, Juan Carlos","2024-08-13"],"IRISARRI NOELIA":["Irisarri, Noelia","2024-08-15"],"ALEGRE MARCOS GABRIEL":["Alegre, Marcos Gabriel","2024-08-26"],"VERSCHOOR ELIANA":["Verschoor, Eliana","2024-09-12"],"BOBA IRENE":["Boba, Irene","2024-09-10"],"PEREYRA DOMINIQUE":["Pereyra, Dominique","2024-09-23"],"FIORINI FERNANDA":["Fiorini, Fernanda","2024-09-27"],"OLIVA EZEQUIEL":["Oliva, Ezequiel","2024-09-17"],"ESPINOLA JUAN":["Espinola, Juan","2024-09-13"],"CHAMAREZ SILVIA":["Chamarez, Silvia","2024-10-01"],"FALCATO CONSTANZA":["Falcato, Constanza","2024-09-17"],"TISSERA PAULA":["Tissera, Paula","2024-09-06"],"AVALOS FRANCISCO":["Avalos, Francisco","2024-09-23"],"LEON BALESTRA ESTEFANIA JUDITH":["Leon Balestra, Estefania Judith","2024-09-27"],"DA COSTA MARIAN PEDRO":["Da Costa Marian, Pedro","2024-09-23"],"MERINO AMELIA":["Merino, Amelia","2024-10-02"],"CIUFFO FAUR MATEO":["Ciuffo Faur, Mateo","2024-09-12"],"GALLINI SOFIA ZOE":["Gallini, Sofía Zoe","2024-09-23"],"PIMENTEL GONZALO":["Pimentel, Gonzalo","2024-09-23"],"FERNANDEZ NELIDA":["Fernandez, Nelida","2024-09-30"],"ZORRAQUIN MARIA":["Zorraquin, María","2024-09-09"],"BELLAVIGNA EUGENIA":["Bellavigna, Eugenia","2024-09-10"],"PODHAJSKI NADIA":["Podhajski, Nadia","2024-09-19"],"MILLA NICOLAS MAXIMO":["Milla, Nicolas Maximo","2024-09-24"],"MAZZIERI FEDERICO":["Mazzieri, Federico","2024-09-06"],"GALLINI LUCAS":["Gallini, Lucas","2024-09-20"],"BETTATIS NICOLE":["Bettatis, Nicole","2024-09-27"],"COLANGELO FLORENCIA":["Colangelo, Florencia","2024-10-17"],"FISQUETTI SUSANA":["Fisquetti, Susana","2024-10-29"],"DI NELLA NADIA":["Di Nella, Nadia","2024-10-29"],"SARRO FLORENCIA":["Sarro, Florencia","2025-04-25"],"PADUANO IGNACIO":["Paduano, Ignacio","2024-10-24"],"RODRIGUEZ CANELA":["Rodriguez, Canela","2024-10-25"],"BERTOLINO TOMAS":["Bertolino, Tomas","2024-10-23"],"CORDOBA LUCAS SEBASTIAN":["Cordoba, Lucas Sebastian","2024-10-29"],"DIAZ CAMILA":["Diaz, Camila","2024-10-18"],"CONDE MARIA":["Conde, Maria","2024-10-16"],"GALINANES SANCHON SANTIAGO":["Galiñanes Sanchon, Santiago","2024-10-15"],"ROMERO SOLEDAD":["Romero, Soledad","2024-10-29"],"BURANITS GUSTAVO":["Buranits, Gustavo","2024-11-15"],"VIANA SEBASTIAN":["Viana, Sebastián","2024-11-22"],"DAMA BIANCHI CAROLINA":["Damá Bianchi, Carolina","2024-11-07"],"DOTRAS BELEN":["Dotras, Belen","2026-06-16"],"MANSO LAUTARO":["Manso, Lautaro","2024-11-08"],"BESTEIRO RODRIGO":["Besteiro, Rodrigo","2024-11-12"],"KARINA PRUDENTE":["Karina, Prudente","2024-12-03"],"LLOBET DELFINA":["Llobet, Delfina","2024-11-08"],"VIVAZ AGUSTINA":["Vivaz, Agustina","2024-11-05"],"TRAVAGLINI JEREMIAS":["Travaglini, Jeremias","2024-11-21"],"CANESTRARI EMA":["Canestrari, Ema","2026-01-22"],"MANSO GONZALO":["Manso, Gonzalo","2024-11-08"],"TRINCA MATHEUS":["Trinca, Matheus","2024-11-08"],"CONDE MARIA FERNANDA":["Conde, Maria Fernanda","2024-11-12"],"RIVERO NATALIA":["Rivero, Natalia","2024-11-19"],"RIVERO TIARA":["Rivero, Tiara","2024-12-03"],"GONZALEZ LUZ":["Gonzalez, Luz","2024-11-05"],"REZZIO CONSTANZA":["Rezzio, Constanza","2024-11-25"],"ANGLIN JAZMIN":["Anglin, Jazmin","2025-01-03"],"VOLKER ANDREA":["Völker, Andrea","2024-12-05"],"POPOV WALTER":["Popov, Walter","2024-12-06"],"GUANA MARIA LAURA":["Guana, Maria Laura","2024-12-10"],"SANCHEZ LOPEZ GONZALO":["Sánchez López, Gonzalo","2024-12-20"],"MAZZETTI GONZALO":["Mazzetti, Gonzalo","2024-12-05"],"TIMPANO MELINA":["Timpano, Melina","2024-12-20"],"D'ONOFRIO MARIANO":["D'onofrio, Mariano","2024-12-16"],"RAMOS MALENA":["Ramos, Malena","2024-12-20"],"SUSACASA SOFIA":["Susacasa, Sofia","2025-05-08"],"DEL VILLAR FACUNDO":["Del Villar, Facundo","2024-12-20"],"ROSELLO CARLA":["Rosello, Carla","2024-12-19"],"MUSALUPPI LORENA":["Musaluppi, Lorena","2025-10-06"],"DIAZ JORGE":["Diaz, Jorge","2024-12-05"],"QUIROGA MARTIN":["Quiroga, Martin","2024-12-06"],"FRESCO EMA":["Fresco, Ema","2024-12-13"],"MARIAN VICTORIA":["Marian, Victoria","2024-12-10"],"MENDIONDO SABRINA":["Mendiondo, Sabrina","2024-12-19"],"ADRIAN LAZARTE":["Adrian, Lazarte","2025-01-21"],"SALEGEL SANSEAU SABRINA":["Salegel Sanséau, Sabrina","2025-01-20"],"DJIVELEKIAN MARIANA":["Djivelekian, Mariana","2025-01-27"],"D'ACUNTO JUAN IGNACIO":["D'acunto, Juan Ignacio","2025-01-23"],"MANSO LUCAS":["Manso, Lucas","2025-01-14"],"VIGUERA MONICA":["Viguera, Monica","2025-05-19"],"SANTUCHO DANTE":["Santucho, Dante","2025-01-06"],"FERNANDEZ MUNOZ JORGE BERNABE":["Fernández Muñoz, Jorge Bernabe","2025-01-07"],"MARTINEZ MARIA EUGENIA":["Martinez, María Eugenia","2025-01-09"],"MINOTTI MARCELA":["Minotti, Marcela","2025-01-21"],"DE BRITO LUIS":["De Brito, Luis","2025-01-07"],"BUKOWSKI FEDERICO":["Bukowski, Federico","2025-01-10"],"ANGLIN ANDREW":["Anglin, Andrew","2026-06-23"],"CORTI DAVIDE":["Corti, Davide","2026-02-09"],"D IMPERIO MARTINA":["D Imperio, Martina","2025-02-03"],"COSTA ANA":["Costa, Ana","2025-01-07"],"BARBICH SEBASTIAN":["Barbich, Sebastian","2026-02-13"],"CENTURION TOMAS":["Centurión, Tomás","2025-01-09"],"CENTURION IGNACIO EZEQUIEL":["Centurión, Ignacio Ezequiel","2025-01-09"],"DT BARTO":["Dt, Barto","2025-01-13"],"MANSILLA PAULA":["Mansilla, Paula","2025-02-24"],"PALACIOS PALOMA":["Palacios, Paloma","2025-02-28"],"VALLEJO FACUNDO":["Vallejo, Facundo","2025-02-24"],"MARTINEZ ANGEL ROBERTO":["Martinez, Ángel Roberto","2025-02-04"],"OTTONELLO JULI":["Ottonello, Juli","2025-02-11"],"WOSCOFF SILVINA":["Woscoff, Silvina","2025-02-21"],"MARTINEZ LUCIANA":["Martinez, Luciana","2025-02-10"],"FALCON ALEJANDRA":["Falcon, Alejandra","2025-02-25"],"CHAVES VIVIANA":["Chaves, Viviana","2025-03-07"],"FERREIRA DAIANA":["Ferreira, Daiana","2025-03-25"],"GONZALEZ FURRER JUAN CRUZ":["Gonzalez Furrer, Juan Cruz","2025-03-20"],"MARTINEZ ROCIO":["Martinez, Rocio","2025-03-11"],"RODRIGUEZ FABIANA":["Rodriguez, Fabiana","2025-03-28"],"GONZALEZ SILVIANA ANDREA":["Gonzalez, Silviana Andrea","2025-03-18"],"D’ONOFRIO MARIANO ENRIQUE":["D’onofrio, Mariano Enrique","2026-04-16"],"QUIROGA ROCIO ALDANA":["Quiroga, Rocio Aldana","2025-03-28"],"PANTANETTI GONZALO":["Pantanetti, Gonzalo","2025-03-07"],"TARANTO MATIAS":["Taranto, Matias","2026-04-21"],"SFERCO VALENTINA":["Sferco, Valentina","2025-03-31"],"COSTA FRANCISCA":["Costa, Francisca","2025-03-20"],"SERPERO FRANCO":["Serpero, Franco","2026-05-21"],"DIAZ BRACELI JULIETA":["Diaz Braceli, Julieta","2025-04-01"],"LONGARTE ADRIAN":["Longarte, Adrian","2025-03-17"],"DIANA PLANDE":["Diana, Plande","2025-03-20"],"SPINELLI CONRADO":["Spinelli, Conrado","2025-03-20"],"TERMINELLO BAUTISTA":["Terminello, Bautista","2025-03-20"],"ROZAS SEBASTIAN":["Rozas, Sebastian","2026-02-02"],"ZANOTTI FRANCISCO HUGO":["Zanotti Francisco, Hugo","2025-03-25"],"GRIGNANI MARCELO":["Grignani, Marcelo","2025-04-21"],"SENOSETI FLORENCIA":["Senoseti, Florencia","2025-04-08"],"LAORGA ARIADNA":["Laorga, Ariadna","2025-04-24"],"VILLANUEVA VICTORIA":["Villanueva, Victoria","2025-04-22"],"LUIS SANTIAGO":["Luis, Santiago","2025-04-15"],"MINETTI ZOE":["Minetti, Zoe","2025-04-21"],"CAYRUS VISCARRA IGNACIO DANTE":["Cayrus Viscarra, Ignacio Dante","2025-04-08"],"ALVAREZ LAURA":["Alvarez, Laura","2025-04-22"],"PIMENTEL SIRI BRUNO":["Pimentel Siri, Bruno","2026-03-30"],"GREGORINI FERMIN":["Gregorini, Fermin","2025-04-22"],"DALINGER LAURA":["Dalinger, Laura","2025-04-24"],"DESHAYES ANDREA LAURA":["Deshayes, Andrea laura","2025-04-07"],"ALBERTONI MICAELA":["Albertoni, Micaela","2025-04-15"],"H FRANK":["H, Frank","2025-04-29"],"AVELLINO ANDREA":["Avellino, Andrea","2025-04-29"],"AISA ANDREA":["Aisa, Andrea","2026-04-06"],"SEITA VALENTIN":["Seita, Valentin","2025-05-28"],"GRICHENER MENDEZ LUCIO":["Grichener Mendez, Lucio","2025-05-29"],"PERALTA NATALIA":["Peralta, Natalia","2025-05-08"],"PEREIRA NUNEZ WASHINGTON":["Pereira Nuñez, Washington","2025-05-13"],"CARMONA ROCIO":["Carmona, Rocio","2025-05-05"],"SUAREZ RAMIRO":["Suárez, Ramiro","2025-06-03"],"LOPEZ STEPHANIE":["Lopez, Stephanie","2025-05-22"],"VELASQUEZ MARIA":["Velásquez, Maria","2025-06-03"],"LIUZZI DEBORA NATALIA":["Liuzzi, Debora Natalia","2025-06-03"],"AGUERRE JUAN":["Aguerre, Juan","2025-05-22"],"BEN DAVID CYNTHIA":["Ben David, Cynthia","2025-05-05"],"RODRIGUEZ MICAELA SOFIA":["Rodriguez, Micaela Sofia","2025-05-06"],"SIMARO GUIDO ALEJANDRO":["Simaro, Guido Alejandro","2025-05-06"],"AHUMADA JAVIER":["Ahumada, Javier","2025-05-15"],"AHUMADA JOAQUIN LAUTARO":["Ahumada, Joaquin Lautaro","2025-05-06"],"HASS BONINO AYELEN":["Hass Bonino, Ayelen","2025-05-06"],"RODRIGUEZ MARIA EUGENIA":["Rodríguez , María Eugenia ","2026-02-09"],"MARTINEZ KAREN":["Martinez, Karen","2025-05-26"],"SILVA YEITSY":["Silva, Yeitsy","2025-05-22"],"LAIS CASANDRA":["Lais, Casandra ","2025-12-22"],"RAFFO FELIPE":["Raffo, Felipe","2025-07-14"],"QUAST CAMILA":["Quast, Camila","2025-07-07"],"VIDAL SOFIA FLORENCIA":["Vidal, Sofia Florencia","2025-07-24"],"POPOV LUDMILA":["Popov, Ludmila","2025-07-11"],"RIEMERSMA MALENA":["Riemersma, Malena","2025-07-29"],"GABUTTI ROMINA":["Gabutti, Romina","2025-07-07"],"OTTONELLO EZEQUIEL":["Ottonello, Ezequiel","2025-07-31"],"PIZZICHILLO FLORENCIA":["Pizzichillo, Florencia","2025-07-04"],"CETRARO ESTEFANIA":["Cetraro, Estefanía","2026-07-30"],"FERNANDEZ VIRGINIA":["Fernandez, Virginia","2025-08-26"],"ETCHEVERRY LAUTARO":["Etcheverry, Lautaro","2025-07-29"],"LAMAR LILIANA":["Lamar, Liliana","2026-04-24"],"VISANI VERONICA":["Visani, Verónica","2025-07-04"],"CASTANO NAVARRO LOLA":["Castaño Navarro, Lola","2025-07-04"],"OKECKI DOLORES":["Okecki, Dolores","2025-07-08"],"AHUMADA EMMA":["Ahumada, Emma","2025-07-28"],"CASERTA MARTINA":["Caserta, Martina","2025-07-11"],"NATALE MARTINA":["Natale, Martina","2025-07-11"],"SANTONI ROMINA":["Santoni, Romina","2025-07-24"],"DIEZ MARIA CECILIA":["Diez, María Cecilia","2025-07-14"],"SALEGEL SANSEAU TATIANA":["Salegel Sanseau, Tatiana","2025-07-29"],"MALDONADO CAIMILE":["Maldonado, Caimile","2025-07-31"],"GENIO PEPE":["Genio, Pepe","2025-07-22"],"JUAREZ FLORENCIA":["Juarez, Florencia","2025-07-04"],"USANO MARICEL":["Usano, Maricel","2026-07-16"],"RODRIGUEZ BARBY":["Rodriguez, Barby","2025-07-28"],"ESERSKY MARTINA":["Esersky, Martina","2025-08-12"],"ABALSAMO DIEGO":["Abalsamo, Diego","2026-08-03"],"SANCHEZ MARIA FLORENCIA":["Sanchez, Maria Florencia","2025-08-06"],"LOLLINI VERONICA":["Lollini, Verónica","2025-08-14"],"FERNANDEZ LUCIANA":["Fernandez, Luciana","2025-08-26"],"SUAREZ ERNESTO":["Suarez, Ernesto","2025-08-29"],"DUPERRE DENISE":["Duperre, Denise","2026-01-13"],"BEL DELFINA":["Bel, Delfina","2025-08-28"],"DRENNEN MARIANA":["Drennen, Mariana","2025-08-11"],"ZUNINO TOMAS":["Zunino, Tomas","2025-08-12"],"LONGO NUX INES":["Longo Nux, Ines","2025-08-12"],"DE URIBURU JAZMIN":["De Uriburu, Jazmin","2025-08-21"],"FERNANDEZ LIONEL":["Fernández, Lionel","2025-08-14"],"SIGA FLORENCIA":["Siga, Florencia","2025-08-14"],"RUBIO GABRIEL":["Rubio, Gabriel","2025-08-21"],"AGUILAR MELISA":["Aguilar, Melisa","2025-08-25"],"RIVAS SEBASTIAN":["Rivas, Sebastián","2025-08-28"],"SZAJOWICZ SOFIA":["Szajowicz, Sofia","2025-08-22"],"MIRANDA TIARA DANIELA":["Miranda, Tiara Daniela","2025-08-26"],"COBENAS ESTEBAN":["Cobeñas, Esteban","2025-09-01"],"BLENGINO DANIEL":["Blengino, Daniel","2025-08-05"],"FREDES MATIAS":["Fredes, Matias","2025-08-25"],"TRIPODI FIORELLA":["Tripodi, Fiorella","2025-09-01"],"MASTRO MARIANA":["Mastro, Mariana","2026-03-16"],"SANCHEZ VERONICA":["Sanchez, Veronica","2025-09-23"],"BRAMBILLA LUCAS":["Brambilla, Lucas","2025-09-23"],"COVAS CELESTE":["Covas, Celeste","2026-01-08"],"ARRIGHI DIEGO":["Arrighi, Diego","2025-10-03"],"FERNANDEZ WILMA":["Fernandez, Wilma","2025-09-04"],"CANESTRARI PAZ":["Canestrari, Paz","2026-01-22"],"OSORES LAURA":["Osores, Laura","2025-09-30"],"IMIZCOZ ANA CLARA":["Imizcoz, Ana Clara","2025-09-23"],"QUEVEDO YEITKER":["Quevedo, Yeitker","2025-09-26"],"GIANICO PAULA":["Gianico, Paula","2025-09-04"],"RATCLIFFE AUGUSTO":["Ratcliffe, Augusto","2025-09-19"],"AZUM CELESTE":["Azum, Celeste","2025-09-17"],"PONCE ROMAN":["Ponce, Roman","2025-09-25"],"ORTIZ NORBERTO":["Ortiz, Norberto","2025-09-24"],"TRIPODI LIONEL":["Tripodi , Lionel ","2026-05-15"],"HERLEIN RENATA":["Herlein, Renata","2025-09-10"],"MASTROLORENZO ANTONELLA":["Mastrolorenzo, Antonella","2025-09-23"],"GOPP PEREIRO MARIA ALEJANDRA":["Gopp Pereiro, María Alejandra","2025-09-26"],"KOLODKO DELFINA":["Kolodko, Delfina","2025-09-26"],"OBENAUS LEOPOLDO":["Obenaus, Leopoldo","2025-09-23"],"PONCE FELIPA":["Ponce, Felipa","2025-09-25"],"TEDESCO MARTA":["Tedesco, Marta","2025-09-04"],"REALE NICOLAS":["Reale, Nicolas","2025-09-17"],"OTRANTO GRACIELA":["Otranto, Graciela","2025-09-10"],"FERNANDEZ VENTURINI DARIO":["Fernández Venturini, Darío","2025-09-30"],"REDONDO FLORENCIA":["Redondo, Florencia","2025-09-26"],"MENDEZ JUAN MANUEL":["Mendez, Juan Manuel","2025-09-11"],"SAFAR PAMELA":["Safar, Pamela","2025-10-07"],"IDDA AGUSTIN":["Idda, Agustin","2025-10-30"],"MANSILLA CAMI":["Mansilla, Cami","2025-10-13"],"ROZADA CECILIA":["Rozada, Cecilia","2025-10-30"],"ANDRADE AZUL":["Andrade, Azul","2025-11-13"],"SIDWELL CAROLINA":["Sidwell, Carolina","2025-10-09"],"JUAREZ NORA":["Juárez, Nora","2025-10-07"],"R L":["R, L","2025-10-28"],"PAREDES SABRINA FERNANDA":["Paredes, Sabrina Fernanda","2025-10-16"],"DEPRATTIS MELINA":["Deprattis, Melina","2025-10-21"],"TORRES CECII":["Torres, Cecii","2025-10-28"],"REYES BELEN":["Reyes, Belen","2025-10-21"],"OCANTO LEON BIANCA SOPHIA":["Ocanto Leon, Bianca Sophia","2025-10-23"],"ALEXANIAN NATALIA":["Alexanian, Natalia","2025-10-14"],"CRESPIN CHRISTIAN":["Crespin, Christian","2025-10-13"],"MARONE NATALIA":["Marone, Natalia","2025-10-16"],"FARINA DELFINA":["Fariña, Delfina","2025-10-21"],"COLLI AGUSTINA":["Colli, Agustina","2025-10-21"],"BOURGUIGNON VERONICA":["Bourguignon, Verónica","2025-10-28"],"ROMERO MARIA":["Romero, maria ","2026-07-30"],"LIUZZI CORREA GIANNI BENICIO":["Liuzzi Correa, Gianni Benicio","2025-10-23"],"BLENGINO SOL":["Blengino, Sol","2025-10-07"],"ROSSI RICARDO":["Rossi, Ricardo","2025-10-13"],"MIRANDA CAMILA":["Miranda, Camila","2025-10-14"],"N AGUSTINA":["N, Agustina","2025-10-28"],"FERNANDEZ SOL":["Fernandez, Sol","2025-10-09"],"BIAZISO MATEO":["Biaziso, Mateo","2025-10-20"],"BRUGNERA AGOSTINA":["Brugnera, Agostina ","2026-06-16"],"LECOMTE MARIANA":["Lecomte, Mariana","2025-11-25"],"DUARTE LOURDES":["Duarte, Lourdes","2025-11-25"],"SOSA ALAN":["Sosa, Alan","2025-11-10"],"FERRANTE CATERINA":["Ferrante, Caterina","2025-11-17"],"CODON SOFIA":["Codon, Sofia","2025-11-04"],"GALINANES CATALINA":["Galiñanes, Catalina","2025-11-27"],"INGRAND ALI":["Ingrand, Ali","2025-12-03"],"CISNEROS NOELIA":["Cisneros, Noelia","2025-11-11"],"GUTIERREZ SANTI":["Gutierrez, Santi","2025-11-18"],"CALVO NELSON GASTON":["Calvo, Nelson Gaston","2025-11-10"],"LAZARTE FLORENCIA":["Lazarte, Florencia","2026-01-26"],"RUFFOLO ROSARIO":["Ruffolo, Rosario","2025-11-18"],"GOMEZ ROLDAN ANDREA CAROLINA":["Gomez Roldan, Andrea Carolina","2025-11-17"],"SFERCO CHRISTIAN":["Sferco, Christián","2025-12-11"],"LOMBARDIA RAMIRO":["Lombardia, Ramiro","2025-11-07"],"GUDINO MARTINA":["Gudiño, Martina","2025-11-17"],"NAVEIRA MATEO":["Naveira, Mateo","2025-11-25"],"CERRUTI GABRIEL":["Cerruti, Gabriel","2025-11-07"],"POLLERO DAGA ISABELLA":["Pollero Daga, Isabella","2025-11-27"],"SANJIAO LIDIA":["Sanjiao, Lidia","2025-11-04"],"ROSAS BELEN":["Rosas, Belen","2025-12-01"],"YANEZ LUCILA":["Yañez, Lucila","2025-11-04"],"GARCIA DIAZ MILAGROS":["Garcia Diaz, Milagros","2025-11-04"],"DE JONGE MATEO":["De Jonge, Mateo","2025-11-04"],"REDONDO MICAELA":["Redondo, Micaela","2025-11-10"],"TOULOUMDJIAN CAROLINA":["Touloumdjian, Carolina","2025-11-27"],"MALDONADO CARLA":["Maldonado, Carla","2025-12-23"],"LIUZZI SUAREZ DAMIAN ESTEBAN":["Liuzzi Suarez, Damian Esteban","2025-12-22"],"ROBLES KARINA":["Robles, Karina","2025-12-23"],"OCANA MARTIN":["Ocana, Martin","2025-12-23"],"MARAGLIANO BARBARA":["Maragliano, Barbara","2025-12-15"],"AGEJAS LISANDRO":["Agejas, Lisandro","2025-12-22"],"LARROUDE SANDRA ROXANA":["Larroude, Sandra Roxana","2025-12-16"],"OLIVER SEBASTIAN":["Oliver, Sebastián","2025-12-09"],"GIANFELICE ANALIA MARIANA":["Gianfelice, Analía Mariana","2025-12-09"],"GUERRI JULIETA":["Güerri, Julieta","2025-12-22"],"SIRI EUGENIA":["Siri, Eugenia","2025-12-12"],"SAGRISTANI FABIAN":["Sagristani, Fabian","2025-12-15"],"COSTA LISANDRO":["Costa, Lisandro","2025-12-18"],"SCALLAN CATALINA":["Scallan, Catalina","2025-12-22"],"PIZARRO MIRIAM SILVIA":["Pizarro, Miriam Silvia","2025-12-11"],"HASSON ESTEBAN":["Hasson, Esteban","2025-12-23"],"POGGI CLARA":["Poggi, Clara","2025-12-18"],"FIGUEROA CAROLINA":["Figueroa, Carolina","2025-12-05"],"SANTUCHO HECTOR ALBERTO":["Santucho, Hector Alberto","2025-12-09"],"NUNEZ YAZMIN":["Nuñez, Yazmin","2025-12-12"],"FRASCADOR CARLA":["Frascador, Carla","2025-12-15"],"CAVALIERI MARIA MERCEDES":["Cavalieri, María Mercedes","2025-12-09"],"QUEZADA WALTER":["Quezada, Walter","2025-12-19"],"PORRAZZO JUAN CRUZ":["porrazzo, juan cruz","2025-12-19"],"ORDONEZ SEBASTIAN":["Ordoñez, Sebastian","2026-05-27"],"WINTERHALTER TAMARA":["Winterhalter, Tamara","2025-12-12"],"RODRIGUEZ VENTURA RAMIRO":["Rodríguez Ventura, Ramiro","2025-12-16"],"PAREDES SABRINA":["Paredes, Sabrina","2026-01-26"],"MARTIN FABRICIO":["Martin, Fabricio","2026-01-19"],"CASERTA GUSTAVO":["Caserta, Gustavo","2026-01-05"],"AGAZZI CAROLINA":["Agazzi, Carolina","2026-01-12"],"PALMA FLORENCIA":["Palma, Florencia","2026-01-30"],"COCERES MARIA INES":["Cóceres, María Inés","2026-01-22"],"SANCHON ROMINA":["Sanchon, Romina","2026-02-03"],"BRIUOLO JUAN JOSE":["Briuolo, Juan José","2026-01-16"],"AGUIRRE JOEL":["Aguirre, Joel","2026-01-08"],"FONTICIELLA VIRGINIA":["Fonticiella, Virginia","2026-03-13"],"NAVARRO LUCIA":["Navarro, Lucía","2026-01-09"],"DIAZ SANTIAGO":["Diaz, Santiago","2026-01-30"],"CARMONA ADRIAN":["Carmona, Adrian","2026-03-30"],"NUNEZ MARTIN":["Nuñez, Martin","2026-05-07"],"ALONSO EZEQUIEL":["Alonso, Ezequiel ","2026-01-19"],"GONZALEZ MICAELA AGUSTINA":["Gonzalez, Micaela Agustina","2026-02-03"],"PAEZ CIRILO JUAN CRUZ":["Paez Cirilo, Juan Cruz","2026-01-20"],"DUNOGENT GREGORIO":["Dunogent, Gregorio","2026-01-08"],"MAZA VIRGINIA":["Maza, Virginia","2026-01-09"],"GROSSER ROJKIN ALYSA":["Grosser Rojkin, Alysa","2026-01-20"],"ALARCON IAN":["Alarcon, Ian ","2026-01-19"],"RENAUD SOFIA":["Renaud, Sofia","2026-01-19"],"TRUJILLO CRISTIAN":["Trujillo, Cristian","2026-01-12"],"SCHIAPPARELLI NADIA":["Schiapparelli, Nadia","2026-01-23"],"TESORIERO GIULIANA":["Tesoriero, Giuliana","2026-01-15"],"AZUM MARIA CELESTE":["azum, María Celeste ","2026-02-02"],"DE URIBURU VERANO JAZMIN":["De Uriburu Verano , Jazmín","2026-01-12"],"VILLALBA VALERIA":["Villalba, Valeria","2026-01-13"],"MOLINARI MANSILLA MILAGROS":["Molinari Mansilla, Milagros","2026-01-09"],"FORSTHUBER GUIDO":["Forsthuber, Guido","2026-01-23"],"ETCHEVERRY DABBAH LAUTARO":["Etcheverry Dabbah, Lautaro ","2026-01-20"],"GONZALEZ NICOLAS E":["Gonzalez, Nicolas E","2026-01-26"],"QUINTANS CLAUDIA CECILIA":["Quintans, Claudia Cecilia","2026-01-08"],"KUNZ NICOLAS":["Kunz, Nicolas","2026-01-29"],"LARROUDE SANDRA":["Larroude , Sandra","2026-01-27"],"D’ONOFRIO BENJAMIN":["D’onofrio, Benjamín","2026-02-09"],"GONZALEZ ALDANA":["Gonzalez, Aldana","2026-02-06"],"GUTIERREZ JEANETTE":["Gutierrez, Jeanette","2026-02-10"],"MONZON NATALIA":["Monzon, Natalia","2026-02-20"],"ZAMORA KIARA":["Zamora, Kiara","2026-02-10"],"BONO FLAVIA":["Bono, Flavia","2026-02-20"],"URUENA EMMA":["Urueña, Emma","2026-02-18"],"GONZALEZ PRIETO RAMIRO":["Gonzalez Prieto, Ramiro","2026-02-05"],"PRODAN FRANCISCO":["Prodan, Francisco","2026-02-04"],"AUSPITZ KARIN":["Auspitz, Karin","2026-02-23"],"NAKAMURA AGUSTINA":["Nakamura, Agustina","2026-02-23"],"RUBIES FEDERICO":["Rubíes, Federico","2026-02-12"],"COSTA VLADIMIR":["Costa, Vladimir","2026-07-17"],"BANCHERO DELFINA":["Banchero, Delfina","2026-02-19"],"DIAZ CANDELA":["Diaz, Candela","2026-02-10"],"CALLEGARI CLAUDIA ESTELA":["Callegari, Claudia Estela","2026-02-20"],"WEINMANN PANEPUCCI FRANCISCO":["Weinmann Panepucci , Francisco ","2026-02-19"],"DUVAL PABLO":["Duval, Pablo","2026-02-18"],"PALACIO FERNANDA CANDELA":["Palacio, Fernanda Candela","2026-02-19"],"BRITOS RAMIRO":["Britos, Ramiro","2026-02-24"],"ANDRADE MARIA AGUSTINA":["Andrade, Maria agustina","2026-02-18"],"CARRASCO ANDREINA":["Carrasco, Andreina","2026-02-13"],"DIAZ LAURA VANESA":["Diaz, Laura Vanesa","2026-02-12"],"MAZZEI VALENTINA":["mazzei, valentina","2026-02-13"],"WEINMANN PANEPUCCI CAMILA":["Weinmann Panepucci , Camila ","2026-02-19"],"NAVEIRA PABLO":["Naveira, Pablo","2026-03-10"],"BELICH SOFI":["Belich, Sofí","2026-03-13"],"BRIUOLO AGUSTINA":["Briuolo, Agustina","2026-03-19"],"CIRILO MARIA FERNANDA":["Cirilo, Maria Fernanda","2026-03-26"],"DEL BAO LAURA":["Del Bao, Laura","2026-07-30"],"DESTUET MELANIE":["Destuet, Melanie","2026-03-05"],"PEREZ VERONICA SOLEDAD":["Perez, Veronica Soledad","2026-03-16"],"POPOV IVAN":["Popov, Iván","2026-03-19"],"ESCALANTE LEONELLA":["Escalante, Leonella","2026-03-31"],"VENTURINI ALEJANDRA":["Venturini, Alejandra","2026-03-19"],"BARCA JOSE MARIO":["Barca, Jose Mario","2026-03-25"],"RUIZ HUIDOBRO MATIAS":["Ruiz Huidobro, Matias","2026-03-26"],"GIAMPIETRI MAURO":["Giampietri, Mauro","2026-03-26"],"ORTIZ BETO":["Ortiz, Beto","2026-03-31"],"MACHADO JORGE":["Machado, Jorge","2026-07-30"],"SATULOVSKY BELU":["Satulovsky, Belu","2026-03-20"],"GONZALEZ MARIA LUZ":["Gonzalez, Maria Luz","2026-03-05"],"SOLA NAVARRO MARTINA":["Sola Navarro, Martina","2026-07-31"],"FORGUES JUAN ANDRES":["Forgues, Juan Andrés","2026-03-13"],"CACIANO NAHUEL":["Caciano, Nahuel","2026-03-09"],"GARCIA GARIN AGUSTINA":["Garcia Garin, Agustina","2026-03-17"],"FERREYRA JIMENA":["Ferreyra, Jimena","2026-03-05"],"VACCARO VALENTINA":["Vaccaro, Valentina","2026-03-10"],"MORELLO SANTIAGO":["Morello, Santiago ","2026-03-27"],"RENAUD MELINA":["Renaud, Melina","2026-03-17"],"CRESPIN DELFINA":["Crespin, Delfina ","2026-03-27"],"PIMENTEL SIRI JOAQUIN":["Pimentel Siri, Joaquin","2026-03-30"],"ROBLES ISABELLA":["Robles , Isabella ","2026-03-30"],"GIRADO ELIZABETH":["Girado, Elizabeth","2026-04-01"],"ARIAS JULIETA VIRGINIA":["Arias, Julieta Virginia","2026-03-16"],"SAGUIR NICOLAS":["Saguir, Nicolas","2026-03-09"],"TESORIERO DIEGO":["Tesoriero, Diego","2026-03-06"],"BARBICH SOFIA":["Barbich, Sofia","2026-03-06"],"TODRES NICOLE":["Todres, Nicole","2026-03-31"],"GROSSER ARIEL":["Grosser, Ariel","2026-03-10"],"CORVALAN RODRIGO":["Corvalan , Rodrigo ","2026-03-19"],"KOLODKO AGUSTINA":["Kolodko, Agustina","2026-05-26"],"MARCHISELLI LUCA":["Marchiselli, Luca","2026-03-30"],"ZANI VALENTINA":["Zani, Valentina","2026-04-16"],"GARCIA PRISCO MARIA CELESTE":["Garcia Prisco, Maria Celeste","2026-04-14"],"VISCARRA ALEJANDRA CECILIA":["Viscarra, Alejandra Cecilia","2026-04-16"],"GONZALEZ JAVIER":["Gonzalez, Javier","2026-04-10"],"CACERES EDGARDO":["Caceres, Edgardo","2026-04-23"],"CASTELLINO ANDREA LAURA":["Castellino, Andrea Laura","2026-04-22"],"CANZIAN ROMINA":["Canzian, Romina","2026-04-06"],"SUAITER VICTORICA MARIA":["Suaiter Victorica, Maria","2026-04-21"],"CIRILO MARIA":["Cirilo, Maria","2026-04-17"],"FERNANDEZ FONTICIELLA JANA":["Fernandez Fonticiella, Jana","2026-04-23"],"MENDIONDO CARLOS":["Mendiondo, Carlos","2026-04-10"],"CERRUTI TOMAS":["Cerruti, Tomas","2026-04-30"],"VILLAVICENCIO GENESIS":["Villavicencio, Genesis","2026-04-16"],"SANCHEZ KARINA":["Sanchez, Karina","2026-04-30"],"MARTINEZ EUGENIA":["Martinez, Eugenia","2026-04-17"],"CASERTA FEDERICO":["Caserta, Federico","2026-04-09"],"BERTOLINO EDUARDO":["Bertolino, Eduardo","2026-04-14"],"TABANERA JERONIMO":["Tabanera, Jeronimo","2026-04-28"],"ROBLES DANIEL":["Robles, Daniel ","2026-06-12"],"NORIEGA LUCIA":["Noriega, Lucia","2026-04-14"],"MARANO MARIANA":["Marano, Mariana","2026-04-29"],"WEINMANN PANEPUCCI AMBAR":["Weinmann Panepucci , Ámbar ","2026-04-21"],"SARDO CAMILA":["Sardo , Camila ","2026-04-17"],"CAPODANNO SEBASTIAN MARTIN":["Capodanno, Sebastian Martin","2026-04-24"],"LEONE EZEQUIEL":["Leone, Ezequiel","2026-04-28"],"CUEVAS FELIPE":["Cuevas, Felipe","2026-04-29"],"BRITOS BRISA MARTINA":["Britos, Brisa martina","2026-04-23"],"BARDERI LUNA":["Barderi, Luna ","2026-04-07"],"GIUSTO ANALIA":["Giusto, Analia ","2026-04-07"],"REYES LONGO CAMILA":["Reyes Longo, Camila","2026-04-07"],"ZUNINO LUCIA":["Zunino, Lucia","2026-04-09"],"ESPINOLA MILAGROS":["Espinola, Milagros","2026-04-13"],"VIDAL JULIETA CAROLINA":["Vidal, Julieta Carolina ","2026-04-13"],"BRIUOLO MATE":["Briuolo, Mate","2026-05-04"],"CATANIA CIERI DELFINA":["Catania Cieri, Delfina","2026-05-29"],"GARIBALDI SAFAR ISABELLA":["Garibaldi Safar, Isabella","2026-05-28"],"SANDRINI NAHIR":["Sandrini, Nahir","2026-05-06"],"GARCIA AGUSTINA":["Garcia, Agustina","2026-07-17"],"NAVARRO BALTAZAR":["Navarro, Baltazar","2026-05-27"],"TROISI JUAN IGNACIO":["Troisi, Juan Ignacio","2026-05-14"],"VUELTA GUADALUPE":["Vuelta, Guadalupe","2026-05-12"],"ALTUBE RAQUEL":["Altube, Raquel","2026-06-02"],"DE OTO DANIEL":["De Oto, Daniel","2026-05-27"],"GAVAZZA LEROUX FRANCISCO":["Gavazza Leroux, Francisco","2026-05-12"],"WAISBEIN LAURA DIANA":["Waisbein, Laura Diana","2026-06-01"],"LEIRO FACUNDO":["Leiro, Facundo","2026-05-14"],"SCIARROTTA LORENA":["Sciarrotta, Lorena","2026-05-18"],"FERNANDEZ FONTICIELLA MAIA":["Fernandez Fonticiella, Maia","2026-05-21"],"PAEZ GER":["Páez, Ger","2026-05-26"],"HERMIDA ELIDA BEATRIZ":["Hermida, Élida Beatriz","2026-05-19"],"FALCON VANINA":["Falcon, Vanina","2026-06-02"],"SANTUCHO DAIRA":["Santucho, Daira","2026-06-01"],"LUIS FEDERICO NAVARRO":["Luis Federico, Navarro","2026-05-11"],"ESTEVEZ LILIANA":["Estevez, Liliana","2026-05-26"],"TORANZO BELEN":["Toranzo, Belen","2026-05-08"],"RODRIGUEZ DANIELA":["Rodriguez, Daniela","2026-05-19"],"LAUTARO ALBRAND":["Lautaro, Albrand","2026-05-07"],"VISCARRA ALEJANDRA":["Viscarra, Alejandra","2026-05-04"],"LEVANTESI ROCIO":["Levantesi, Rocío ","2026-05-08"],"JUCHIMCZUK ZAWOROTNY LARA":["Juchimczuk Zaworotny , Lara","2026-05-12"],"CALVO BRUNO":["Calvo , Bruno","2026-05-06"],"DALIA LEONARDO":["Dalia, Leonardo ","2026-05-28"],"RASULO GISELE":["Rasulo, Gisele","2026-05-21"],"CARTAGENA SANTIAGO":["Cartagena , Santiago ","2026-05-26"],"CAVALIERI HERNAN":["Cavalieri, Hernan","2026-05-04"],"ABAD FLORENCIA":["Abad, Florencia","2026-05-27"],"LOMBARDIA GONZALO":["Lombardia, Gonzalo","2026-05-28"],"ROMERO GEGUNDEZ LARA TAIEL":["Romero gegundez, Lara taiel","2026-05-21"],"SOSA ARIEL ALEJANDRO":["Sosa, Ariel Alejandro ","2026-05-07"],"FERNANDEZ IVAN":["Fernandez, Ivan","2026-05-28"],"VILLA CAMILA SOLEDAD":["Villa, Camila Soledad","2026-05-26"],"DOSUALDO VALENTINA":["Dosualdo, Valentina","2026-05-15"],"ABRIATA LORENZO":["Abriata, Lorenzo","2026-05-28"],"MIRANDA FLORENCIA":["Miranda, Florencia ","2026-05-04"],"LONGO MARTIN":["Longo, Martín ","2026-05-07"],"CALZINARI MARIA":["Calzinari , Maria","2026-05-05"],"FONTAN MENENDEZ Y MIGUEZ DAIANA MAGALI":["Fontán Menéndez y Míguez , Daiana Magali ","2026-05-18"],"REZZIO NDAAYA":["Rezzio, Ndaaya","2026-05-19"],"ALEGRE BELEN":["Alegre , Belen","2026-05-22"],"RODRIGUEZ BARBARA INES":["Rodriguez, Barbara Ines","2026-06-30"],"BANCHERO SOFIA":["Banchero, Sofia","2026-06-04"],"PRUNESTI SEBASTIAN":["Prunesti, Sebastian","2026-06-30"],"RODRIGUEZ ANDRES":["Rodriguez, Andres","2026-06-25"],"MINUTELLA MERCEDES":["Minutella, Mercedes","2026-06-08"],"MAITA LAURA":["Maita, Laura","2026-06-22"],"CEVALLOS SANTIAGO":["Cevallos, Santiago","2026-06-29"],"GIL ANDREA":["Gil, Andrea","2026-07-02"],"GARMENDIA RAQUEL":["Garmendia, Raquel","2026-06-25"],"ROMERO LOIZAGA JAVIER":["Romero Lóizaga, Javier","2026-06-08"],"OZINO GRETEL":["Ozino, Gretel","2026-06-09"],"MACIEL MARIA JOSE":["Maciel, Maria Jose","2026-06-08"],"JAUNARENA LUCAS":["Jaunarena, Lucas","2026-06-05"],"OTTONELLO SOFIA":["Ottonello, Sofía","2026-06-18"],"FERNANDEZ DARIO CARLOS":["Fernandez, Dario Carlos","2026-07-03"],"ZANOTTI FABIANA":["Zanotti, Fabiana","2026-06-04"],"SOLOAGA DAMIAN":["Soloaga, Damian","2026-06-11"],"ORTIZ LUCIANA":["Ortiz, Luciana","2026-06-09"],"GIANNETTI JUAN":["Giannetti, Juan","2026-06-16"],"GIANFRANCESCO CAROLINA":["Gianfrancesco, Carolina","2026-06-22"],"FERNANDEZ NATALIA":["Fernandez, Natalia","2026-07-02"],"RODOLFI NICOLAS":["Rodolfi, Nicolas","2026-06-04"],"MENDIONDO PARRICIA":["Mendiondo, Parricia","2026-06-11"],"ROSA AUGUSTO":["Rosa, Augusto","2026-06-29"],"SANCHEZ AGUSTINA":["Sanchez, Agustina","2026-06-19"],"BORRELLO MARIA VALERIA":["Borrello,  Maria Valeria","2026-06-22"],"LOBEIRA FLORENCIA":["Lobeira, Florencia","2026-06-05"],"RIENTE GABRIELA":["Riente, Gabriela","2026-06-22"],"GENI MACARENA":["Geni, Macarena ","2026-07-03"],"CURTI MELISA":["Curti, Melisa","2026-06-09"],"CHARPIN MARTIN HORACIO":["Charpin, Martin Horacio","2026-06-09"],"MASCANFRONI HERNAN":["Mascanfroni , Hernan","2026-06-08"],"RODRIGUEZ CORNAGLIA MICAELA":["Rodríguez Cornaglia , Micaela","2026-06-19"],"QUESADA BERNABE":["Quesada, Bernabe","2026-07-03"],"SCHUSTER ISABEL":["Schuster, Isabel","2026-06-04"],"GUARDIA DANZO LUNA":["Guardia Danzo, Luna","2026-06-26"],"BARBICH FELIPE":["Barbich, Felipe","2026-06-12"],"ABRIATA FRANCO (2228)":["Abriata, Franco (2228)","2026-06-09"],"LEDESMA MARTIN":["Ledesma, Martin","2026-06-12"],"PUCHES MATIAS":["Puches, Matias","2026-06-23"],"BALBARREY HARGUINDEGUY JULIAN":["Balbarrey Harguindeguy, Julián","2026-06-22"],"MICHAN GINETTE ESTHER":["Michan, Ginette  Esther","2026-06-18"],"TESEI MARIA FLORENCIA":["Tesei, María Florencia","2026-07-23"],"GONZALEZ IVANA":["Gonzalez, Ivana","2026-06-11"],"DOY SOFIA":["Doy, Sofia","2026-06-30"],"PANEPUCCI LUCILA":["Panepucci, Lucila","2026-07-02"],"ALMADA JULIETA":["Almada, Julieta","2026-06-25"],"IMIZCOZ ANA":["Imizcoz, Ana ","2026-06-30"],"SCALLAN SEBASTIAN":["Scallan, Sebastian","2026-07-14"],"IDDA HERNAN":["Idda, Hernan","2026-07-23"],"CARRIZO PAULA":["Carrizo, Paula","2026-07-20"],"TORRES OLIVIA":["Torres, Olivia","2026-07-31"],"BASSO FRANCISCO":["Basso, Francisco","2026-07-16"],"PUSSETTO SOFIA":["Pussetto, Sofia","2026-07-13"],"MERLINO MACARENA":["Merlino, Macarena","2026-07-23"],"SORIA MARIELA":["Soria, Mariela","2026-07-21"],"ZAMORA DANIELA":["Zamora, Daniela","2026-07-28"],"ROGET MARIA ARACELI":["Roget, María Araceli","2026-07-21"],"BARBICH SANTIAGO":["Barbich, Santiago","2026-07-14"],"VANOTTI CHIARA":["Vanotti, Chiara","2026-07-21"],"SERPERO NICOLAS":["Serpero, Nicolas","2026-07-31"],"ARAZI OSCAR":["Arazi, Oscar","2026-07-29"],"FERRADA IGNACIO":["Ferrada, Ignacio","2026-07-23"],"RIBERO ARIAS CLAUDIA":["Ribero Arias , Claudia","2026-07-16"],"SANGIORGI VANESA ANDREA":["SANGIORGI, VANESA ANDREA ","2026-07-29"],"JANKOWSKI LUCIA":["Jankowski, Lucia","2026-07-16"],"GROSSER ROJKIN THIAGO":["Grosser Rojkin, Thiago","2026-07-21"],"CEBALLOS JUANA":["Ceballos, Juana ","2026-07-17"],"CARBALLEDA GONZALO":["Carballeda, Gonzalo ","2026-07-28"],"HERNANDEZ RAMIREZ YADIRA ISABEL":["Hernández Ramirez, Yadira  Isabel","2026-07-13"],"LEPORACE OLIVIA":["Leporace , Olivia ","2026-07-23"],"FERRARO MARINA":["Ferraro, Marina","2026-07-31"],"GARBARINI JUAN PABLO":["Garbarini, Juan Pablo","2026-07-16"],"ANDRADE SANDRA":["Andrade, Sandra","2026-07-28"],"LOPEZ MARIA BELEN":["López , Maria Belen","2026-07-24"],"PESTARINO TATIANA":["Pestarino, Tatiana","2026-08-03"],"ORSI ADRIANA":["Orsi, Adriana","2026-07-16"],"LINARES PATRICIO":["Linares , Patricio","2026-08-03"],"DURAN YAKO":["Duran , Yako","2026-07-20"],"SUAREZ SERAFIN":["Suarez, Serafin","2026-07-13"],"RODRIGUEZ MAGALI":["Rodríguez , Magali ","2026-07-28"],"GARCIA BENJAMIN":["Garcia, Benjamin","2026-07-29"],"LEPORACE NINA":["Leporace , Nina ","2026-07-23"],"FIGUEROA JOHANNA":["Figueroa, Johanna","2026-07-21"],"GONZALEZ GISELLE":["González , Giselle ","2026-07-30"],"VARELA IGNACIO":["VARELA, IGNACIO","2026-08-03"],"SCHIAVO FERNANDA":["Schiavo, Fernanda","2026-07-21"],"GARCIA MERLO MANUEL":["García Merlo, Manuel","2026-08-03"],"TESEI LUDMILA":["Tesei, Ludmila","2026-07-31"],"ESCALANTE FERNANDO":["Escalante, Fernando","2026-07-30"]};
-
 
 const ARANCELES = {
   "01.01":14504,
@@ -1197,6 +1159,7 @@ async function cargar(silencioso=false) {
       return obj;
     });
     setSyncStatus('✅ Sync: ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}));
+    _recCache = null; // invalidar cache de recordatorios
     render();
     renderPreview();
     actualizarDatalist();
@@ -1523,7 +1486,6 @@ function cancelarEdicion() {
 let pacientesMap = {};
 let datosDrapp = []; // { nombre, telefono, email, dni, obrasocial }
 let drappMap = {};   // nombre.toLowerCase() → { obrasocial, telefono, email, dni }
-let drappPhoneByNorm = {}; // normNombre(nombre) → telefono (para matchear variantes de escritura)
 
 async function cargarPacientesDrapp() {
   try {
@@ -1531,10 +1493,8 @@ async function cargarPacientesDrapp() {
     const raw = await res.json();
     datosDrapp = Array.isArray(raw) ? raw : [];
     drappMap = {};
-    drappPhoneByNorm = {};
     datosDrapp.forEach(p => {
       if (p.nombre) drappMap[p.nombre.toLowerCase()] = p;
-      if (p.nombre && p.telefono) drappPhoneByNorm[normNombre(p.nombre)] = p.telefono;
     });
     actualizarDatalist();
     actualizarDatalistCobros();
@@ -1619,114 +1579,63 @@ function onPacienteInput() {
 
 // ─── RECORDATORIOS ──────────────────────────────────────────────────────────
 
-function getContactados() {
-  try { return JSON.parse(localStorage.getItem('contactados_reactivacion')||'{}'); } catch(e) { return {}; }
-}
+// Cache para recordatorios — se calcula una vez y se reusan
+let _recCache = null;
 
-function marcarContactado(key, nombre) {
-  const c = getContactados();
-  c[key] = { nombre, fecha: new Date().toISOString().split('T')[0] };
-  localStorage.setItem('contactados_reactivacion', JSON.stringify(c));
-}
+function calcularUltimaVisita() {
+  if (_recCache) return _recCache;
+  const ultimaVisita = {};
 
-function deshacerContactado(key) {
-  const c = getContactados();
-  delete c[key];
-  localStorage.setItem('contactados_reactivacion', JSON.stringify(c));
-  renderRecordatorios();
-}
+  // 1. Drapp
+  Object.entries(DRAPP_ULTIMA_VISITA).forEach(([nombre, fecha]) => {
+    const key = normNombre(nombre);
+    if (!ultimaVisita[key] || fecha > ultimaVisita[key].fecha) {
+      ultimaVisita[key] = { paciente: nombre, fecha };
+    }
+  });
 
-function onEnviarWhatsapp(key, nombre) {
-  marcarContactado(key, nombre);
-  // Pequeño delay para no interferir con la apertura del link (target=_blank)
-  setTimeout(renderRecordatorios, 300);
-}
+  // 2. Prestaciones (complemento o más reciente)
+  datos.forEach(d => {
+    if (!d.paciente || !d.fecha) return;
+    const key = normNombre(d.paciente);
+    if (!ultimaVisita[key] || d.fecha > ultimaVisita[key].fecha) {
+      const nombreCanon = ultimaVisita[key]?.paciente || d.paciente.trim();
+      ultimaVisita[key] = { paciente: nombreCanon, fecha: d.fecha };
+    }
+  });
 
-function getExcluidos() {
-  try { return JSON.parse(localStorage.getItem('excluidos_reactivacion')||'{}'); } catch(e) { return {}; }
-}
-
-function marcarExcluido(key, nombre) {
-  const e = getExcluidos();
-  e[key] = { nombre, fecha: new Date().toISOString().split('T')[0] };
-  localStorage.setItem('excluidos_reactivacion', JSON.stringify(e));
-}
-
-function deshacerExcluido(key) {
-  const e = getExcluidos();
-  delete e[key];
-  localStorage.setItem('excluidos_reactivacion', JSON.stringify(e));
-  renderRecordatorios();
-}
-
-function onExcluirPaciente(key, nombre) {
-  if (!confirm(`¿Sacar a ${nombre} de la lista de recordatorios sin enviarle mensaje?`)) return;
-  marcarExcluido(key, nombre);
-  renderRecordatorios();
+  _recCache = ultimaVisita;
+  return ultimaVisita;
 }
 
 function renderRecordatorios() {
   const ventana = parseInt(document.getElementById('rec-ventana')?.value || 30);
   const hoy = new Date(); hoy.setHours(0,0,0,0);
 
-  // Agrupar por paciente usando normNombre para unificar variantes
-  const ultimaVisita = {};
-  datos.forEach(d => {
-    if (!d.paciente || !d.fecha) return;
-    const key = normNombre(d.paciente);
-    if (!ultimaVisita[key] || d.fecha > ultimaVisita[key].fecha) {
-      // Preferir el nombre con coma como nombre canónico
-      const nombreCanon = ultimaVisita[key]?.nombre?.includes(',')
-        ? ultimaVisita[key].nombre
-        : d.paciente.trim();
-      ultimaVisita[key] = { key, paciente: nombreCanon, fecha: d.fecha };
-    }
-  });
-
-  // Sumar los turnos reales de DrApp (reservados/atendidos) como visitas también,
-  // por si el paciente vino pero no se le cargó ninguna prestación ese día.
-  Object.keys(TURNOS_HISTORICOS).forEach(key => {
-    const [nombre, fecha] = TURNOS_HISTORICOS[key];
-    if (!ultimaVisita[key] || fecha > ultimaVisita[key].fecha) {
-      const nombreCanon = ultimaVisita[key]?.paciente?.includes(',')
-        ? ultimaVisita[key].paciente
-        : nombre;
-      ultimaVisita[key] = { key, paciente: nombreCanon, fecha };
-    }
-  });
-
-  const contactados = getContactados();
-  const excluidos = getExcluidos();
+  const ultimaVisita = calcularUltimaVisita();
   const vencidos = [], proximos = [], ok = [];
 
   Object.values(ultimaVisita).forEach(p => {
-    if (contactados[p.key]) return; // ya se le envió mensaje de reactivación — no duplicar
-    if (excluidos[p.key]) return;   // se sacó manualmente de la lista
     const ultima = new Date(p.fecha + 'T00:00:00');
     const diasDesde = Math.floor((hoy - ultima) / 86400000);
     const proximoControl = new Date(ultima);
-    proximoControl.setDate(proximoControl.getDate() + 365);
+    proximoControl.setMonth(proximoControl.getMonth() + 6);
     const diasParaControl = Math.floor((proximoControl - hoy) / 86400000);
-
     const obj = { ...p, diasDesde, diasParaControl, proximoControl };
-
-    if (diasDesde >= 365) vencidos.push(obj);
+    if (diasDesde >= 180) vencidos.push(obj);
     else if (diasParaControl <= ventana) proximos.push(obj);
     else ok.push(obj);
   });
 
-  // Ordenar vencidos de más antiguo a más reciente
   vencidos.sort((a,b) => b.diasDesde - a.diasDesde);
   proximos.sort((a,b) => a.diasParaControl - b.diasParaControl);
 
-  // KPIs
   document.getElementById('rec-stat-vencidos').textContent = vencidos.length;
   document.getElementById('rec-stat-proximos').textContent = proximos.length;
   document.getElementById('rec-stat-ok').textContent = ok.length;
   document.getElementById('rec-stat-proximos-label').textContent = `En los próximos ${ventana} días`;
   document.getElementById('rec-proximos-titulo').textContent = `Próximos a vencer — en menos de ${ventana} días`;
 
-  // Secciones
   const secVenc = document.getElementById('rec-section-vencidos');
   const secProx = document.getElementById('rec-section-proximos');
   const empty   = document.getElementById('rec-empty');
@@ -1737,56 +1646,7 @@ function renderRecordatorios() {
 
   document.getElementById('rec-lista-vencidos').innerHTML = vencidos.map(p => tarjetaRecordatorio(p, 'vencido')).join('');
   document.getElementById('rec-lista-proximos').innerHTML = proximos.map(p => tarjetaRecordatorio(p, 'proximo')).join('');
-
-  renderContactados(contactados);
-  renderExcluidos(excluidos);
 }
-
-function renderContactados(contactados) {
-  const entries = Object.entries(contactados).sort((a,b) => b[1].fecha.localeCompare(a[1].fecha));
-  const secCont = document.getElementById('rec-section-contactados');
-  const cont = document.getElementById('rec-contactados-toggle');
-  if (!secCont || !cont) return;
-  cont.textContent = `✅ Ya contactados (${entries.length})`;
-  secCont.style.display = entries.length ? '' : 'none';
-  document.getElementById('rec-lista-contactados').innerHTML = entries.map(([key, c]) => `
-    <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid var(--success)">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:0.9rem">${c.nombre}</div>
-        <div style="font-size:0.78rem;color:var(--text-muted)">Contactado el ${c.fecha.split('-').reverse().join('/')}</div>
-      </div>
-      <button class="btn btn-ghost" style="padding:6px 12px;font-size:0.78rem" onclick="deshacerContactado('${key}')">↩️ Deshacer</button>
-    </div>`).join('');
-}
-
-function renderExcluidos(excluidos) {
-  const entries = Object.entries(excluidos).sort((a,b) => b[1].fecha.localeCompare(a[1].fecha));
-  const secExcl = document.getElementById('rec-section-excluidos');
-  const tog = document.getElementById('rec-excluidos-toggle');
-  if (!secExcl || !tog) return;
-  tog.textContent = `🚫 Sacados de la lista (${entries.length})`;
-  secExcl.style.display = entries.length ? '' : 'none';
-  document.getElementById('rec-lista-excluidos').innerHTML = entries.map(([key, c]) => `
-    <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid var(--text-muted)">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:0.9rem">${c.nombre}</div>
-        <div style="font-size:0.78rem;color:var(--text-muted)">Sacado el ${c.fecha.split('-').reverse().join('/')} — sin mensaje enviado</div>
-      </div>
-      <button class="btn btn-ghost" style="padding:6px 12px;font-size:0.78rem" onclick="deshacerExcluido('${key}')">↩️ Deshacer</button>
-    </div>`).join('');
-}
-
-function normalizarTelefonoWa(tel) {
-  if (!tel) return '';
-  let digits = String(tel).replace(/[^0-9]/g, '');
-  // Números argentinos: WhatsApp necesita el 9 de celular después del 54 (código país)
-  if (digits.startsWith('54') && !digits.startsWith('549')) {
-    digits = '549' + digits.slice(2);
-  }
-  return digits;
-}
-
-const DRAPP_BOOKING_URL = 'https://veronica-ortiz.cartilla.drapp.com.ar/equipos/003fac53/1c0df482/odontologia/consulta-general/2025-12-01';
 
 function tarjetaRecordatorio(p, tipo) {
   const esvencido = tipo === 'vencido';
@@ -1799,16 +1659,10 @@ function tarjetaRecordatorio(p, tipo) {
     ? `Hace ${Math.floor(p.diasDesde/30)} meses sin venir (desde ${fechaUlti})`
     : `Control en ${p.diasParaControl} días — ${fechaCtrl}`;
 
-  const telefono = drappPhoneByNorm[normNombre(p.paciente)] || '';
-  const telWa = normalizarTelefonoWa(telefono);
-
   const msgWsp = encodeURIComponent(
-    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. Podés reservar tu turno acá: ${DRAPP_BOOKING_URL}  ¡Te esperamos!`
+    `Hola ${p.paciente.split(',').reverse().map(s=>s.trim()).join(' ')}! 😊 Te escribimos del consultorio odontológico para recordarte que ha pasado el tiempo recomendado para tu control de rutina. ¿Cuándo te quedaría bien sacar un turno? ¡Te esperamos! 🦷`
   );
-  const wspUrl = telWa
-    ? `https://wa.me/${telWa}?text=${msgWsp}`
-    : `https://wa.me/?text=${msgWsp}`;
-  const wspTitle = telWa ? '' : 'title="No encontré el teléfono en DrApp — vas a tener que elegir el contacto a mano"';
+  const wspUrl = `https://wa.me/?text=${msgWsp}`;
 
   return `
     <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-left:4px solid ${color}">
@@ -1816,15 +1670,11 @@ function tarjetaRecordatorio(p, tipo) {
         <div style="font-weight:700;font-size:0.95rem;margin-bottom:3px">${p.paciente}</div>
         <div style="font-size:0.82rem;color:${color};font-weight:500">${estadoTexto}</div>
       </div>
-      <a href="${wspUrl}" target="_blank" ${wspTitle} onclick="onEnviarWhatsapp('${p.key}', '${p.paciente.replace(/'/g,"\\'")}')"
+      <a href="${wspUrl}" target="_blank"
          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#25D366;color:white;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         WhatsApp
       </a>
-      <button type="button" title="Sacar de la lista sin enviar mensaje" onclick="onExcluirPaciente('${p.key}', '${p.paciente.replace(/'/g,"\\'")}')"
-         style="display:inline-flex;align-items:center;gap:5px;padding:8px 12px;background:white;color:var(--text-muted);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
-        🚫 Sacar
-      </button>
     </div>`;
 }
 
@@ -1874,27 +1724,11 @@ function actualizarDatalistPresup() {
   });
 }
 
-function clavePresup(fecha, paciente, descripcion) {
-  return normNombre(paciente) + '|' + (fecha||'').trim() + '|' + (descripcion||'').trim().toLowerCase();
-}
-
-function getPresupExtras() {
-  try { return JSON.parse(localStorage.getItem('presupuestos_extra')||'{}'); } catch(e) { return {}; }
-}
-
-function guardarPresupExtra(clave, prepaga, afiliado) {
-  const ex = getPresupExtras();
-  ex[clave] = { prepaga: prepaga||'', afiliado: afiliado||'' };
-  localStorage.setItem('presupuestos_extra', JSON.stringify(ex));
-}
-
 async function guardarPresupuesto() {
-  const pac     = document.getElementById('presup-paciente').value.trim();
-  const desc    = document.getElementById('presup-descripcion').value.trim();
-  const monto   = document.getElementById('presup-monto').value.trim();
-  const fecha   = document.getElementById('presup-fecha').value;
-  const prepaga = document.getElementById('presup-prepaga').value.trim();
-  const afiliado = document.getElementById('presup-afiliado').value.trim();
+  const pac   = document.getElementById('presup-paciente').value.trim();
+  const desc  = document.getElementById('presup-descripcion').value.trim();
+  const monto = document.getElementById('presup-monto').value.trim();
+  const fecha = document.getElementById('presup-fecha').value;
   if (!pac || !desc || !monto) {
     toast('Completá Paciente, Descripción y Monto', 'warning');
     ['presup-paciente','presup-descripcion','presup-monto'].forEach(id => {
@@ -1906,16 +1740,11 @@ async function guardarPresupuesto() {
   const btn = document.getElementById('btn-guardar-presup');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
   try {
-    const params = new URLSearchParams({ action:'savePresupuesto', paciente:pac, descripcion:desc, monto, fecha, prepaga, afiliado });
+    const params = new URLSearchParams({ action:'savePresupuesto', paciente:pac, descripcion:desc, monto, fecha });
     await fetch(SCRIPT_URL + '?' + params.toString(), {mode:'no-cors'});
-    // Guardamos Prepaga/Afiliado también en este navegador — el Sheet de tu Apps Script
-    // todavía no tiene esas columnas, así que esto es lo que asegura que no se pierdan acá.
-    guardarPresupExtra(clavePresup(fecha, pac, desc), prepaga, afiliado);
     toast('✓ Presupuesto guardado', 'success');
     document.getElementById('presup-descripcion').value = '';
     document.getElementById('presup-monto').value = '';
-    document.getElementById('presup-prepaga').value = '';
-    document.getElementById('presup-afiliado').value = '';
     await new Promise(r => setTimeout(r, 2000));
     await cargarPresupuestos(true);
     renderPresupuestos();
@@ -1933,25 +1762,14 @@ function renderPresupuestos() {
     tbody.innerHTML = ''; empty.style.display = 'block'; return;
   }
   empty.style.display = 'none';
-  const extras = getPresupExtras();
-  tbody.innerHTML = [...datosPresupuestos].sort((a,b) => b.fecha.localeCompare(a.fecha)).map(d => {
-    const clave = clavePresup(d.fecha, d.paciente, d.descripcion);
-    const extra = extras[clave] || { prepaga:'', afiliado:'' };
-    const dJson = JSON.stringify({...d, prepaga: extra.prepaga, afiliado: extra.afiliado}).replace(/"/g,'&quot;');
-    return `
+  tbody.innerHTML = [...datosPresupuestos].sort((a,b) => b.fecha.localeCompare(a.fecha)).map(d => `
     <tr>
       <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;white-space:nowrap">${d.fecha ? d.fecha.split('-').reverse().join('/') : ''}</td>
       <td style="font-weight:500">${d.paciente||''}</td>
       <td style="font-size:0.85rem;color:var(--text-muted)">${d.descripcion||''}</td>
-      <td style="font-size:0.82rem;color:var(--primary)">${extra.prepaga||'—'}${extra.afiliado ? ' · '+extra.afiliado : ''}</td>
       <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary)">${formatMoney(d.monto)}</td>
-      <td style="display:flex;gap:4px;white-space:nowrap">
-        <button class="action-btn" style="background:#e8f9ef;color:#25D366" title="Enviar por WhatsApp" onclick="onEnviarPresupuestoWsp(${dJson})">💬</button>
-        <button class="action-btn" style="background:var(--primary-light);color:var(--primary)" title="Descargar PDF" onclick="generarPDFPresupuesto(${dJson})">📄</button>
-        <button class="action-btn btn-del" onclick="pedirBorrarPresup(${d._rowIndex})">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
+      <td><button class="action-btn btn-del" onclick="pedirBorrarPresup(${d._rowIndex})">🗑️</button></td>
+    </tr>`).join('');
 }
 
 // ─── ESTADO DE CUENTAS ───────────────────────────────────────────────────────
@@ -2100,109 +1918,6 @@ async function confirmarBorrarPresup() {
     toast('Error al borrar', 'error');
   } finally { btn.disabled = false; }
 }
-
-// ─── ENVÍO DE PRESUPUESTO (WhatsApp + PDF) ───────────────────────────────────
-
-// TODO: reemplazar por la imagen real de firma y sello (PNG en base64) cuando la mande Verónica.
-const FIRMA_SELLO_IMG = 'data:image/jpeg;base64,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';
-
-const CONSULTORIO_INFO = {
-  nombre: 'Dra. Verónica Ortiz',
-  titulo: 'Odontóloga UBA · MP 45197',
-  direccion: 'Av. Maipú 2443, 2° Cuerpo A'
-};
-
-function onEnviarPresupuestoWsp(d) {
-  const telefono = drappPhoneByNorm[normNombre(d.paciente)] || '';
-  const telWa = normalizarTelefonoWa(telefono);
-  const nombreCorto = d.paciente.split(',').reverse().map(s=>s.trim()).join(' ');
-  const fechaFmt = d.fecha ? d.fecha.split('-').reverse().join('/') : '';
-  let texto = `Hola ${nombreCorto}! Te paso el presupuesto del consultorio odontológico:\n\n`;
-  texto += `Tratamiento: ${d.descripcion}\n`;
-  if (d.prepaga) texto += `Prepaga: ${d.prepaga}\n`;
-  if (d.afiliado) texto += `N° Afiliado: ${d.afiliado}\n`;
-  texto += `Monto total: ${formatMoney(d.monto)}\n`;
-  if (fechaFmt) texto += `Fecha: ${fechaFmt}\n`;
-  texto += `\nTe adjunto el presupuesto firmado en PDF. ¡Cualquier consulta, escribinos!`;
-  const msg = encodeURIComponent(texto);
-  const wspUrl = telWa ? `https://wa.me/${telWa}?text=${msg}` : `https://wa.me/?text=${msg}`;
-  if (!telWa) toast('No encontré el teléfono en DrApp — elegí el contacto a mano', 'warning');
-  window.open(wspUrl, '_blank');
-}
-
-function generarPDFPresupuesto(d) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const pageW = doc.internal.pageSize.getWidth();
-  let y = 22;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text(CONSULTORIO_INFO.nombre, pageW/2, y, {align:'center'}); y += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(CONSULTORIO_INFO.titulo, pageW/2, y, {align:'center'}); y += 5;
-  doc.text(CONSULTORIO_INFO.direccion, pageW/2, y, {align:'center'}); y += 12;
-
-  doc.setDrawColor(233,30,140);
-  doc.setLineWidth(0.6);
-  doc.line(15, y, pageW-15, y); y += 12;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('PRESUPUESTO ODONTOLÓGICO', pageW/2, y, {align:'center'}); y += 14;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  const fechaFmt = d.fecha ? d.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
-  const filas = [
-    ['Paciente:', d.paciente || ''],
-    ['Fecha:', fechaFmt],
-    ['Prepaga:', d.prepaga || '— (particular)'],
-    ['N° Afiliado:', d.afiliado || '—'],
-  ];
-  filas.forEach(([label, val]) => {
-    doc.setFont('helvetica','bold'); doc.text(label, 20, y);
-    doc.setFont('helvetica','normal'); doc.text(String(val), 60, y);
-    y += 8;
-  });
-  y += 6;
-
-  doc.setFont('helvetica','bold');
-  doc.text('Tratamiento propuesto:', 20, y); y += 8;
-  doc.setFont('helvetica','normal');
-  const desc = doc.splitTextToSize(d.descripcion || '', pageW - 40);
-  doc.text(desc, 20, y); y += desc.length * 6 + 10;
-
-  doc.setDrawColor(220,220,220);
-  doc.line(15, y, pageW-15, y); y += 12;
-
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(13);
-  doc.text('Monto total:', 20, y);
-  doc.setTextColor(233,30,140);
-  doc.text(formatMoney(d.monto), 70, y);
-  doc.setTextColor(0,0,0);
-  y += 30;
-
-  // Firma y sello
-  const firmaY = Math.max(y, 210);
-  if (FIRMA_SELLO_IMG) {
-    doc.addImage(FIRMA_SELLO_IMG, 'JPEG', pageW - 90, firmaY - 8, 65, 46);
-  } else {
-    doc.setFontSize(10);
-    doc.text('.........................................................', pageW - 85, firmaY + 8);
-    doc.setFont('helvetica','bold');
-    doc.text(CONSULTORIO_INFO.nombre, pageW - 85, firmaY + 14);
-    doc.setFont('helvetica','normal');
-    doc.text(CONSULTORIO_INFO.titulo, pageW - 85, firmaY + 19);
-    doc.text('Firma y sello', pageW - 85, firmaY + 26);
-  }
-
-  doc.save(`Presupuesto_${(d.paciente||'paciente').replace(/[^a-zA-Z0-9]/g,'_')}.pdf`);
-}
-
-// ─── FIN ENVÍO DE PRESUPUESTO ─────────────────────────────────────────────────
 
 // ─── FIN PRESUPUESTOS ────────────────────────────────────────────────────────
 
@@ -2456,6 +2171,878 @@ async function confirmarBorrarCobro() {
 }
 
 // ─── FIN COBROS ─────────────────────────────────────────────────────────────
+
+const DRAPP_ULTIMA_VISITA = {
+  "21217IGR, DANIELROBLESMENDEZ@HOTMAIL.COM": "2026-04-16",
+  "ABAD, FLORENCIA": "2026-05-27",
+  "ABALSAMO, DIEGO": "2026-08-03",
+  "ABRIATA, FRANCO (2228)": "2026-06-09",
+  "ABRIATA, LORENZO": "2026-05-28",
+  "ACHILLI, GUADALUPE": "2024-06-07",
+  "ACHOYAN, DANIELA": "2023-10-03",
+  "ACUÑA, MORENA": "2024-04-09",
+  "ADRIAN, LAZARTE": "2025-01-21",
+  "AGAZZI, CAROLINA": "2026-01-12",
+  "AGEJAS, LISANDRO": "2025-12-22",
+  "AGEJAS, ROBERTO": "2026-07-20",
+  "AGEJAS, ROBERTO BLAS": "2026-07-14",
+  "AGUERRE, JUAN": "2025-05-22",
+  "AGUILAR, MELISA": "2025-08-25",
+  "AGUIRRE, ANA": "2023-12-06",
+  "AGUIRRE, JOEL": "2026-01-08",
+  "AHUMADA, EMMA": "2025-07-28",
+  "AHUMADA, JAVIER": "2025-05-15",
+  "AHUMADA, JOAQUIN LAUTARO": "2025-05-06",
+  "AISA, ANDREA": "2026-04-06",
+  "ALARCON, IAN": "2026-01-19",
+  "ALBANO, LUZ": "2023-10-06",
+  "ALBANO, MARTIN": "2023-10-06",
+  "ALBANO, VALENTIN": "2023-07-25",
+  "ALBERTONI, MICAELA": "2025-04-15",
+  "ALEGRE , BELEN": "2026-05-22",
+  "ALEGRE, CAMILA": "2024-07-23",
+  "ALEGRE, DAMIAN ALEJANDRO": "2024-04-26",
+  "ALEGRE, MARCOS GABRIEL": "2024-08-26",
+  "ALEJO, MÓNICA VALERIA": "2024-07-18",
+  "ALEXANIAN, NATALIA": "2025-10-14",
+  "ALMADA, JULIETA": "2026-06-25",
+  "ALONSO, EZEQUIEL": "2026-01-19",
+  "ALTUBE, RAQUEL": "2026-06-02",
+  "ALVAREZ PAGELLA, NAHUEL": "2024-06-19",
+  "ALVAREZ, LAURA": "2025-04-22",
+  "ANDRADE, AZUL": "2025-11-13",
+  "ANDRADE, GUILLERMO": "2024-07-11",
+  "ANDRADE, MARIA AGUSTINA": "2026-02-18",
+  "ANDRADE, SANDRA": "2026-07-28",
+  "ANGLIN, ANDREW": "2026-06-23",
+  "ANGLIN, JAZMIN": "2025-01-03",
+  "ANGST, MAURO": "2023-04-04",
+  "ANTONIOLLI, ANALÍA": "2023-09-05",
+  "APAT, JUAN PABLO": "2023-09-19",
+  "APAT, MARIA PIA": "2024-04-16",
+  "APAT, MARÍA PIA": "2023-08-10",
+  "APAT, MARÍA PÍA": "2026-02-12",
+  "APAT, NATALIA": "2025-09-11",
+  "APPLEYARD, TOMAS": "2023-11-15",
+  "ARAZI, OSCAR": "2026-07-29",
+  "ARDILES, MAURICIO": "2023-11-10",
+  "AREVALO, SEBASTIÁN": "2024-01-26",
+  "ARIAS, JULIETA VIRGINIA": "2026-03-16",
+  "ARMALEO, RODOLFO": "2024-01-09",
+  "ARRIGHI, DIEGO": "2025-10-03",
+  "ASCAZURI, MARTINA": "2024-08-13",
+  "AUSPITZ, KARIN": "2026-08-24",
+  "AVALOS, FRANCISCO": "2024-09-23",
+  "AVALOS, RENATA": "2023-12-28",
+  "AVELLINO, ANDREA": "2025-04-29",
+  "AVILA, VERONICA TAMARA": "2024-04-16",
+  "AZUM, CELESTE": "2025-09-17",
+  "AZUM, MARÍA CELESTE": "2026-02-02",
+  "AZZARELLI, IGNACIO": "2024-06-13",
+  "BALBARREY HARGUINDEGUY, JULIÁN": "2026-06-22",
+  "BALCARCE, AGUSTINA": "2022-12-19",
+  "BAMBERGER, MICAELA": "2022-12-05",
+  "BANCHERO, DELFINA": "2026-02-19",
+  "BANCHERO, JORGE": "2024-06-25",
+  "BANCHERO, SOFIA": "2026-06-04",
+  "BARBICH, FELIPE": "2026-06-12",
+  "BARBICH, SANTIAGO": "2026-07-14",
+  "BARBICH, SEBASTIAN": "2026-02-13",
+  "BARBICH, SEBASTIÁN": "2025-01-17",
+  "BARBICH, SOFIA": "2026-03-06",
+  "BARCA, JOSE MARIO": "2026-03-25",
+  "BARDERI, LUNA": "2026-08-20",
+  "BARREDO, ULISES": "2022-12-15",
+  "BARRETO, MARIA ESTER": "2023-10-09",
+  "BASSO, FELIPE": "2023-09-22",
+  "BASSO, FRANCISCO": "2026-07-16",
+  "BAUDRON, SILVIA": "2023-01-12",
+  "BECKMANN, DOLORES": "2024-08-09",
+  "BEL, DELFINA": "2025-08-28",
+  "BELICH, SOFÍ": "2026-03-13",
+  "BELLAVIGNA, EUGENIA": "2024-09-10",
+  "BEN DAVID, CYNTHIA": "2025-05-05",
+  "BERTOLINO, EDUARDO": "2026-04-14",
+  "BERTOLINO, MARTIN": "2024-06-28",
+  "BERTOLINO, TOMAS": "2024-10-23",
+  "BESTEIRO, RODRIGO": "2024-11-12",
+  "BETTATIS, NICOLE": "2024-09-27",
+  "BIAZISO, MATEO": "2025-10-20",
+  "BLANCO, ESTEFANIA": "2023-12-06",
+  "BLANCO, LORENA": "2023-12-07",
+  "BLENGINO, DANIEL": "2025-08-05",
+  "BLENGINO, SOL": "2025-10-07",
+  "BOBA, IRENE": "2024-09-10",
+  "BONARDI, CARLA": "2023-08-08",
+  "BONO, FLAVIA": "2026-08-11",
+  "BORRELLO,  MARIA VALERIA": "2026-06-22",
+  "BOURGUIGNON, VERÓNICA": "2025-10-28",
+  "BRAMBILLA, LUCAS": "2025-09-23",
+  "BRITOS, BRISA MARTINA": "2026-04-23",
+  "BRITOS, RAMIRO": "2026-02-24",
+  "BRIUOLO, AGUSTINA": "2026-03-19",
+  "BRIUOLO, JUAN JOSÉ": "2026-01-16",
+  "BRIUOLO, MATE": "2026-05-04",
+  "BRUGNERA, AGOSTINA": "2026-06-16",
+  "BUKOWSKI, CAROLINA": "2024-02-27",
+  "BUKOWSKI, FEDERICO": "2025-01-10",
+  "BURANITS, GUSTAVO": "2024-11-15",
+  "BUSTO, LUCAS NAHUEL": "2024-03-26",
+  "CACERES, EDGARDO": "2026-04-23",
+  "CACIANO, NAHUEL": "2026-03-09",
+  "CAJARAVILLA, MARIA BELEN": "2026-08-18",
+  "CALLEGARI, CLAUDIA ESTELA": "2026-02-20",
+  "CALVO , BRUNO": "2026-05-06",
+  "CALVO, GASTON": "2024-05-02",
+  "CALVO, NELSON GASTON": "2025-11-10",
+  "CALVO, PRISCILA": "2024-05-02",
+  "CALZINARI , MARIA": "2026-05-05",
+  "CAMERON, MELANIE": "2026-08-24",
+  "CANESTRARI, EMA": "2026-08-10",
+  "CANESTRARI, PAZ": "2026-08-10",
+  "CANZIAN, ROMINA": "2026-04-06",
+  "CAPODANNO, SEBASTIAN MARTIN": "2026-04-24",
+  "CAPURRO, SOFIA": "2022-11-25",
+  "CARABAJAL, JUAN": "2026-08-25",
+  "CARBALLEDA, GONZALO": "2026-07-28",
+  "CARCASÍA, MARCELO ALBERTO": "2023-05-30",
+  "CARMONA, ADRIAN": "2026-03-30",
+  "CARMONA, ADRIÁN": "2026-01-23",
+  "CARMONA, ROCIO": "2025-05-05",
+  "CARRASCO, ANDREINA": "2026-02-13",
+  "CARRIZO, PAULA": "2026-07-20",
+  "CARTAGENA , SANTIAGO": "2026-05-26",
+  "CASERTA, FEDERICO": "2026-04-09",
+  "CASERTA, GUSTAVO": "2026-01-05",
+  "CASERTA, MARTINA": "2025-07-11",
+  "CASTAÑO NAVARRO, LOLA": "2025-07-04",
+  "CASTELLINO, ANDREA LAURA": "2026-04-22",
+  "CASTELUCCIO, ILEANA": "2025-11-20",
+  "CATANIA CIERI, DELFINA": "2026-05-29",
+  "CAVALIERI, HERNAN": "2026-05-04",
+  "CAVALIERI, MARÍA MERCEDES": "2025-12-09",
+  "CAYRUS VISCARRA, IGNACIO DANTE": "2025-04-08",
+  "CEBALLOS, JUANA": "2026-08-20",
+  "CECILIA, AMIGA": "2023-01-25",
+  "CENERINI, GABRIELA": "2024-01-30",
+  "CENTURIÓN, IGNACIO EZEQUIEL": "2025-01-09",
+  "CENTURIÓN, TOMÁS": "2025-01-09",
+  "CERIANI, MANUEL": "2024-04-18",
+  "CERRUTI, GABRIEL": "2025-11-07",
+  "CERRUTI, TOMAS": "2026-04-30",
+  "CESCHIN, MELANIE": "2024-08-02",
+  "CETRARO, ESTEFANIA": "2025-07-22",
+  "CETRARO, ESTEFANÍA": "2026-07-30",
+  "CEVALLOS, SANTIAGO": "2026-06-29",
+  "CHAMAREZ, SILVIA": "2024-10-01",
+  "CHARPIN, MARTIN HORACIO": "2026-06-09",
+  "CHAVES, VIVIANA": "2025-03-07",
+  "CHIRINO, ANDREA": "2024-08-23",
+  "CIRILO, MARIA": "2026-04-17",
+  "CIRILO, MARIA FERNANDA": "2026-03-26",
+  "CISNEROS, NOELIA": "2025-11-11",
+  "CIUFFARSI, GINO": "2024-04-12",
+  "CIUFFO FAUR, MATEO": "2024-09-12",
+  "CIUFFO, THIAGO": "2024-08-27",
+  "COBEÑAS, ESTEBAN": "2025-09-01",
+  "CODON, SOFIA": "2025-11-04",
+  "COLANGELO, FLORENCIA": "2024-10-17",
+  "COLLI, AGUSTINA": "2025-10-21",
+  "COLLIA, AGUSTINA": "2023-11-10",
+  "COLOMBO, NORA": "2024-06-13",
+  "CONDE, MARIA": "2024-10-16",
+  "CONDE, MARIA FERNANDA": "2024-11-12",
+  "CONTRERAS, CLYDE": "2024-07-16",
+  "CONVERTI, LAURA": "2026-08-06",
+  "CORDOBA, LUCAS": "2023-09-05",
+  "CORDOBA, LUCAS SEBASTIAN": "2024-10-29",
+  "CORIA, LEON": "2023-04-21",
+  "CORNEJO, SILVIA": "2023-04-12",
+  "CORRAL, LUANA": "2024-01-04",
+  "CORTI, DANTE": "2024-02-01",
+  "CORTI, DAVIDE": "2026-02-09",
+  "CORVALAN , RODRIGO": "2026-03-19",
+  "COSTA, ANA": "2025-01-07",
+  "COSTA, FRANCISCA": "2025-03-20",
+  "COSTA, LISANDRO": "2025-12-18",
+  "COSTA, VLADIMIR": "2026-07-17",
+  "COVAS, CELESTE": "2026-01-08",
+  "COVAS, GONZALO": "2024-08-22",
+  "CRESPIN, CHRISTIAN": "2025-10-13",
+  "CRESPIN, DELFINA": "2026-03-27",
+  "CUEVAS, FELIPE": "2026-04-29",
+  "CUITIÑO, RICARDO": "2023-11-08",
+  "CURTI, MELISA": "2026-06-09",
+  "CÓCERES, MARÍA INÉS": "2026-01-22",
+  "CÓRDOBA, LUCAS": "2025-10-06",
+  "D AREZZO, VICTORIA": "2026-08-12",
+  "D IMPERIO, MARTINA": "2025-02-03",
+  "D\'ACUNTO, JUAN IGNACIO": "2025-01-23",
+  "D\'ONOFRIO, MARIANO": "2024-12-16",
+  "DA COSTA MARIAN, PEDRO": "2024-09-23",
+  "DAGA, MONICA": "2025-12-18",
+  "DALIA, LEONARDO": "2026-05-28",
+  "DALINGER, LAURA": "2025-04-24",
+  "DAMÁ BIANCHI, CAROLINA": "2024-11-07",
+  "DE BLAS, GUSTAVO": "2026-08-06",
+  "DE BRITO, INÉS": "2024-02-16",
+  "DE BRITO, JOAQUÍN": "2024-06-28",
+  "DE BRITO, LUIS": "2025-01-07",
+  "DE JONGE, MATEO": "2025-11-04",
+  "DE OTO, DANIEL": "2026-05-27",
+  "DE TULLIO, MARIA BELÉN": "2024-06-25",
+  "DE URIBURU VERANO , JAZMÍN": "2026-01-12",
+  "DE URIBURU, JAZMIN": "2025-08-21",
+  "DEL BAO, LAURA": "2026-08-06",
+  "DEL TORTO, BARTOLOME": "2023-12-19",
+  "DEL TORTO, BARTOLOMÉ": "2023-01-04",
+  "DEL VILLAR, FACUNDO": "2024-12-20",
+  "DEN, APSOT": "2023-02-23",
+  "DEPRATTIS, MELINA": "2025-10-21",
+  "DERMATOLOGO, HB": "2024-07-16",
+  "DESHAYES, ANDREA LAURA": "2025-04-07",
+  "DESTUET, MELANIE": "2026-03-05",
+  "DI NELLA, NADIA": "2024-10-29",
+  "DI PASQUO, LORENA": "2023-01-17",
+  "DIANA, PLANDE": "2025-03-20",
+  "DIAZ BRACELI, JULIETA": "2025-04-01",
+  "DIAZ, CAMILA": "2026-08-11",
+  "DIAZ, CANDELA": "2026-02-10",
+  "DIAZ, JORGE": "2024-12-05",
+  "DIAZ, JULIETA": "2024-03-21",
+  "DIAZ, LAURA VANESA": "2026-02-12",
+  "DIAZ, MONICA": "2023-02-14",
+  "DIAZ, SANTIAGO": "2026-01-30",
+  "DIEZ, MARÍA CECILIA": "2025-07-14",
+  "DIMPERIO, AGUSTINA": "2024-05-07",
+  "DIRRHEIMER, CLEMENTINA": "2023-05-31",
+  "DJIVELEKIAN, MARIANA": "2025-01-27",
+  "DOMINGUEZ, HERNAN": "2023-04-05",
+  "DOSUALDO, VALENTINA": "2026-05-15",
+  "DOTRAS, BELEN": "2026-06-16",
+  "DOY, SOFIA": "2026-06-30",
+  "DRENNEN, MARIANA": "2025-08-11",
+  "DT, BARTO": "2025-01-13",
+  "DUARTE, LOURDES": "2025-11-25",
+  "DUNOGENT, GREGORIO": "2026-01-08",
+  "DUPERRE, DENISE": "2026-01-13",
+  "DURAN , YAKO": "2026-07-20",
+  "DUVAL, PABLO": "2026-02-18",
+  "DÁVILA, GRACIELA LUCIA": "2024-01-30",
+  "D’ONOFRIO, BENJAMÍN": "2026-02-09",
+  "D’ONOFRIO, MARIANO ENRIQUE": "2026-04-16",
+  "ELIAS, HIARA INES": "2023-05-10",
+  "EPELBOIM, MARISOL": "2024-03-22",
+  "ESCALANTE, FERNANDO": "2026-08-20",
+  "ESCALANTE, LEONELLA": "2026-03-31",
+  "ESERSKY, ALEXIA": "2024-08-26",
+  "ESERSKY, MARTINA": "2025-08-12",
+  "ESPINOLA, JUAN": "2024-09-13",
+  "ESPINOLA, MILAGROS": "2026-04-13",
+  "ESTEVEZ, LILIANA": "2026-05-26",
+  "ESTRUGA, MARIA JOSE": "2024-10-16",
+  "ESTRUGA, MARÍA JOSÉ": "2023-04-26",
+  "ETCHEVERRY , LAUTARO ETCHEVERRY": "2026-09-16",
+  "ETCHEVERRY DABBAH, LAUTARO": "2026-01-20",
+  "ETCHEVERRY, FACUNDO": "2026-09-16",
+  "ETCHEVERRY, LAUTARO": "2025-07-29",
+  "FALCATO, CONSTANZA": "2024-09-17",
+  "FALCO, AGUSTINA": "2024-07-30",
+  "FALCON, ALEJANDRA": "2025-02-25",
+  "FALCON, VANINA": "2026-06-02",
+  "FARIÑA, BRUNO": "2023-09-08",
+  "FARIÑA, DELFINA": "2025-10-21",
+  "FERNANDEZ FONTICIELLA, JANA": "2026-04-23",
+  "FERNANDEZ FONTICIELLA, MAIA": "2026-05-21",
+  "FERNANDEZ MUÑOZ, JORGE": "2024-06-04",
+  "FERNANDEZ, DARIO CARLOS": "2026-07-03",
+  "FERNANDEZ, IVAN": "2026-05-28",
+  "FERNANDEZ, LUCIANA": "2025-08-26",
+  "FERNANDEZ, NATALIA": "2026-08-20",
+  "FERNANDEZ, NELIDA": "2024-09-30",
+  "FERNANDEZ, ROBERTO": "2024-01-29",
+  "FERNANDEZ, SOL": "2025-10-09",
+  "FERNANDEZ, VIRGINIA": "2025-08-26",
+  "FERNANDEZ, WILMA": "2025-09-04",
+  "FERNÁNDEZ MUÑOZ, JORGE BERNABE": "2025-01-07",
+  "FERNÁNDEZ VENTURINI, DARÍO": "2025-09-30",
+  "FERNÁNDEZ, LIONEL": "2025-08-14",
+  "FERRADA, IGNACIO": "2026-07-23",
+  "FERRANTE, CATERINA": "2025-11-17",
+  "FERRARO, MARINA": "2026-08-11",
+  "FERREIRA, DAIANA": "2026-08-13",
+  "FERREYRA, JIMENA": "2026-03-05",
+  "FIGUEROA, CAROLINA": "2025-12-05",
+  "FIGUEROA, JOHANNA": "2026-07-21",
+  "FIORINI, FERNANDA": "2024-09-27",
+  "FISQUETTI, SUSANA": "2024-10-29",
+  "FLEISCHMANN, AJAX": "2023-07-28",
+  "FLORES COLOMBO, MATEO": "2024-07-10",
+  "FLUGEL, MARIA": "2023-04-18",
+  "FOGLIA, CAROLINA": "2023-04-19",
+  "FONTICIELLA, VIRGINIA": "2026-03-13",
+  "FONTÁN MENÉNDEZ Y MÍGUEZ , DAIANA MAGALI": "2026-05-18",
+  "FORGUES, JUAN ANDRÉS": "2026-03-13",
+  "FORSTHUBER, GUIDO": "2026-01-23",
+  "FRASCADOR, CARLA": "2026-08-06",
+  "FREDES, MATIAS": "2025-08-25",
+  "FREILE, ANDREA": "2025-07-15",
+  "FRESCO, EMA": "2024-12-13",
+  "FRESCO, MARTIN": "2023-05-10",
+  "FRESCO, VALENTINA": "2024-08-16",
+  "GABUTTI, ROMINA": "2026-08-24",
+  "GALIÑANES SANCHON, SANTIAGO": "2024-10-15",
+  "GALIÑANES, CATALINA": "2025-11-27",
+  "GALIÑANES, SANTIAGO": "2023-07-21",
+  "GALLINI, LUCAS": "2024-09-20",
+  "GALLINI, RITA": "2025-10-23",
+  "GALLINI, SOFÍA ZOE": "2024-09-23",
+  "GARBARINI, JUAN PABLO": "2026-08-13",
+  "GARCIA DIAZ, MILAGROS": "2025-11-04",
+  "GARCIA GARIN, AGUSTINA": "2026-03-17",
+  "GARCIA PRISCO, MARIA CELESTE": "2026-04-14",
+  "GARCIA, AGUSTINA": "2026-08-13",
+  "GARCIA, BENJAMIN": "2026-08-25",
+  "GARCIA, MARIANA": "2023-04-26",
+  "GARCIA, MARTIN": "2024-07-05",
+  "GARCÍA DE LEO, FELIPE": "2024-08-08",
+  "GARCÍA MERLO, MANUEL": "2026-08-03",
+  "GARDEY, FEDERICO": "2023-09-20",
+  "GARIBALDI SAFAR, ISABELLA": "2026-05-28",
+  "GARMENDIA, RAQUEL": "2026-08-06",
+  "GASPARRI, MARIA LAURA": "2023-05-02",
+  "GAVAZZA LEROUX, FRANCISCO": "2026-05-12",
+  "GENI, MACARENA": "2026-07-03",
+  "GENIO, PEPE": "2025-07-22",
+  "GIAMPIETRI, MAURO": "2026-03-26",
+  "GIANFELICE, ANALÍA MARIANA": "2025-12-09",
+  "GIANFRANCESCO, CAROLINA": "2026-06-22",
+  "GIANICO, PAULA": "2025-09-04",
+  "GIANNETTI, JUAN": "2026-06-16",
+  "GIANNETTI, LOLA": "2025-12-16",
+  "GIANNETTI, PEDRO": "2026-06-16",
+  "GIANNONI, MATIAS": "2026-08-20",
+  "GIL, ANDREA": "2026-07-02",
+  "GIRADO, ELIZABETH": "2026-04-01",
+  "GIUSTO, ANALIA": "2026-04-07",
+  "GOMEZ ROLDAN, ANDREA CAROLINA": "2025-11-17",
+  "GOMEZ, FERNANDA": "2022-12-13",
+  "GONZALEZ FURRER, JUAN CRUZ": "2025-03-20",
+  "GONZALEZ PRIETO, RAMIRO": "2026-02-05",
+  "GONZALEZ, ALDANA": "2026-02-06",
+  "GONZALEZ, IVANA": "2026-08-06",
+  "GONZALEZ, JAVIER": "2026-08-10",
+  "GONZALEZ, LUZ": "2024-11-05",
+  "GONZALEZ, MARIA LUZ": "2026-03-05",
+  "GONZALEZ, MICAELA AGUSTINA": "2026-02-03",
+  "GONZALEZ, NICOLAS E": "2026-01-26",
+  "GONZALEZ, SILVIANA ANDREA": "2025-03-18",
+  "GONZÁLEZ , GISELLE": "2026-08-20",
+  "GOPAR ESTEVA REZZIO, NDAAYA": "2024-06-26",
+  "GOPP PAREYRA, ALEJANDRA": "2024-07-16",
+  "GOPP PEREIRO, MARÍA ALEJANDRA": "2025-09-26",
+  "GRAZIANI, GONZALO": "2023-07-25",
+  "GREGORINI, FERMIN": "2025-04-22",
+  "GRICHENER MENDEZ, LUCIO": "2025-05-29",
+  "GRIGNANI, FELIPE": "2024-03-25",
+  "GRIGNANI, LUCAS": "2024-03-25",
+  "GRIGNANI, MARCELO": "2025-04-21",
+  "GRINBANK, GERMAN": "2023-11-10",
+  "GROSSER ROJKIN, ALYSA": "2026-01-20",
+  "GROSSER ROJKIN, THIAGO": "2026-07-21",
+  "GROSSER, ARIEL": "2026-03-10",
+  "GUANA, MARIA LAURA": "2024-12-10",
+  "GUARDIA DANZO, LUNA": "2026-06-26",
+  "GUBITOSI, MALENA": "2023-07-14",
+  "GUDIÑO, MARTINA": "2025-11-17",
+  "GUERRI, ESTEBAN": "2024-06-19",
+  "GUILLERMO, SUSANA Y": "2023-12-05",
+  "GUTIERREZ, DANTE": "2023-05-17",
+  "GUTIERREZ, JEANETTE": "2026-02-10",
+  "GUTIERREZ, SANTI": "2025-11-18",
+  "GÜERRI, JULIETA": "2025-12-22",
+  "H, FRANK": "2025-04-29",
+  "HASS BONINO, AYELEN": "2025-05-06",
+  "HASSON, ESTEBAN": "2025-12-23",
+  "HENDERSON, HERNAN": "2023-06-06",
+  "HERLEIN, RENATA": "2025-09-10",
+  "HERMIDA, ÉLIDA BEATRIZ": "2026-05-19",
+  "HERNÁNDEZ RAMIREZ, YADIRA  ISABEL": "2026-08-12",
+  "IDDA, AGUSTIN": "2025-10-30",
+  "IDDA, HERNAN": "2026-07-23",
+  "IDDA, JOAQUIN": "2024-06-06",
+  "IERMITO, LETICIA": "2023-05-17",
+  "IMIZCOZ, ANA": "2026-06-30",
+  "IMIZCOZ, ANA CLARA": "2026-08-05",
+  "INGRAND, ALI": "2025-12-03",
+  "INSAURRALDE, MILAGROS": "2024-02-05",
+  "INSAURRALDE, SHARON": "2023-05-18",
+  "INSAURRALDE, SILVIA": "2024-08-23",
+  "IRISARRI, NOELIA": "2024-08-15",
+  "JANKOWSKI, LUCIA": "2026-07-16",
+  "JAUNARENA, LUCAS": "2026-06-05",
+  "JIMENEZ, JUAN TOMAS": "2023-07-13",
+  "JOAO, CINTIA": "2022-12-05",
+  "JUAREZ, FLORENCIA": "2025-07-04",
+  "JUCHIMCZUK ZAWOROTNY , LARA": "2026-05-12",
+  "JUÁREZ, NORA": "2025-10-07",
+  "KARINA, PRUDENTE": "2024-12-03",
+  "KIESSIG, MARIEL": "2026-08-18",
+  "KOLODKO, AGUSTINA": "2026-05-26",
+  "KOLODKO, DELFINA": "2025-09-26",
+  "KUNZ, NICOLAS": "2026-01-29",
+  "KVITKO, NAHAMA": "2024-03-26",
+  "L, NICOLAS": "2023-12-15",
+  "LA BEST, LUCY": "2023-09-19",
+  "LAIS, CASANDRA": "2025-12-22",
+  "LAMAR, LILIANA": "2026-04-24",
+  "LANTARON, MILAGROS": "2023-05-02",
+  "LAORGA, ARIADNA": "2025-04-24",
+  "LARROUDE , SANDRA": "2026-01-27",
+  "LARROUDE, SANDRA ROXANA": "2025-12-16",
+  "LAUTARO, ALBRAND": "2026-05-07",
+  "LAZARTE, FLORENCIA": "2026-08-05",
+  "LECOMTE, MARIANA": "2025-11-25",
+  "LEDESMA, MARTIN": "2026-06-12",
+  "LEGUIZAMON, LUCIANA": "2023-01-11",
+  "LEIRO, FACUNDO": "2026-05-14",
+  "LEON BALESTRA, ESTEFANIA JUDITH": "2024-09-27",
+  "LEONE, EZEQUIEL": "2026-04-28",
+  "LEPORACE , JORGE": "2026-08-18",
+  "LEPORACE , NINA": "2026-07-23",
+  "LEPORACE , OLIVIA": "2026-07-23",
+  "LERMITO, FEDERICO": "2023-01-12",
+  "LEVANTESI, ROCÍO": "2026-05-08",
+  "LICCIARDELLO, NICOLAS": "2024-07-12",
+  "LINARES , PATRICIO": "2026-08-03",
+  "LIUZZI CORREA, GIANNI BENICIO": "2025-10-23",
+  "LIUZZI SUAREZ, DAMIAN ESTEBAN": "2026-08-05",
+  "LIUZZI, DEBORA NATALIA": "2025-06-03",
+  "LLOBET, DELFINA": "2024-11-08",
+  "LOBEIRA, FLORENCIA": "2026-06-05",
+  "LOLLINI, VERÓNICA": "2025-08-14",
+  "LOMBARDIA, GONZALO": "2026-05-28",
+  "LOMBARDIA, RAMIRO": "2025-11-07",
+  "LONGARTE, ADRIAN": "2025-03-17",
+  "LONGO NUX, INES": "2025-08-12",
+  "LONGO, MARTÍN": "2026-05-07",
+  "LOPEZ FERROFINO, EMANUEL": "2023-11-15",
+  "LOPEZ, JULIA": "2026-08-06",
+  "LOPEZ, PAULA": "2023-09-28",
+  "LOPEZ, STEPHANIE": "2025-05-22",
+  "LUBOS, VERONICA": "2023-02-09",
+  "LUIS FEDERICO, NAVARRO": "2026-05-11",
+  "LUIS, SANTIAGO": "2025-04-15",
+  "LÓPEZ , MARIA BELEN": "2026-07-24",
+  "MACHADO, JORGE": "2026-07-30",
+  "MACIEL, MARIA JOSE": "2026-06-08",
+  "MAITA, LAURA": "2026-08-13",
+  "MALDONADO, CAIMILE": "2025-07-31",
+  "MALDONADO, CARLA": "2025-12-23",
+  "MALUENDEZ, ALEJO": "2023-06-28",
+  "MANSILLA, CAMI": "2025-10-13",
+  "MANSILLA, CAMILA ALDANA": "2023-08-02",
+  "MANSILLA, PAULA": "2025-02-24",
+  "MANSO, GONZALO": "2024-11-08",
+  "MANSO, LAUTARO": "2024-11-08",
+  "MANSO, LUCAS": "2025-01-14",
+  "MARAGLIANO, BARBARA": "2025-12-15",
+  "MARANO, MARIANA": "2026-04-29",
+  "MARCENARO, FERNANDA": "2023-04-12",
+  "MARCHISELLI, LUCA": "2026-03-30",
+  "MARIAN, MARIA LAURA": "2024-01-11",
+  "MARIAN, MARÍA LAURA": "2026-04-07",
+  "MARIAN, VICTORIA": "2024-12-10",
+  "MARINO, JULIA BEATRIZ": "2024-04-25",
+  "MARINO, LUCIA": "2023-02-14",
+  "MARONE, NATALIA": "2025-10-16",
+  "MARQUISELLI, VERONICA": "2023-06-14",
+  "MARTIN, FABRICIO": "2026-01-19",
+  "MARTIN, OLIVIA": "2024-01-05",
+  "MARTINEZ, EUGENIA": "2026-04-17",
+  "MARTINEZ, KAREN": "2025-05-26",
+  "MARTINEZ, LUCIANA": "2025-02-10",
+  "MARTINEZ, MARÍA EUGENIA": "2025-01-09",
+  "MARTINEZ, ROCIO": "2025-03-11",
+  "MARTINEZ, ÁNGEL ROBERTO": "2025-02-04",
+  "MASCANFRONI , HERNAN": "2026-06-08",
+  "MASTRO, MARIANA": "2026-08-21",
+  "MASTROLORENZO, ANTONELLA": "2025-09-23",
+  "MATIAS, GINO": "2023-11-30",
+  "MAZA, VIRGINIA": "2026-08-04",
+  "MAZZEI, VALENTINA": "2026-02-13",
+  "MAZZETTI, GONZALO": "2024-12-05",
+  "MAZZIERI, FEDERICO": "2024-09-06",
+  "MENDEZ, JUAN MANUEL": "2025-09-11",
+  "MENDIONDO, CARLOS": "2026-04-10",
+  "MENDIONDO, PARRICIA": "2026-08-10",
+  "MENDIONDO, SABRINA": "2024-12-19",
+  "MENDOZA POLGARI, IGNACIO": "2023-06-08",
+  "MERINO, AMELIA": "2024-10-02",
+  "MERLINO, MACARENA": "2026-08-04",
+  "MEROLLA, FERNANDO": "2024-06-04",
+  "MICHAN, GINETTE  ESTHER": "2026-06-18",
+  "MIKULIC, MARIA EMILIA": "2024-08-20",
+  "MILLA, NICOLAS MAXIMO": "2024-09-24",
+  "MINETTI, ZOE": "2025-04-21",
+  "MINOTTI, MARCELA": "2025-01-21",
+  "MINUTELLA, MERCEDES": "2026-06-08",
+  "MIQUELARENA, MARIANO": "2026-03-30",
+  "MIRANDA, CAMILA": "2025-10-14",
+  "MIRANDA, FLORENCIA": "2026-08-13",
+  "MIRANDA, TIARA DANIELA": "2025-08-26",
+  "MIÑONES, LUCÍA": "2026-08-21",
+  "MOLINARI MANSILLA, MILAGROS": "2026-01-09",
+  "MOLLO, CLAUDIO MARCELO": "2023-11-08",
+  "MONZON, NATALIA": "2026-02-20",
+  "MORELLO, SANTIAGO": "2026-03-27",
+  "MOREYRA, EDUARDO": "2024-06-26",
+  "MUSALUPPI, LORENA": "2025-10-06",
+  "MUÑOZ, NICOLÁS ERNESTO": "2024-01-30",
+  "N, AGUSTINA": "2025-10-28",
+  "NAKAMURA, AGUSTINA": "2026-02-23",
+  "NATALE, MARTINA": "2025-07-11",
+  "NAVARRO, BALTAZAR": "2026-05-27",
+  "NAVARRO, FEDERICO": "2024-02-02",
+  "NAVARRO, LUCÍA": "2026-01-09",
+  "NAVARRO, SOLEDAD": "2024-12-20",
+  "NAVEIRA, MATEO": "2025-11-25",
+  "NAVEIRA, PABLO": "2026-03-10",
+  "NORIEGA, LUCIA": "2026-04-14",
+  "NUÑEZ, MARTIN": "2026-05-07",
+  "NUÑEZ, YAZMIN": "2025-12-12",
+  "OBENAUS, LEOPOLDO": "2025-09-23",
+  "OCANA, MARTIN": "2025-12-23",
+  "OCANTO LEON, BIANCA SOPHIA": "2026-08-04",
+  "ODINO, JUAN MANUEL": "2026-01-29",
+  "OJEDA, LUCAS EMANUEL": "2023-11-09",
+  "OKECKI, DOLORES": "2025-07-08",
+  "OLIVA, EZEQUIEL": "2024-09-17",
+  "OLIVER, SEBASTIÁN": "2025-12-09",
+  "OLMOS MITRE, OLIVERIO": "2024-08-20",
+  "OLMOS, EMILIA": "2023-04-25",
+  "ORDOÑEZ, SEBASTIAN": "2026-05-27",
+  "ORIENTAL, VIRGINIA": "2024-06-26",
+  "ORSI, ADRIANA": "2026-08-11",
+  "ORTIGOZA, FLORENCIA": "2024-08-09",
+  "ORTIZ, BETO": "2026-03-31",
+  "ORTIZ, CARLOS": "2024-05-07",
+  "ORTIZ, LILIANA LAURA": "2024-09-20",
+  "ORTIZ, LUCIANA": "2026-06-09",
+  "ORTIZ, NORBERTO": "2025-09-24",
+  "OSORES, LAURA": "2025-09-30",
+  "OTRANTO, GRACIELA": "2025-09-10",
+  "OTTONELLO, EZEQUIEL": "2025-07-31",
+  "OTTONELLO, JULI": "2025-02-11",
+  "OTTONELLO, JULIAN": "2023-05-24",
+  "OTTONELLO, SOFÍA": "2026-06-18",
+  "OZINO, GRETEL": "2026-06-09",
+  "PADUANO, IGNACIO": "2024-10-24",
+  "PAEZ CIRILO, JUAN CRUZ": "2026-01-20",
+  "PAGLIETTA, MELINA": "2024-02-16",
+  "PALACIO, FERNANDA CANDELA": "2026-02-19",
+  "PALACIOS, JUAN JOSE": "2024-08-08",
+  "PALACIOS, JUANA MORENA": "2024-06-26",
+  "PALACIOS, PALOMA": "2025-02-28",
+  "PALMA, FLORENCIA": "2026-01-30",
+  "PANEPUCCI, LUCILA": "2026-07-02",
+  "PANTANETTI, GONZALO": "2025-03-07",
+  "PAREDES, SABRINA": "2026-01-26",
+  "PAREDES, SABRINA FERNANDA": "2025-10-16",
+  "PAVON PIVETTA, FEDERICO": "2024-03-05",
+  "PAZ, DANIELA VICTORIA": "2024-07-18",
+  "PECILE, SANDRA": "2024-01-04",
+  "PERALTA, NATALIA": "2025-05-08",
+  "PERAZZI, JESICA": "2023-11-08",
+  "PEREIRA NUÑEZ, WASHINGTON": "2025-05-13",
+  "PEREYRA, ALEJANDRO": "2022-12-06",
+  "PEREYRA, ANDREA SOLEDAD": "2023-06-01",
+  "PEREYRA, DOMINIQUE": "2024-09-23",
+  "PEREZ, ELSA ALBA": "2023-12-28",
+  "PEREZ, PAMELA LILIANA ANDREA": "2023-12-19",
+  "PEREZ, VERONICA SOLEDAD": "2026-03-16",
+  "PESTARINO, TATIANA": "2026-08-03",
+  "PEÑA, AXEL MANUEL": "2024-07-04",
+  "PIMENTEL SIRI, BRUNO": "2026-03-30",
+  "PIMENTEL SIRI, JOAQUIN": "2026-03-30",
+  "PIMENTEL, GONZALO": "2024-09-23",
+  "PIZARRO, MIRIAM SILVIA": "2025-12-11",
+  "PIZZICHILLO, FLORENCIA": "2025-07-04",
+  "PLANDE, ALICIA": "2024-07-05",
+  "PODHAJSKI, NADIA": "2024-09-19",
+  "POGGI, CLARA": "2025-12-18",
+  "POLGARI, ANA": "2023-10-05",
+  "POLLERO DAGA, ISABELLA": "2025-11-27",
+  "POLLERO, JULIO": "2023-09-07",
+  "POLLERO, SOFIA": "2026-08-31",
+  "PONCE, FELIPA": "2025-09-25",
+  "PONCE, ROMAN": "2025-09-25",
+  "POPOV, IVÁN": "2026-03-19",
+  "POPOV, LUDMILA": "2025-07-11",
+  "POPOV, WALTER": "2024-12-06",
+  "PORRAZZO, JUAN CRUZ": "2025-12-19",
+  "PRODAN, FRANCISCO": "2026-02-04",
+  "PRUNESTI, SEBASTIAN": "2026-06-30",
+  "PUCHES, MATIAS": "2026-06-23",
+  "PUSSETTO, SOFIA": "2026-07-13",
+  "PÁEZ, GER": "2026-05-26",
+  "PÉREZ JOHANNSON, LAUTARO NAHUEL": "2024-02-29",
+  "QUAST, CAMILA": "2025-07-07",
+  "QUESADA, BERNABE": "2026-08-04",
+  "QUEVEDO, YEITKER": "2025-09-26",
+  "QUEZADA, WALTER": "2025-12-19",
+  "QUINTANS, CLAUDIA CECILIA": "2026-08-05",
+  "QUIROGA, MARTIN": "2024-12-06",
+  "QUIROGA, NATIVIDAD": "2023-09-12",
+  "QUIROGA, ROCIO ALDANA": "2025-03-28",
+  "R, L": "2025-10-28",
+  "RAFFO, FELIPE": "2025-07-14",
+  "RAMOA, MALENA": "2023-09-07",
+  "RAMOS, EZEQUIEL": "2023-11-07",
+  "RAMOS, MALENA": "2024-12-20",
+  "RAMOS, RAMIRO": "2023-11-16",
+  "RASULO, GISELE": "2026-05-21",
+  "RATCLIFFE, AUGUSTO": "2025-09-19",
+  "REALE, NICOLAS": "2025-09-17",
+  "REALE, NICOLÁS": "2025-09-09",
+  "REDONDO, FLORENCIA": "2025-09-26",
+  "REDONDO, MICAELA": "2025-11-10",
+  "REDONDO, OSCAR ALFREDO": "2023-10-06",
+  "REISS, LEANDRO": "2023-12-28",
+  "RENAUD, MELINA": "2026-03-17",
+  "RENAUD, SOFIA": "2026-01-19",
+  "REYES LONGO, CAMILA": "2026-04-07",
+  "REYES LONGO, MARIA BELEN": "2024-05-14",
+  "REYES, BELEN": "2025-10-21",
+  "REZZIO, CONSTANZA": "2024-11-25",
+  "REZZIO, NDAAYA": "2026-05-19",
+  "RIBERO ARIAS , CLAUDIA": "2026-07-16",
+  "RIEMERSMA, MALENA": "2025-07-29",
+  "RIEMERSMA, PAULA": "2025-08-25",
+  "RIEMERSMA, SEBASTIAN": "2024-06-11",
+  "RIENTE, GABRIELA": "2026-06-22",
+  "RIGANTI, NANCY": "2024-01-23",
+  "RIVAS, SEBASTIÁN": "2025-08-28",
+  "RIVERA, LEONARDO": "2024-02-29",
+  "RIVERO, NATALIA": "2026-08-24",
+  "RIVERO, TIARA": "2024-12-03",
+  "ROBLES , ISABELLA": "2026-03-30",
+  "ROBLES, DANIEL": "2026-06-12",
+  "ROBLES, KARI": "2024-04-25",
+  "ROBLES, KARINA": "2025-12-23",
+  "ROCCHESSO, ROSA": "2023-08-08",
+  "RODAS, JULIETA": "2024-04-26",
+  "RODOLFI, NICOLAS": "2026-06-04",
+  "RODRIGUEZ QUEVEDO, JUAN CARLOS": "2024-08-13",
+  "RODRIGUEZ, ANALIA": "2024-01-30",
+  "RODRIGUEZ, ANDRES": "2026-08-05",
+  "RODRIGUEZ, BARBARA INES": "2026-08-13",
+  "RODRIGUEZ, BARBY": "2025-07-28",
+  "RODRIGUEZ, CANELA": "2024-10-25",
+  "RODRIGUEZ, DANIELA": "2026-05-19",
+  "RODRIGUEZ, FABIANA": "2025-03-28",
+  "RODRIGUEZ, FEDERICO": "2023-08-18",
+  "RODRIGUEZ, HERNAN": "2024-08-23",
+  "RODRIGUEZ, JULIETA": "2026-03-09",
+  "RODRIGUEZ, MACARENA": "2023-05-16",
+  "RODRIGUEZ, MICAELA SOFIA": "2025-05-06",
+  "RODRÍGUEZ , MAGALI": "2026-07-28",
+  "RODRÍGUEZ , MARÍA EUGENIA": "2026-02-09",
+  "RODRÍGUEZ CORNAGLIA , MICAELA": "2026-06-19",
+  "RODRÍGUEZ VENTURA, RAMIRO": "2025-12-16",
+  "RODRÍGUEZ, MARÍA EUGENIA": "2025-09-01",
+  "ROGET, MARÍA ARACELI": "2026-08-12",
+  "ROJAS, CAMILA": "2024-06-26",
+  "ROMERO GEGUNDEZ, LARA TAIEL": "2026-05-21",
+  "ROMERO LÓIZAGA, JAVIER": "2026-06-08",
+  "ROMERO, JONATHAN": "2023-04-26",
+  "ROMERO, MARIA": "2026-07-30",
+  "ROMERO, MARÍA": "2025-10-13",
+  "ROMERO, SOLEDAD": "2024-10-29",
+  "ROSA, AUGUSTO": "2026-06-29",
+  "ROSAS, BELEN": "2025-12-01",
+  "ROSELLO, CARLA": "2024-12-19",
+  "ROSSI, RICARDO": "2025-10-13",
+  "ROULIER, MÓNICA": "2023-07-21",
+  "ROVIRA, PENELOPE": "2023-10-05",
+  "ROZADA, CECILIA": "2025-10-30",
+  "ROZAS, SEBASTIAN": "2026-02-02",
+  "RUBIO, GABRIEL": "2025-08-21",
+  "RUBÍES, FEDERICO": "2026-02-12",
+  "RUFFOLO, ROSARIO": "2025-11-18",
+  "RUISI, CINTIA": "2024-06-25",
+  "RUISI, SILVINA": "2024-06-12",
+  "RUIZ HUIDOBRO, MATIAS": "2026-08-12",
+  "RUIZ, RODRIGO": "2024-01-08",
+  "SAFAR, PAMELA": "2025-10-07",
+  "SAGRADINI, PIA": "2024-05-07",
+  "SAGRISTANI, FABIAN": "2025-12-15",
+  "SAGUIR, NICOLAS": "2026-03-09",
+  "SAIJO, VALENTIN": "2024-07-23",
+  "SALEGEL SANSEAU, TATIANA": "2025-07-29",
+  "SALEGEL SANSÉAU, SABRINA": "2025-01-20",
+  "SAN JOSÉ, AGUSTÍNA JULIETA": "2024-03-28",
+  "SAN JOSÉ, EDUARDO": "2023-06-29",
+  "SANCHEZ, AGUSTINA": "2026-06-19",
+  "SANCHEZ, KARINA": "2026-04-30",
+  "SANCHEZ, MARIA FLORENCIA": "2025-08-06",
+  "SANCHEZ, MICAELA": "2022-12-13",
+  "SANCHEZ, VERONICA": "2025-09-23",
+  "SANCHON, ROMINA": "2026-02-03",
+  "SANDOVAL, DEBORA": "2023-11-03",
+  "SANDRINI, NAHIR": "2026-05-06",
+  "SANGIORGI, VANESA ANDREA": "2026-08-05",
+  "SANJIAO, LIDIA": "2025-11-04",
+  "SANTONI, ROMINA": "2025-07-24",
+  "SANTUCHO, DAIRA": "2026-08-24",
+  "SANTUCHO, DANTE": "2025-01-06",
+  "SANTUCHO, HECTOR ALBERTO": "2025-12-09",
+  "SARDO , CAMILA": "2026-08-18",
+  "SARRATEA, LAURA": "2023-07-11",
+  "SARRO, FLORENCIA": "2025-04-25",
+  "SATULOVSKY, BELU": "2026-03-20",
+  "SCALLAN, CATALINA": "2025-12-22",
+  "SCALLAN, JULIANA": "2025-12-18",
+  "SCALLAN, SEBASTIAN": "2026-07-14",
+  "SCANNAPIECO, ANDRES": "2026-08-12",
+  "SCHIAPPARELLI, NADIA": "2026-01-23",
+  "SCHIAVO, FERNANDA": "2026-08-11",
+  "SCHOLEM PEREYRA, ADRIEL BALTAZAR": "2024-08-13",
+  "SCHUSTER, ISABEL": "2026-06-04",
+  "SCHWINDT, AGUSTINA": "2024-08-15",
+  "SCIARROTTA, LORENA": "2026-05-18",
+  "SCIARROTTA, VANESA": "2023-01-26",
+  "SEGRE, AMBAR": "2023-01-19",
+  "SEITA, VALENTIN": "2025-05-28",
+  "SENOSETI, FLORENCIA": "2025-04-08",
+  "SERPERO, FRANCO": "2026-05-21",
+  "SERPERO, NICOLAS": "2026-07-31",
+  "SFERCO, CHRISTIAN": "2025-11-13",
+  "SFERCO, CHRISTIÁN": "2025-12-11",
+  "SFERCO, VALENTINA": "2025-03-31",
+  "SHEMI, MARINA": "2024-02-16",
+  "SIDWELL, CAROLINA": "2025-10-09",
+  "SIGA, FLORENCIA": "2025-08-14",
+  "SILVA, GRISELDA": "2023-01-04",
+  "SILVA, YEITSY": "2025-05-22",
+  "SIMARO, GUIDO ALEJANDRO": "2025-05-06",
+  "SINTES, ALEJO": "2024-02-01",
+  "SIRI, EUGENIA": "2025-12-12",
+  "SIRI, PAULA": "2023-05-02",
+  "SIROVICA, MARTINA": "2026-08-11",
+  "SOLA NAVARRO, MARTINA": "2026-08-10",
+  "SOLOAGA, DAMIAN": "2026-06-11",
+  "SORIA, MARIELA": "2026-07-21",
+  "SOSA PEYRET, JUAN MANUEL": "2023-11-23",
+  "SOSA, ALAN": "2025-11-10",
+  "SOSA, ARIEL ALEJANDRO": "2026-05-07",
+  "SOSA, FABRICIO": "2023-03-30",
+  "SOSA, LEONEL": "2024-03-21",
+  "SOSA, PAOLA": "2023-01-18",
+  "SPINELLI, CONRADO": "2025-03-20",
+  "STRUCCHI, LUCIANO": "2023-03-28",
+  "SUAITER VICTORICA, MARIA": "2026-04-21",
+  "SUAREZ, ERNESTO": "2026-08-11",
+  "SUAREZ, SERAFIN": "2026-07-13",
+  "SUSACASA, SOFIA": "2025-05-08",
+  "SUTO, MARIANA": "2023-04-20",
+  "SUÁREZ, MÓNICA BEATRIZ": "2024-04-19",
+  "SUÁREZ, RAMIRO": "2025-06-03",
+  "SZAJOWICZ, SOFIA": "2026-08-18",
+  "SÁNCHEZ LÓPEZ, GONZALO": "2024-12-20",
+  "TABANERA, JERONIMO": "2026-04-28",
+  "TAIARIOL, IVANO": "2023-07-21",
+  "TAJES, EUGENIA": "2023-07-14",
+  "TAJES, FERNANDA": "2026-07-17",
+  "TARANTO, MATIAS": "2026-04-21",
+  "TARANTO, MATÍAS": "2025-03-18",
+  "TARDINI, GONZALO": "2023-10-03",
+  "TEDESCO, MARTA": "2025-09-04",
+  "TERMINELLO, BAUTISTA": "2025-03-20",
+  "TESEI, LUDMILA": "2026-08-12",
+  "TESEI, MARÍA FLORENCIA": "2026-08-04",
+  "TESORIERO, DIEGO": "2026-03-06",
+  "TESORIERO, GIULIANA": "2026-01-15",
+  "TIMPANO, MELINA": "2024-12-20",
+  "TISSERA, PAULA": "2024-09-06",
+  "TISSERA, PAULAL": "2024-03-26",
+  "TODRES, NICOLE": "2026-03-31",
+  "TOMEI, ADRIANA": "2025-04-15",
+  "TORANZO, BELEN": "2026-05-08",
+  "TORRES, CECII": "2025-10-28",
+  "TORRES, HORACIO MIGUEL": "2023-04-13",
+  "TORRES, OLIVIA": "2026-07-31",
+  "TOULOUMDJIAN, CAROLINA": "2025-11-27",
+  "TOÑANEZ, LUIS ALBERTO": "2024-02-29",
+  "TRAVAGLINI, JEREMIAS": "2024-11-21",
+  "TRINCA, MATHEUS": "2024-11-08",
+  "TRINCA, MATHEUS FELIPE": "2024-08-27",
+  "TRIPODI , LIONEL": "2026-05-15",
+  "TRIPODI, FIORELLA": "2025-09-01",
+  "TRIPODI, LIONEL": "2025-09-23",
+  "TROISI, JUAN IGNACIO": "2026-05-14",
+  "TRUJILLO, CRISTIAN": "2026-01-12",
+  "TURNER, CATALINA": "2024-12-10",
+  "TURNER, CRISTIAN": "2023-03-28",
+  "TURNER, JUAN PABLO": "2025-04-07",
+  "URANGA, JACQUELINE": "2026-01-29",
+  "URIEN, DELFINA": "2024-06-25",
+  "URUEÑA, EMMA": "2026-02-18",
+  "USANO, MARICEL": "2026-07-16",
+  "VACCARO, ADRIANA": "2022-12-06",
+  "VACCARO, CARLOS": "2023-04-21",
+  "VACCARO, VALENTINA": "2026-03-10",
+  "VALENTI, JOSÉ": "2024-01-25",
+  "VALLE, LUCAS EZEQUIEL": "2023-08-22",
+  "VALLEJO, FACUNDO": "2025-02-24",
+  "VANOTTI, CHIARA": "2026-07-21",
+  "VANOTTI, EDUARDO": "2024-09-09",
+  "VARELA, IGNACIO": "2026-08-03",
+  "VELASQUEZ, DIANA": "2024-08-06",
+  "VELIZ, KARINA": "2023-04-12",
+  "VELÁSQUEZ, MARIA": "2025-06-03",
+  "VENTURINI, ALEJANDRA": "2026-03-19",
+  "VERSCHOOR, ELIANA": "2024-09-12",
+  "VIANA, SEBASTIÁN": "2024-11-22",
+  "VIDAL, JULIETA": "2023-06-08",
+  "VIDAL, JULIETA CAROLINA": "2026-04-13",
+  "VIDAL, SOFIA FLORENCIA": "2025-07-24",
+  "VIGUERA, MONICA": "2025-05-19",
+  "VIGUERA, MÓNICA MARCELA": "2024-07-12",
+  "VILLA, CAMILA SOLEDAD": "2026-05-26",
+  "VILLALBA, VALERIA": "2026-01-13",
+  "VILLANUEVA, VICTORIA": "2025-04-22",
+  "VILLARRUBIA, MATIAS": "2024-07-24",
+  "VILLAVICENCIO, GENESIS": "2026-04-16",
+  "VISANI, VERÓNICA": "2025-07-04",
+  "VISCARRA, ALEJANDRA": "2026-05-04",
+  "VISCARRA, ALEJANDRA CECILIA": "2026-04-16",
+  "VIVAZ, AGUSTINA": "2026-08-05",
+  "VIVOT, DELFINA": "2023-12-22",
+  "VOLONTE, NICOLÁS MATÍAS": "2023-07-20",
+  "VUELTA, GUADALUPE": "2026-05-12",
+  "VUELTA, MAURO": "2024-01-09",
+  "VÖLKER, ANDREA": "2024-12-05",
+  "W, PETER": "2023-05-23",
+  "WAISBEIN, LAURA DIANA": "2026-06-01",
+  "WEILL, FRANCISCO": "2023-08-15",
+  "WEINMANN PANEPUCCI , CAMILA": "2026-02-19",
+  "WEINMANN PANEPUCCI , FRANCISCO": "2026-02-19",
+  "WEINMANN PANEPUCCI , ÁMBAR": "2026-04-21",
+  "WINTERHALTER, TAMARA": "2025-12-12",
+  "WOSCOFF, SILVINA": "2025-02-21",
+  "WRIGHT, WALTER": "2022-11-16",
+  "YAÑEZ, LUCILA": "2025-11-04",
+  "ZAMORA, DANIELA": "2026-08-17",
+  "ZAMORA, KIARA": "2026-02-10",
+  "ZANI, VALENTINA": "2026-08-21",
+  "ZANOTTI FRANCISCO, HUGO": "2025-03-25",
+  "ZANOTTI, FABIANA": "2027-05-04",
+  "ZARZA, ELI": "2026-08-18",
+  "ZORRAQUIN, MARÍA": "2024-09-09",
+  "ZUNINO, LUCIA": "2026-04-09",
+  "ZUNINO, TOMAS": "2025-08-12",
+};
 
 // ─── GARANTÍAS ───────────────────────────────────────────────────────────────
 
