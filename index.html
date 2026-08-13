@@ -134,6 +134,30 @@
       background: #fff9fd;
     }
     input.error { border-color: var(--danger); }
+    textarea {
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem; color: var(--text);
+      background: white;
+      transition: all 0.2s; width: 100%;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(233,30,140,0.12);
+      background: #fff9fd;
+    }
+    #btn-dictar.dictando {
+      background: var(--danger); color: white; border-color: var(--danger);
+      animation: pulse-dictado 1.4s infinite;
+    }
+    @keyframes pulse-dictado {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(220,53,69,0); }
+    }
 
     /* ── BOTONES ── */
     .btn {
@@ -297,6 +321,7 @@
   <button class="tab" onclick="showTab('resumen')">📊 Resumen</button>
   <button class="tab" onclick="showTab('cobros')">💰 Cobros</button>
   <button class="tab" onclick="showTab('recordatorios')">🔔 Recordatorios</button>
+  <button class="tab" onclick="showTab('historia')">🩺 Historia clínica</button>
 </div>
 
 <!-- TAB CARGAR -->
@@ -776,6 +801,47 @@
 
 </div>
 
+<!-- TAB HISTORIA CLÍNICA -->
+<div id="tab-historia" class="panel">
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">🩺 Historia clínica</div>
+    <div class="field">
+      <label>Paciente</label>
+      <input type="text" id="historia-paciente" list="historia-pacientes-datalist"
+             placeholder="Escribí o elegí un paciente..." autocomplete="off"
+             onkeydown="if(event.key==='Enter') buscarHistoriaPaciente()">
+      <datalist id="historia-pacientes-datalist"></datalist>
+    </div>
+    <button class="btn btn-primary" onclick="buscarHistoriaPaciente()">🔍 Ver ficha</button>
+  </div>
+
+  <div id="historia-ficha" style="display:none">
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" id="historia-ficha-nombre">—</div>
+
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="historia-nota-fecha">
+      </div>
+      <div class="field">
+        <label>Nota</label>
+        <textarea id="historia-nota-texto" rows="5" placeholder="Escribí o dictá la nota clínica de esta visita..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-ghost" id="btn-dictar" onclick="toggleDictado()" type="button">🎤 Dictar</button>
+        <button class="btn btn-primary" id="btn-guardar-historia" onclick="guardarNotaHistoria()">💾 Guardar nota</button>
+        <span id="historia-dictado-estado" style="font-size:0.8rem;color:var(--text-muted)"></span>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-bottom:10px">📜 Historial de notas</div>
+    <div id="historia-timeline"></div>
+  </div>
+
+</div>
+
 <!-- MODAL BORRAR PRESUPUESTO -->
 <div id="modal-borrar-presup" class="modal-backdrop">
   <div class="modal">
@@ -1152,13 +1218,14 @@ let toastTimer;
 
 function showTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['cargar','historial','resumen','cobros','recordatorios'][i] === name);
+    t.classList.toggle('active', ['cargar','historial','resumen','cobros','recordatorios','historia'][i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'resumen') renderResumen();
   if (name === 'cobros') { renderCobros(); actualizarDatalistCobros(); actualizarDatalistPresup(); }
   if (name === 'recordatorios') renderRecordatorios();
+  if (name === 'historia') actualizarDatalistHistoria();
 }
 
 function toast(msg, type='success') {
@@ -1560,6 +1627,7 @@ async function cargarPacientesDrapp() {
     actualizarDatalist();
     actualizarDatalistCobros();
     actualizarDatalistPresup();
+    actualizarDatalistHistoria();
   } catch(e) {
     // Falla silenciosa — la app funciona igual sin Drapp
     console.warn('No se pudieron cargar pacientes de Drapp:', e);
@@ -2205,6 +2273,185 @@ function actualizarDatalistCobros() {
   const nombres = getPacientesUnicos();
   dl.innerHTML = nombres.map(n => `<option value="${n}">`).join('');
 }
+
+// ─── HISTORIA CLÍNICA ──────────────────────────────────────────────────────
+let _historiaClinica = [];   // cache local: [{fecha, paciente, nota, rowIndex}, ...]
+let historiaPacienteActual = '';
+
+function actualizarDatalistHistoria() {
+  const dl = document.getElementById('historia-pacientes-datalist');
+  if (dl) dl.innerHTML = getPacientesUnicos().map(n => `<option value="${n}">`).join('');
+}
+
+async function buscarHistoriaPaciente() {
+  const nombre = document.getElementById('historia-paciente').value.trim();
+  if (!nombre) { toast('Escribí o elegí un paciente', 'warning'); return; }
+
+  historiaPacienteActual = nombre;
+  document.getElementById('historia-ficha').style.display = '';
+  document.getElementById('historia-ficha-nombre').textContent = '🩺 ' + nombre;
+  document.getElementById('historia-nota-texto').value = '';
+  if (!document.getElementById('historia-nota-fecha').value) {
+    document.getElementById('historia-nota-fecha').value = new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('historia-timeline').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+  await cargarHistoriaClinica();
+  renderHistoriaTimeline();
+}
+
+async function cargarHistoriaClinica() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=readHistoria&t=' + Date.now());
+    const raw = await res.json();
+    _historiaClinica = Array.isArray(raw) ? raw : [];
+  } catch (e) {
+    console.warn('No se pudo cargar la historia clínica:', e);
+    toast('No se pudo cargar la historia clínica', 'error');
+  }
+}
+
+function renderHistoriaTimeline() {
+  const key = normNombre(historiaPacienteActual);
+  const notas = _historiaClinica
+    .filter(n => normNombre(n.paciente) === key)
+    .sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+  const cont = document.getElementById('historia-timeline');
+  if (!notas.length) {
+    cont.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🩺</div>
+        <div>Todavía no hay notas cargadas para ${historiaPacienteActual}.</div>
+      </div>`;
+    return;
+  }
+
+  cont.innerHTML = notas.map(n => `
+    <div class="card" style="margin-bottom:10px;padding:14px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:700;color:var(--primary);font-size:0.88rem">${formatearFechaCorta(n.fecha)}</span>
+        <button class="btn btn-ghost" style="padding:3px 10px;font-size:0.72rem" onclick="borrarNotaHistoria(${n.rowIndex})" title="Eliminar nota">🗑️</button>
+      </div>
+      <div style="white-space:pre-wrap;line-height:1.55;font-size:0.92rem">${escapeHtml(n.nota)}</div>
+    </div>
+  `).join('');
+}
+
+function formatearFechaCorta(fecha) {
+  if (!fecha) return '—';
+  const [y, m, d] = fecha.split('-');
+  if (!y || !m || !d) return fecha;
+  return `${d}/${m}/${y}`;
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function guardarNotaHistoria() {
+  const texto = document.getElementById('historia-nota-texto').value.trim();
+  const fecha = document.getElementById('historia-nota-fecha').value;
+  if (!texto) { toast('Escribí o dictá la nota antes de guardar', 'warning'); return; }
+  if (!fecha) { toast('Elegí una fecha', 'warning'); return; }
+  if (historiaEscuchando) toggleDictado(); // corta el dictado si estaba activo
+
+  const btn = document.getElementById('btn-guardar-historia');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const params = new URLSearchParams({
+      action: 'saveHistoria', paciente: historiaPacienteActual, fecha, nota: texto
+    });
+    await fetch(SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
+    toast('✓ Nota guardada', 'success');
+    document.getElementById('historia-nota-texto').value = '';
+    await cargarHistoriaClinica();
+    renderHistoriaTimeline();
+  } catch (e) {
+    toast('No se pudo guardar la nota', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '💾 Guardar nota';
+  }
+}
+
+async function borrarNotaHistoria(rowIndex) {
+  if (!confirm('¿Eliminar esta nota de la historia clínica? Esta acción no se puede deshacer.')) return;
+  try {
+    const params = new URLSearchParams({ action: 'deleteHistoria', rowIndex: String(rowIndex) });
+    await fetch(SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
+    toast('✓ Nota eliminada', 'success');
+    await cargarHistoriaClinica();
+    renderHistoriaTimeline();
+  } catch (e) {
+    toast('No se pudo eliminar la nota', 'error');
+  }
+}
+
+// ─── Dictado por voz (Web Speech API — Chrome / Edge) ──────────────────────
+let historiaRecognition = null;
+let historiaEscuchando = false;
+let historiaTextoBase = '';
+
+function toggleDictado() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('btn-dictar');
+  const estado = document.getElementById('historia-dictado-estado');
+
+  if (!SpeechRecognition) {
+    toast('El dictado por voz no está disponible en este navegador. Probá con Chrome.', 'warning');
+    return;
+  }
+
+  if (historiaEscuchando) {
+    historiaRecognition && historiaRecognition.stop();
+    return;
+  }
+
+  const textarea = document.getElementById('historia-nota-texto');
+  historiaTextoBase = textarea.value ? textarea.value.trim() + ' ' : '';
+
+  historiaRecognition = new SpeechRecognition();
+  historiaRecognition.lang = 'es-AR';
+  historiaRecognition.continuous = true;
+  historiaRecognition.interimResults = true;
+
+  historiaRecognition.onstart = () => {
+    historiaEscuchando = true;
+    btn.classList.add('dictando');
+    btn.innerHTML = '⏹️ Detener';
+    estado.textContent = '🔴 Escuchando...';
+  };
+
+  historiaRecognition.onresult = (event) => {
+    let final = '', interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t + ' ';
+      else interim += t;
+    }
+    if (final) historiaTextoBase += final;
+    textarea.value = historiaTextoBase + interim;
+  };
+
+  historiaRecognition.onerror = (event) => {
+    console.warn('Error de dictado:', event.error);
+    if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+      toast('Necesito permiso del micrófono para dictar', 'warning');
+    }
+  };
+
+  historiaRecognition.onend = () => {
+    historiaEscuchando = false;
+    btn.classList.remove('dictando');
+    btn.innerHTML = '🎤 Dictar';
+    estado.textContent = '';
+    textarea.value = textarea.value.trim();
+  };
+
+  historiaRecognition.start();
+}
+// ─── FIN HISTORIA CLÍNICA ───────────────────────────────────────────────────
 
 function getPacientesUnicos() {
   const dePrestaciones = datos.map(d => d.paciente).filter(Boolean);
