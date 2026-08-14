@@ -626,7 +626,11 @@
             <option value="saldado">✅ Solo saldados</option>
           </select>
         </div>
-        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';document.getElementById('estado-filtro-saldo').value='';renderEstado()">✕ Limpiar</button>
+        <div class="field">
+          <label>Total cobrado de</label>
+          <select id="estado-filtro-mes" onchange="renderEstado()"></select>
+        </div>
+        <button class="btn btn-ghost" onclick="document.getElementById('estado-buscador').value='';document.getElementById('estado-filtro-saldo').value='';document.getElementById('estado-filtro-mes').value='';renderEstado()">✕ Limpiar</button>
       </div>
     </div>
 
@@ -641,7 +645,7 @@
         <div class="stat-value" id="estado-kpi-total" style="color:var(--danger)">—</div>
       </div>
       <div class="stat-card" style="border-left:4px solid var(--success)">
-        <div class="stat-label">Total cobrado</div>
+        <div class="stat-label" id="estado-kpi-cobrado-label">Total cobrado</div>
         <div class="stat-value money" id="estado-kpi-cobrado">—</div>
       </div>
     </div>
@@ -2094,9 +2098,39 @@ function renderPresupuestos() {
 
 // ─── ESTADO DE CUENTAS ───────────────────────────────────────────────────────
 
+function nombreMes(yyyyMM) {
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const [y, m] = yyyyMM.split('-');
+  return `${meses[parseInt(m,10)-1]} ${y}`;
+}
+
+function actualizarSelectMesEstado() {
+  const sel = document.getElementById('estado-filtro-mes');
+  if (!sel) return;
+  const valorPrevio = sel.value;
+
+  const mesesDisponibles = [...new Set(datosCobros.map(c => (c.fecha||'').substring(0,7)).filter(Boolean))].sort().reverse();
+  const mesActual = new Date().toISOString().substring(0,7);
+  if (!mesesDisponibles.includes(mesActual)) mesesDisponibles.unshift(mesActual);
+
+  sel.innerHTML = '<option value="">— Todos los meses —</option>' +
+    mesesDisponibles.map(m => `<option value="${m}">${nombreMes(m)}</option>`).join('');
+
+  if (sel.dataset.iniciado) {
+    // Renders posteriores: respetar lo que el usuario eligió
+    sel.value = mesesDisponibles.includes(valorPrevio) ? valorPrevio : '';
+  } else {
+    // Primera carga: arrancar en el mes actual para no mostrar el total histórico de una
+    sel.value = mesActual;
+    sel.dataset.iniciado = '1';
+  }
+}
+
 function renderEstado() {
+  actualizarSelectMesEstado();
   const filtro      = (document.getElementById('estado-buscador')?.value||'').toUpperCase().trim();
   const filtroSaldo = document.getElementById('estado-filtro-saldo')?.value||'';
+  const filtroMes   = document.getElementById('estado-filtro-mes')?.value||'';
   const lista       = document.getElementById('estado-lista');
 
   const pacientes = {};
@@ -2137,7 +2171,9 @@ function renderEstado() {
                - pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
   }, 0);
   const totalCobradoGlobal = Object.values(pacientes).reduce((sum,pac) =>
-    sum + pac.cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0), 0);
+    sum + pac.cobros
+      .filter(c => !filtroMes || (c.fecha||'').startsWith(filtroMes))
+      .reduce((s,c)=>s+(parseFloat(c.monto)||0), 0), 0);
 
   const kpiEl = document.getElementById('estado-kpi');
   if (kpiEl && conDeuda.length > 0) {
@@ -2145,6 +2181,8 @@ function renderEstado() {
     document.getElementById('estado-kpi-count').textContent = conDeuda.length;
     document.getElementById('estado-kpi-total').textContent = formatMoney(totalAdeudado);
     document.getElementById('estado-kpi-cobrado').textContent = formatMoney(totalCobradoGlobal);
+    const labelCobrado = document.getElementById('estado-kpi-cobrado-label');
+    if (labelCobrado) labelCobrado.textContent = filtroMes ? `Total cobrado — ${nombreMes(filtroMes)}` : 'Total cobrado (histórico)';
   } else if (kpiEl) {
     kpiEl.style.display = 'none';
   }
@@ -2360,10 +2398,12 @@ async function guardarNotaHistoria() {
   const btn = document.getElementById('btn-guardar-historia');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
   try {
+    // POST en vez de GET: las notas dictadas pueden ser largas y romper el
+    // límite de longitud de una URL si van como query string.
     const params = new URLSearchParams({
       action: 'saveHistoria', paciente: historiaPacienteActual, fecha, nota: texto
     });
-    await fetch(SCRIPT_URL + '?' + params.toString(), { mode: 'no-cors' });
+    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: params });
     toast('✓ Nota guardada', 'success');
     document.getElementById('historia-nota-texto').value = '';
     await cargarHistoriaClinica();
